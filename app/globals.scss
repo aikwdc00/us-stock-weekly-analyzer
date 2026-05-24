@@ -308,7 +308,7 @@ h1 {
 
 .notice {
   @include card(panel, line);
-  @include inline-center(8px);
+//   @include inline-center(8px);
   color: color(body-copy);
   margin: 0 auto 16px;
   max-width: $container;
@@ -325,7 +325,8 @@ h1 {
 }
 
 .workspace {
-  @include grid(minmax(270px, 320px) minmax(0, 1fr) minmax(250px, 300px), 16px);
+  @include grid(minmax(260px, 300px) minmax(0, 1fr) minmax(300px, 360px), 16px);
+  align-items: start;
   margin: 0 auto;
   max-width: $container;
 }
@@ -338,24 +339,37 @@ h1 {
 .sidebar,
 .rightRail {
   align-self: start;
+  max-height: calc(100vh - 56px);
+  overflow: auto;
   padding: 16px;
+  position: sticky;
+  top: 20px;
 }
 
 .panelHeader {
   @include flex-between(12px, flex-start);
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 14px;
 
   h2 {
     font-size: 1.05rem;
     margin: 0;
   }
+
+  > div:first-child {
+    flex: 1 1 160px;
+    min-width: 0;
+  }
 }
 
 .timestamp {
   @include muted-text(0.75rem);
+  flex: 0 0 auto;
   line-height: 1.4;
-  max-width: 120px;
+  max-width: 140px;
   text-align: right;
+  white-space: nowrap;
 }
 
 .searchBox {
@@ -414,7 +428,6 @@ h1 {
 }
 
 .searchResults button,
-.watchItem,
 .suggestions button {
   @include flex-between(10px);
   background: color(white);
@@ -440,6 +453,16 @@ h1 {
 
 .watchItem {
   @include card;
+  align-items: center;
+  background: color(white);
+  border: 0;
+  color: color(ink);
+  display: grid;
+  gap: 8px 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 12px;
+  text-align: left;
+  width: 100%;
 
   &:last-child {
     border-bottom: 0;
@@ -449,16 +472,43 @@ h1 {
     background: color(teal-soft-2);
     border-color: color(teal-line-2);
   }
+}
 
-  > span:first-child {
-    min-width: 0;
+.watchItemMain {
+  min-width: 0;
+
+  strong {
+    display: block;
+  }
+
+  small {
+    @include muted-text(0.75rem);
+    display: block;
+    line-height: 1.35;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.watchItemRemove {
+  @include inline-center;
+  color: color(muted);
+  flex: 0 0 auto;
+
+  &:hover {
+    color: color(red);
   }
 }
 
 .move {
   color: color(muted);
+  flex: 0 0 auto;
+  font-size: 0.82rem;
   font-weight: 800;
-  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .up {
@@ -529,13 +579,22 @@ h1 {
 }
 
 .decisionBar {
-  @include grid(repeat(3, minmax(0, 1fr)) auto);
+  @include grid(repeat(3, minmax(0, 1fr)));
   align-items: stretch;
+  gap: 10px;
   margin-bottom: 16px;
 
   > div {
     @include card(panel-strong);
     padding: 12px;
+  }
+
+  > button {
+    @include button-shell;
+    grid-column: 1 / -1;
+    justify-self: end;
+    min-width: 148px;
+    width: fit-content;
   }
 }
 
@@ -1112,7 +1171,7 @@ h1 {
 }
 
 .suggestions {
-  @include grid(repeat(2, minmax(0, 1fr)), 8px);
+  @include grid(1fr, 8px);
 
   button {
     @include card(white);
@@ -1179,11 +1238,15 @@ h1 {
 
 .suggestionItem {
   align-items: flex-start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-width: 0;
+  text-align: left;
+}
 
-  span {
-    min-width: 0;
-  }
+.suggestionItemBody {
+  min-width: 0;
 
   strong,
   small,
@@ -1200,13 +1263,20 @@ h1 {
 
   em {
     color: color(teal);
-    display: block;
     font-size: 0.72rem;
     font-style: normal;
     font-weight: 850;
-    line-height: 1.35;
+    line-height: 1.45;
     margin-top: 5px;
+    overflow-wrap: anywhere;
   }
+}
+
+.suggestionItemAction {
+  @include inline-center;
+  color: color(teal);
+  flex: 0 0 auto;
+  margin-top: 2px;
 }
 
 .suggestionReasons {
@@ -1228,11 +1298,14 @@ h1 {
 
 .railRefresh {
   @include button-shell(white, teal, line);
-  font-size: 0.8rem;
+  flex: 0 1 auto;
+  font-size: 0.78rem;
   font-weight: 850;
   gap: 6px;
+  max-width: 100%;
   min-height: 34px;
   padding: 0 10px;
+  white-space: nowrap;
 }
 
 .deployBox {
@@ -1267,11 +1340,18 @@ h1 {
 
 @media (max-width: 1180px) {
   .workspace {
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
   }
 
   .rightRail {
     grid-column: 1 / -1;
+    max-height: none;
+    position: static;
+  }
+
+  .sidebar {
+    max-height: none;
+    position: static;
   }
 }
 
@@ -1289,7 +1369,15 @@ h1 {
   .metricGrid,
   .workspace,
   .qualityLayout,
-  .decisionBar,
+  .decisionBar {
+    grid-template-columns: 1fr;
+
+    > button {
+      justify-self: stretch;
+      width: 100%;
+    }
+  }
+
   .quoteGrid,
   .methodBox,
   .fundamentalGrid,
