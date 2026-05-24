@@ -58,7 +58,7 @@ export function ReportTabs({
             {activeTab === "valuation" ? (
               <ValuationPanel quote={quote} t={t} activeModel={activeModel} setSelectedModel={setSelectedModel} />
             ) : null}
-            {activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} /> : null}
+            {activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} language={language} /> : null}
             {activeTab === "industry" ? (
               <IndustryPanel quote={quote} peerQuotes={peerQuotes} language={language} t={t} />
             ) : null}

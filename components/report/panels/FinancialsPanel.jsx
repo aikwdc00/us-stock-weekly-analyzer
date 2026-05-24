@@ -3,7 +3,7 @@ import { FinancialCharts } from "../shared/FinancialCharts";
 import { Info } from "../shared/Info";
 import { SectionTitle } from "../shared/SectionTitle";
 
-export function FinancialsPanel({ quote, t }) {
+export function FinancialsPanel({ quote, t, language }) {
   return (
     <div className="reportTabPanel">
       <section className="analysisSection">
@@ -102,7 +102,7 @@ export function FinancialsPanel({ quote, t }) {
             <strong>{t.costJudgement}</strong>
             <p>{quote.detailedFinancials.costAnalysis}</p>
           </div>
-          <FinancialCharts chart={quote.detailedFinancials.chart} />
+          <FinancialCharts chart={quote.detailedFinancials.chart} language={language} />
         </section>
       ) : null}
 

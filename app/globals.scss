@@ -979,49 +979,41 @@ h1 {
   }
 }
 
-.mindMap {
-  align-items: center;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.mindMapFlow {
+  background: color(subpanel);
+  border: 1px solid color(line);
+  border-radius: $radius;
+  height: min(480px, 62vh);
   margin-top: 14px;
-  position: relative;
+  max-width: 100%;
+  min-height: 360px;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
 
-  &::before {
-    background: color(line);
-    content: "";
-    height: 2px;
-    left: 8%;
-    position: absolute;
-    right: 8%;
-    top: 50%;
-    z-index: 0;
+  .react-flow__pane {
+    cursor: grab;
   }
 }
 
-.mindMapCore,
-.mindMapNode {
-  @include card(panel);
-  position: relative;
-  z-index: 1;
-}
-
-.mindMapCore {
+.mindMapFlowCore {
   align-items: center;
   background: color(hero);
+  border: 1px solid color(hero);
+  border-radius: $radius;
+  box-shadow: var(--shadow);
   color: color(white);
   display: grid;
+  gap: 6px;
   justify-items: center;
-  min-height: 126px;
-  padding: 14px;
+  min-height: 96px;
+  padding: 14px 16px;
   text-align: center;
-
-  svg {
-    color: color(hero-accent);
-  }
+  width: 168px;
 
   strong {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
+    line-height: 1.1;
   }
 
   span {
@@ -1031,20 +1023,34 @@ h1 {
   }
 }
 
-.mindMapNode {
-  min-height: 126px;
+.mindMapFlowBranch {
+  @include card(panel);
+  box-shadow: var(--shadow);
+  max-width: 196px;
+  min-height: 118px;
   padding: 12px;
+  width: 196px;
 
   strong {
+    color: color(teal);
     display: block;
-    font-size: 0.9rem;
-    margin-bottom: 7px;
+    font-size: 0.88rem;
+    margin-bottom: 6px;
   }
 
   p {
-    @include muted-text(0.78rem);
-    line-height: 1.55;
+    @include muted-text(0.76rem);
+    line-height: 1.5;
+    margin: 0;
+    overflow-wrap: anywhere;
   }
+}
+
+.mindMapFlowHandle {
+  border: 0;
+  height: 1px;
+  opacity: 0;
+  width: 1px;
 }
 
 .peerTableWrap {
@@ -1186,12 +1192,33 @@ h1 {
 
 .chartCard {
   @include card(white);
+  min-width: 0;
   padding: 14px;
 
   h4 {
     font-size: 0.96rem;
-    margin: 0 0 10px;
+    margin: 0;
   }
+}
+
+.chartCardHeader {
+  @include flex-between(8px, flex-start);
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+}
+
+.chartUnitNote {
+  @include muted-text(0.75rem, 700);
+  white-space: nowrap;
+}
+
+.chartCanvas {
+  height: 260px;
+  max-width: 100%;
+  min-width: 0;
+  position: relative;
+  width: 100%;
 }
 
 .svgChart {
@@ -1451,8 +1478,7 @@ h1 {
 
   .methodBox,
   .analysisGrid,
-  .longTermPlan .planGrid,
-  .mindMap {
+  .longTermPlan .planGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -1510,18 +1536,17 @@ h1 {
   }
 
   .chartGrid,
-  .longTermPlan .planGrid,
-  .mindMap {
+  .longTermPlan .planGrid {
     grid-template-columns: 1fr;
   }
 
-  .mindMap::before {
-    bottom: 8%;
-    height: auto;
-    left: 50%;
-    right: auto;
-    top: 8%;
-    width: 2px;
+  .mindMapFlow {
+    height: 420px;
+    min-height: 320px;
+  }
+
+  .chartCanvas {
+    height: 220px;
   }
 
   .appFooter {
