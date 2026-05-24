@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 const YAHOO_PEERS_URL = "https://query2.finance.yahoo.com/v6/finance/recommendationsbysymbol";
 const FINNHUB_PEERS_URL = "https://finnhub.io/api/v1/stock/peers";
-const FINNHUB_TOKEN = process.env.FINNHUB_API_KEY || process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+const FINNHUB_TOKEN = process.env.FINNHUB_API_KEY;
 
 async function fetchFinnhubPeers(symbol) {
 	if (!FINNHUB_TOKEN) return [];

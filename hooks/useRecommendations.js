@@ -8,11 +8,13 @@ export function useRecommendations(watchlist, { onError } = {}) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const refreshRecommendations = useCallback(
-		async (excludedSymbols = watchlist) => {
+		async (excludedSymbols = watchlist, options = {}) => {
 			setIsLoading(true);
 
 			try {
-				const response = await fetch(`/api/recommendations?exclude=${excludedSymbols.join(",")}`, {
+				const force = Boolean(options?.force);
+				const query = force ? `exclude=${excludedSymbols.join(",")}&_ts=${Date.now()}` : `exclude=${excludedSymbols.join(",")}`;
+				const response = await fetch(`/api/recommendations?${query}`, {
 					cache: "no-store",
 				});
 				const payload = await response.json();

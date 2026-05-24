@@ -48,12 +48,12 @@ export function useStockAnalyzer() {
 
 	const refreshAll = useCallback(async () => {
 		clearError();
-		await quotesState.refreshQuotes();
-	}, [clearError, quotesState]);
+		await Promise.all([quotesState.refreshQuotes(undefined, { force: true }), recommendationsState.refreshRecommendations(undefined, { force: true })]);
+	}, [clearError, quotesState, recommendationsState]);
 
 	const refreshIdeas = useCallback(async () => {
 		clearError();
-		await recommendationsState.refreshRecommendations();
+		await recommendationsState.refreshRecommendations(undefined, { force: true });
 	}, [clearError, recommendationsState]);
 
 	const selectedQuote = useMemo(

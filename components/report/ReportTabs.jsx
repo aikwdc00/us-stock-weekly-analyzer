@@ -14,7 +14,7 @@ const panelMotion = {
 	transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
 };
 
-export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, onTabChange, activeModel, setSelectedModel }) {
+export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, onTabChange, activeModel, setSelectedModel, updatedAt }) {
 	return (
 		<div className="reportTabs">
 			<div className="reportTabList" role="tablist" aria-label="Report sections">
@@ -51,7 +51,7 @@ export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, on
 						) : null}
 						{activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} language={language} /> : null}
 						{activeTab === "industry" ? <IndustryPanel quote={quote} peerQuotes={peerQuotes} language={language} t={t} /> : null}
-						{activeTab === "mindmapSwot" ? <MindMapSwotPanel quote={quote} language={language} t={t} /> : null}
+						{activeTab === "mindmapSwot" ? <MindMapSwotPanel quote={quote} language={language} t={t} updatedAt={updatedAt} /> : null}
 					</motion.div>
 				</AnimatePresence>
 			</div>

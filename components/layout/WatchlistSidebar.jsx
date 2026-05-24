@@ -3,6 +3,7 @@ import { cls, formatDate } from "../../hooks/utils";
 
 export function WatchlistSidebar({
 	t,
+	language,
 	updatedAt,
 	searchTerm,
 	setSearchTerm,
@@ -23,7 +24,9 @@ export function WatchlistSidebar({
 					<p className="eyebrow">Watchlist</p>
 					<h2>{t.watchlist}</h2>
 				</div>
-				<span className="timestamp">{formatDate(updatedAt)}</span>
+				<span className="timestamp">
+					{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}
+				</span>
 			</div>
 
 			<form className="searchBox" onSubmit={searchSymbols}>

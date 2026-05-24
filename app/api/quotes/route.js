@@ -2,10 +2,12 @@ import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
 import { fetchSecOwnershipFilings } from "../../../lib/secOwnershipProvider";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
 import { fetchFinnhubData } from "../../../lib/finnhubProvider";
+import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskProvider";
 
 export const dynamic = "force-dynamic";
 
 const YAHOO_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote";
+const YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart";
 const STOOQ_QUOTE_URL = "https://stooq.com/q/l/";
 const displayNames = {
 	NVDA: "NVIDIA Corporation",
@@ -67,6 +69,9 @@ async function fetchStooqQuote(symbol) {
 	}
 
 	const text = await response.text();
+	if (text.includes("Exceeded the daily hits limit")) {
+		return null;
+	}
 	const [, row] = text.trim().split("\n");
 	const [rawSymbol, date, time, open, high, low, close, volume] = parseCsvLine(row || "");
 
@@ -95,6 +100,65 @@ async function fetchStooqQuote(symbol) {
 		marketState: "REGULAR",
 		source: `Stooq latest quote ${date} ${time}`,
 	};
+}
+
+async function fetchYahooChartQuote(symbol) {
+	const url = new URL(`${YAHOO_CHART_URL}/${symbol}`);
+	url.searchParams.set("range", "1d");
+	url.searchParams.set("interval", "5m");
+	url.searchParams.set("includePrePost", "false");
+
+	const response = await fetch(url, {
+		headers: {
+			"User-Agent": "Mozilla/5.0",
+		},
+		next: { revalidate: 0 },
+	});
+
+	if (!response.ok) {
+		return null;
+	}
+
+	const payload = await response.json();
+	const result = payload?.chart?.result?.[0];
+	const meta = result?.meta;
+	if (!meta) return null;
+
+	const current = toNumber(meta.regularMarketPrice);
+	const previousClose = toNumber(meta.chartPreviousClose);
+	const change = Number.isFinite(current) && Number.isFinite(previousClose) ? current - previousClose : null;
+	const changePercent = Number.isFinite(change) && Number.isFinite(previousClose) && previousClose !== 0 ? (change / previousClose) * 100 : null;
+
+	if (!Number.isFinite(current)) {
+		return null;
+	}
+
+	return {
+		symbol: String(meta.symbol || symbol).toUpperCase(),
+		shortName: displayNames[String(meta.symbol || symbol).toUpperCase()] || meta.symbol || symbol,
+		fullExchangeName: "US market",
+		currency: meta.currency || "USD",
+		regularMarketPrice: current,
+		regularMarketChange: change,
+		regularMarketChangePercent: changePercent,
+		regularMarketPreviousClose: previousClose,
+		regularMarketOpen: toNumber(meta.regularMarketOpen),
+		regularMarketDayLow: toNumber(meta.regularMarketDayLow),
+		regularMarketDayHigh: toNumber(meta.regularMarketDayHigh),
+		regularMarketVolume: toNumber(meta.regularMarketVolume),
+		marketState: meta.marketState || "REGULAR",
+		source: "Yahoo chart fallback",
+	};
+}
+
+async function fetchBackupQuote(symbol) {
+	const stooq = await fetchStooqQuote(symbol).catch(() => null);
+	if (stooq) return stooq;
+	return fetchYahooChartQuote(symbol).catch(() => null);
+}
+
+function pickFulfilled(results, fallback) {
+	return results.map((result) => (result.status === "fulfilled" ? result.value : fallback));
 }
 
 export async function GET(request) {
@@ -130,17 +194,45 @@ export async function GET(request) {
 		let rawQuotes = payload.quoteResponse?.result || [];
 
 		if (!rawQuotes.length) {
-			rawQuotes = await Promise.all(symbols.map((symbol) => fetchStooqQuote(symbol)));
+			rawQuotes = await Promise.all(symbols.map((symbol) => fetchBackupQuote(symbol)));
 			rawQuotes = rawQuotes.filter(Boolean);
 		}
 
-		const [snapshots, ownershipFilings, finnhubData] = await Promise.all([
-			Promise.all(rawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-			Promise.all(rawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null))),
-			Promise.all(rawQuotes.map((quote) => fetchFinnhubData(quote.symbol).catch(() => null))),
+		const [snapshotResults, ownershipResults, finnhubResults] = await Promise.all([
+			Promise.allSettled(rawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
+			Promise.allSettled(rawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol))),
+			Promise.allSettled(rawQuotes.map((quote) => fetchFinnhubData(quote.symbol))),
 		]);
+		const snapshots = pickFulfilled(snapshotResults, {});
+		const ownershipFilings = pickFulfilled(ownershipResults, null);
+		const finnhubData = pickFulfilled(finnhubResults, null);
+		const aiRiskInsights = await Promise.all(
+			rawQuotes.map((quote, index) =>
+				fetchAiRiskInsights(
+					quote.symbol,
+					snapshots[index] || {},
+					finnhubData[index] || {},
+					getProfileForSymbol(quote.symbol, snapshots[index] || {})
+				).catch(() => [])
+			)
+		);
+		const aiSwotInsights = await Promise.all(
+			rawQuotes.map((quote, index) =>
+				fetchAiSwotInsights(
+					quote.symbol,
+					snapshots[index] || {},
+					finnhubData[index] || {},
+					getProfileForSymbol(quote.symbol, snapshots[index] || {})
+				).catch(() => null)
+			)
+		);
 		const quotes = rawQuotes.map((quote, index) => {
 			const snapshot = snapshots[index] || {};
+			const snapshotWithAi = {
+				...snapshot,
+				aiRisks: aiRiskInsights[index] || [],
+				aiSwot: aiSwotInsights[index] || null,
+			};
 			const secOwnership = ownershipFilings[index] || null;
 			const finnhub = finnhubData[index] || {};
 			const metrics = snapshot.metrics || {};
@@ -176,7 +268,7 @@ export async function GET(request) {
 				fundamentalsSourceUrl: snapshot.sourceUrl,
 			};
 
-			return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshot));
+			return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshotWithAi));
 		});
 
 		return Response.json({
@@ -185,15 +277,43 @@ export async function GET(request) {
 		});
 	} catch (error) {
 		try {
-			const rawQuotes = await Promise.all(symbols.map((symbol) => fetchStooqQuote(symbol)));
+			const rawQuotes = await Promise.all(symbols.map((symbol) => fetchBackupQuote(symbol)));
 			const validRawQuotes = rawQuotes.filter(Boolean);
-			const [snapshots, ownershipFilings, finnhubData] = await Promise.all([
-				Promise.all(validRawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-				Promise.all(validRawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null))),
-				Promise.all(validRawQuotes.map((quote) => fetchFinnhubData(quote.symbol).catch(() => null))),
+			const [snapshotResults, ownershipResults, finnhubResults] = await Promise.all([
+				Promise.allSettled(validRawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
+				Promise.allSettled(validRawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol))),
+				Promise.allSettled(validRawQuotes.map((quote) => fetchFinnhubData(quote.symbol))),
 			]);
+			const snapshots = pickFulfilled(snapshotResults, {});
+			const ownershipFilings = pickFulfilled(ownershipResults, null);
+			const finnhubData = pickFulfilled(finnhubResults, null);
+			const aiRiskInsights = await Promise.all(
+				validRawQuotes.map((quote, index) =>
+					fetchAiRiskInsights(
+						quote.symbol,
+						snapshots[index] || {},
+						finnhubData[index] || {},
+						getProfileForSymbol(quote.symbol, snapshots[index] || {})
+					).catch(() => [])
+				)
+			);
+			const aiSwotInsights = await Promise.all(
+				validRawQuotes.map((quote, index) =>
+					fetchAiSwotInsights(
+						quote.symbol,
+						snapshots[index] || {},
+						finnhubData[index] || {},
+						getProfileForSymbol(quote.symbol, snapshots[index] || {})
+					).catch(() => null)
+				)
+			);
 			const quotes = validRawQuotes.map((quote, index) => {
 				const snapshot = snapshots[index] || {};
+				const snapshotWithAi = {
+					...snapshot,
+					aiRisks: aiRiskInsights[index] || [],
+					aiSwot: aiSwotInsights[index] || null,
+				};
 				const secOwnership = ownershipFilings[index] || null;
 				const finnhub = finnhubData[index] || {};
 				const metrics = snapshot.metrics || {};
@@ -229,7 +349,7 @@ export async function GET(request) {
 						fundamentalsSource: snapshot.source,
 						fundamentalsSourceUrl: snapshot.sourceUrl,
 					},
-					getProfileForSymbol(quote.symbol, snapshot)
+					getProfileForSymbol(quote.symbol, snapshotWithAi)
 				);
 			});
 

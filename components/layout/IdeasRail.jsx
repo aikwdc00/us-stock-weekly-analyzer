@@ -29,7 +29,7 @@ export function IdeasRail({
 				<strong>{t.ideaBasis}</strong>
 				<p>{t.ideaBasisText}</p>
 				<small>
-					{t.ideasUpdated}: {formatDate(recommendationsUpdatedAt)}
+					{t.ideasUpdated}: {formatDate(recommendationsUpdatedAt, language, t.notUpdated)}
 				</small>
 			</div>
 

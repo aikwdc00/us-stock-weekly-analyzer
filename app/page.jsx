@@ -48,7 +48,18 @@ export default function Page() {
 					<h1>{t.appTitle}</h1>
 					<p className="subtitle">{t.subtitle}</p>
 				</div>
-				<div className="topActions">
+				<div className="topRight">
+					<span className="timestamp topTimestamp">
+						{t.lastUpdated}:{" "}
+						{updatedAt
+							? new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-TW", {
+							dateStyle: "medium",
+							timeStyle: "medium",
+							hour12: language === "en",
+						}).format(new Date(updatedAt))
+							: t.notUpdated}
+					</span>
+					<div className="topActions">
 					<div className="languageToggle" aria-label="Language">
 						<Languages size={17} />
 						<button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>
@@ -66,6 +77,7 @@ export default function Page() {
 						<RefreshCw size={18} className={cls(isLoading && "spin")} />
 						{isLoading ? t.refreshing : t.refresh}
 					</button>
+					</div>
 				</div>
 			</section>
 
@@ -103,6 +115,7 @@ export default function Page() {
 			<section className="workspace">
 				<WatchlistSidebar
 					t={t}
+					language={language}
 					updatedAt={updatedAt}
 					searchTerm={searchTerm}
 					setSearchTerm={setSearchTerm}
@@ -119,7 +132,7 @@ export default function Page() {
 
 				<section className="mainPanel">
 					{selectedQuote ? (
-						<StockReport quote={selectedQuote} peerQuotes={quotes} language={language} t={t} />
+						<StockReport quote={selectedQuote} peerQuotes={quotes} language={language} t={t} updatedAt={updatedAt} />
 					) : selectedSymbol ? (
 						<div className="emptyState">
 							<RefreshCw size={30} className={cls(isLoading && "spin")} />

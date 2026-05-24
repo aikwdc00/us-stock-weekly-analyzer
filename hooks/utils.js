@@ -26,12 +26,12 @@ export function getNewsUrl(item, symbol) {
 	return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
-export function formatDate(value) {
-	if (!value) return "尚未更新";
-	return new Intl.DateTimeFormat("zh-TW", {
+export function formatDate(value, language = "zh", fallbackText) {
+	if (!value) return fallbackText || (language === "en" ? "Not updated yet" : "尚未更新");
+	return new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-TW", {
 		dateStyle: "medium",
 		timeStyle: "short",
-		hour12: false,
+		hour12: language === "en",
 	}).format(new Date(value));
 }
 

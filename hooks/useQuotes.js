@@ -9,7 +9,7 @@ export function useQuotes(watchlist, { onError } = {}) {
 	const [dataWarning, setDataWarning] = useState("");
 
 	const refreshQuotes = useCallback(
-		async (symbols = watchlist) => {
+		async (symbols = watchlist, options = {}) => {
 			if (!symbols.length) {
 				setQuotes([]);
 				setDataWarning("");
@@ -20,7 +20,9 @@ export function useQuotes(watchlist, { onError } = {}) {
 			setDataWarning("");
 
 			try {
-				const response = await fetch(`/api/quotes?symbols=${symbols.join(",")}`, {
+				const force = Boolean(options?.force);
+				const query = force ? `symbols=${symbols.join(",")}&_ts=${Date.now()}` : `symbols=${symbols.join(",")}`;
+				const response = await fetch(`/api/quotes?${query}`, {
 					cache: "no-store",
 				});
 				const payload = await response.json();

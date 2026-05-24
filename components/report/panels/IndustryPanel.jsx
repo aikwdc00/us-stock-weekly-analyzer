@@ -16,10 +16,10 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 					title={t.industry || "產業分類"}
 					items={[translateTerm(quote.profile.sector, language), translateTerm(quote.profile.industry, language)].filter(Boolean)}
 				/>
-				<AnalysisBlock title={language === "zh" ? "競爭格局 (清單)" : "Competitors (Watchlist)"} items={quote.profile.competitors} />
+				<AnalysisBlock title={t.competitorWatchlist} items={quote.profile.competitors} />
 				<div className="analysisCard">
 					<div className="sectionTitle">
-						<h3>{language === "zh" ? "公司摘要" : "Company Summary"}</h3>
+						<h3>{t.companySummary}</h3>
 						{quote.fundamentals.sourceUrl && (
 							<a
 								href={quote.fundamentals.sourceUrl.replace("/statistics/", "/")}
@@ -34,9 +34,7 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 					<p className="summaryText">
 						{quote.profile.description
 							? `${quote.profile.description.slice(0, 300)}...`
-							: language === "zh"
-								? "暫無描述"
-								: "No description"}
+							: t.noDescription}
 					</p>
 				</div>
 			</section>
@@ -61,11 +59,11 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 				</div>
 
 				{isLoadingPeers ? (
-					<p>Loading industry peers...</p>
+					<p>{t.industryLoading}</p>
 				) : industryPeers.length ? (
 					<PeerTable quotes={industryPeers} language={language} t={t} />
 				) : (
-					<p>No industry peers found.</p>
+					<p>{t.industryEmpty}</p>
 				)}
 			</section>
 
@@ -77,13 +75,11 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 			<section className="analysisSection">
 				<h3>{t.ownership}</h3>
 				<div className="zones">
-					<Info label="內部人持股" value={quote.ownership.insiders} />
-					<Info label="法人持股" value={quote.ownership.institutions} />
+					<Info label={language === "zh" ? "內部人持股" : "Insider Ownership"} value={quote.ownership.insiders} />
+					<Info label={language === "zh" ? "法人持股" : "Institutional Ownership"} value={quote.ownership.institutions} />
 					<Info
-						label="異動資料"
-						value={
-							quote.ownership.filings?.length ? `${quote.ownership.filings.length} 筆 SEC ownership filings` : "近期未抓到 Form 3/4/5"
-						}
+						label={t.ownershipChanges}
+						value={quote.ownership.filings?.length ? `${quote.ownership.filings.length} SEC ownership filings` : t.recentNoForm345}
 					/>
 				</div>
 				<p className="ownershipNote">{quote.ownership.transactionNote}</p>
@@ -95,7 +91,9 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 									{filing.filingDate}｜{filing.form}
 								</span>
 								<strong>{filing.description}</strong>
-								<small>Report date: {filing.reportDate || "N/A"}</small>
+								<small>
+									{t.reportDate}: {filing.reportDate || "N/A"}
+								</small>
 								<ExternalLink size={14} />
 							</a>
 						))}

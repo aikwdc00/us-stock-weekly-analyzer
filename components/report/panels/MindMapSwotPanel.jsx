@@ -1,6 +1,8 @@
 import { InvestmentMindMap } from "../shared/InvestmentMindMap";
 
-export function MindMapSwotPanel({ quote, t, language }) {
+import { formatDate } from "../../../hooks/utils";
+
+export function MindMapSwotPanel({ quote, t, language, updatedAt }) {
 	const swot = quote.profile.swot;
 
 	return (
@@ -14,7 +16,7 @@ export function MindMapSwotPanel({ quote, t, language }) {
 						<div className="tooltipAnchor">
 							<span>i</span>
 							<div className="tooltipBubble">
-								{t.dataSource}: Analysis derived from live StockAnalysis forecasts & Yahoo consensus metrics.
+								{t.dataSource}: {t.marketDataSourceHint}
 							</div>
 						</div>
 					</div>
@@ -53,6 +55,12 @@ export function MindMapSwotPanel({ quote, t, language }) {
 						</div>
 					</div>
 					<p className="swotSource">{t.dataSource}: StockAnalysis / Yahoo Finance Consensus</p>
+					<p className="swotSource">
+						AI: {quote.profile?.aiSupplement?.enabled ? t.aiEnabled : t.aiDisabled}
+					</p>
+					<p className="swotSource">
+						{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}
+					</p>
 				</section>
 			)}
 		</div>
