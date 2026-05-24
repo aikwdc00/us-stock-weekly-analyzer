@@ -76,6 +76,10 @@ export const copy = {
     moat: "護城河分析",
     ownership: "董監事持股 / 異動",
     risks: "主要風險",
+    tabOverview: "總覽",
+    tabValuation: "估值",
+    tabFinancials: "財報",
+    tabIndustry: "產業與風險",
     footer: "資料僅供研究流程使用，不構成個人化投資建議。"
   },
   en: {
@@ -150,6 +154,10 @@ export const copy = {
     moat: "Moat Analysis",
     ownership: "Insider / Institutional Ownership",
     risks: "Key Risks",
+    tabOverview: "Overview",
+    tabValuation: "Valuation",
+    tabFinancials: "Financials",
+    tabIndustry: "Industry & Risk",
     footer: "Data is for research workflow only and is not personalized investment advice."
   }
 };
