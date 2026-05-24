@@ -1,0 +1,1321 @@
+$colors: (
+  bg: #f6f7f9,
+  panel: #ffffff,
+  panel-strong: #f0f5f7,
+  ink: #172026,
+  muted: #66737f,
+  line: #dce3e8,
+  blue: #2563eb,
+  green: #0f8a5f,
+  red: #c2413b,
+  teal: #117c8b,
+  teal-soft: #e8f4f5,
+  teal-soft-2: #eef6f6,
+  teal-line: #bfdee2,
+  teal-line-2: #8fc8ce,
+  teal-ink: #1e6670,
+  yellow: #936b00,
+  yellow-soft: #f7f0db,
+  yellow-line: #ead89b,
+  warning-bg: #fff7ed,
+  warning-line: #fed7aa,
+  warning-ink: #7c2d12,
+  hero: #102026,
+  hero-muted: #cdd8dc,
+  hero-accent: #7dd3d8,
+  body-copy: #34424d,
+  chip: #edf3f5,
+  chip-ink: #2f4858,
+  chart-grid: #cbd5dd,
+  subpanel: #f8fbfb,
+  toggle-active: #e5f3f5,
+  white: #ffffff
+);
+
+$dark-colors: (
+  bg: #0e1418,
+  panel: #151d22,
+  panel-strong: #1c272e,
+  ink: #eef4f6,
+  muted: #95a5af,
+  line: #2b3942,
+  teal: #5fc7d1,
+  teal-soft: #12333a,
+  teal-soft-2: #163940,
+  teal-line: #28535b,
+  teal-line-2: #3a7079,
+  teal-ink: #9adbe1,
+  yellow: #f3c35f,
+  yellow-soft: #332810,
+  yellow-line: #5b4615,
+  warning-bg: #321d12,
+  warning-line: #70401e,
+  warning-ink: #ffc08a,
+  hero: #081014,
+  hero-muted: #a8b8bf,
+  hero-accent: #80dbe3,
+  body-copy: #c7d2d8,
+  chip: #1c2a31,
+  chip-ink: #d7e4e8,
+  chart-grid: #394852,
+  subpanel: #111b20,
+  toggle-active: #173840,
+  white: #151d22
+);
+
+$radius: 8px;
+$container: 1480px;
+$shadow: 0 14px 36px rgba(23, 32, 38, 0.08);
+$font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+
+@function color($name) {
+  @return var(--#{"" + $name});
+}
+
+@mixin card($bg: panel, $border: line, $shadowed: false) {
+  background: color($bg);
+  border: 1px solid color($border);
+  border-radius: $radius;
+
+  @if $shadowed {
+    box-shadow: var(--shadow);
+  }
+}
+
+@mixin inline-center($gap: 8px) {
+  align-items: center;
+  display: inline-flex;
+  gap: $gap;
+}
+
+@mixin flex-between($gap: 12px, $align: center) {
+  align-items: $align;
+  display: flex;
+  gap: $gap;
+  justify-content: space-between;
+}
+
+@mixin grid($columns, $gap: 10px) {
+  display: grid;
+  gap: $gap;
+  grid-template-columns: $columns;
+}
+
+@mixin button-shell($bg: ink, $fg: white, $border: $bg) {
+  @include inline-center;
+  background: color($bg);
+  border: 1px solid color($border);
+  border-radius: $radius;
+  color: color($fg);
+  font-weight: 800;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+@mixin muted-text($size: 0.82rem, $weight: 400) {
+  color: color(muted);
+  font-size: $size;
+  font-weight: $weight;
+}
+
+@mixin chip($bg: teal-soft, $border: teal-line, $fg: teal-ink, $weight: 800) {
+  background: color($bg);
+  border: 1px solid color($border);
+  border-radius: $radius;
+  color: color($fg);
+  font-size: 0.84rem;
+  font-weight: $weight;
+  padding: 8px 10px;
+}
+
+:root {
+  @each $name, $value in $colors {
+    --#{"" + $name}: #{$value};
+  }
+
+  --shadow: #{$shadow};
+}
+
+:root[data-theme="dark"] {
+  @each $name, $value in $dark-colors {
+    --#{"" + $name}: #{$value};
+  }
+
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: color(bg);
+  color: color(ink);
+  font-family: $font-family;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin-bottom: 10px;
+}
+
+.shell {
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.topbar {
+  @include flex-between(18px, flex-end);
+  margin: 0 auto 22px;
+  max-width: $container;
+}
+
+.eyebrow {
+  color: color(teal);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  @include muted-text(1rem);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 780px;
+}
+
+.topActions {
+  @include flex-between(10px);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.languageToggle {
+  @include inline-center(4px);
+  @include card;
+  min-height: 42px;
+  padding: 4px;
+
+  svg {
+    color: color(teal);
+    margin: 0 4px;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: color(muted);
+    font-size: 0.82rem;
+    font-weight: 850;
+    min-height: 32px;
+    min-width: 42px;
+    padding: 0 8px;
+
+    &.active {
+      background: color(toggle-active);
+      color: color(teal);
+    }
+  }
+}
+
+.themeToggle {
+  @include button-shell(white, teal, line);
+  min-height: 42px;
+}
+
+.primaryButton,
+.decisionBar button,
+.searchBox button {
+  @include button-shell;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.metricGrid {
+  @include grid(repeat(4, minmax(0, 1fr)), 12px);
+  margin: 0 auto 16px;
+  max-width: $container;
+}
+
+.metric {
+  @include card;
+  @include grid(auto 1fr, 4px 12px);
+  align-items: center;
+  padding: 16px;
+
+  svg {
+    color: color(teal);
+    grid-row: span 2;
+  }
+
+  span {
+    @include muted-text;
+  }
+
+  strong {
+    font-size: 1.35rem;
+  }
+}
+
+.alert {
+  @include card(warning-bg, warning-line);
+  color: #9a3412;
+  margin: 0 auto 16px;
+  max-width: $container;
+  padding: 12px 14px;
+}
+
+.notice {
+  @include card(panel, line);
+  @include inline-center(8px);
+  color: color(body-copy);
+  margin: 0 auto 16px;
+  max-width: $container;
+  padding: 12px 14px;
+
+  strong {
+    color: color(teal);
+    white-space: nowrap;
+  }
+
+  span {
+    line-height: 1.5;
+  }
+}
+
+.workspace {
+  @include grid(minmax(270px, 320px) minmax(0, 1fr) minmax(250px, 300px), 16px);
+  margin: 0 auto;
+  max-width: $container;
+}
+
+.panel,
+.mainPanel {
+  @include card(panel, line, true);
+}
+
+.sidebar,
+.rightRail {
+  align-self: start;
+  padding: 16px;
+}
+
+.panelHeader {
+  @include flex-between(12px, flex-start);
+  margin-bottom: 14px;
+
+  h2 {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+}
+
+.timestamp {
+  @include muted-text(0.75rem);
+  line-height: 1.4;
+  max-width: 120px;
+  text-align: right;
+}
+
+.searchBox {
+  @include card(panel-strong);
+  @include grid(auto 1fr auto, 8px);
+  align-items: center;
+  padding: 8px;
+
+  input {
+    background: transparent;
+    border: 0;
+    color: color(ink);
+    min-width: 0;
+    outline: none;
+  }
+
+  button {
+    min-height: 34px;
+    padding: 0 10px;
+  }
+}
+
+.manualAdd {
+  @include inline-center;
+  background: color(white);
+  border: 1px dashed color(teal-line-2);
+  border-radius: $radius;
+  color: color(teal);
+  display: flex;
+  font-weight: 850;
+  justify-content: center;
+  margin-top: 10px;
+  min-height: 40px;
+  width: 100%;
+
+  &:disabled {
+    color: color(muted);
+    cursor: default;
+    opacity: 0.55;
+  }
+}
+
+.searchResults {
+  @include card;
+  margin-top: 10px;
+  max-height: 230px;
+  overflow: auto;
+
+  button {
+    border-bottom: 1px solid color(line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
+
+.searchResults button,
+.watchItem,
+.suggestions button {
+  @include flex-between(10px);
+  background: color(white);
+  border: 0;
+  color: color(ink);
+  padding: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.searchResults small,
+.watchItem small {
+  @include muted-text(0.75rem);
+  display: block;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.watchlist {
+  @include grid(1fr, 8px);
+  margin-top: 14px;
+}
+
+.watchItem {
+  @include card;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &.active {
+    background: color(teal-soft-2);
+    border-color: color(teal-line-2);
+  }
+
+  > span:first-child {
+    min-width: 0;
+  }
+}
+
+.move {
+  color: color(muted);
+  font-weight: 800;
+  margin-left: auto;
+}
+
+.up {
+  color: color(green);
+}
+
+.down {
+  color: color(red);
+}
+
+.mainPanel {
+  min-height: 740px;
+  overflow: hidden;
+}
+
+.emptyState {
+  align-items: center;
+  display: grid;
+  min-height: 520px;
+  padding: 32px;
+  place-items: center;
+  text-align: center;
+}
+
+.report {
+  padding: 20px;
+}
+
+.reportHero {
+  @include flex-between(16px, flex-start);
+  background: color(hero);
+  color: color(white);
+  margin: -20px -20px 18px;
+  padding: 24px;
+
+  .eyebrow {
+    color: color(hero-accent);
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 4rem);
+    letter-spacing: 0;
+    line-height: 1;
+    margin: 0;
+
+    span {
+      color: color(hero-muted);
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+  }
+}
+
+.priceBlock {
+  text-align: right;
+
+  strong {
+    display: block;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  span {
+    font-weight: 900;
+  }
+}
+
+.decisionBar {
+  @include grid(repeat(3, minmax(0, 1fr)) auto);
+  align-items: stretch;
+  margin-bottom: 16px;
+
+  > div {
+    @include card(panel-strong);
+    padding: 12px;
+  }
+}
+
+.decisionBar span,
+.info span {
+  @include muted-text(0.78rem);
+  display: block;
+  margin-bottom: 5px;
+}
+
+.decisionBar strong,
+.info strong {
+  font-size: 1rem;
+}
+
+.analysisSection,
+.analysisCard,
+.info {
+  @include card(white);
+}
+
+.analysisSection {
+  margin-bottom: 14px;
+  padding: 16px;
+
+  h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: color(body-copy);
+    line-height: 1.75;
+    margin: 0;
+  }
+}
+
+.sectionTitle {
+  @include inline-center(8px);
+  align-items: flex-start;
+  margin-bottom: 10px;
+  position: relative;
+
+  h3 {
+    margin: 0;
+  }
+
+  &.static {
+    display: block;
+
+    p {
+      @include muted-text(0.9rem);
+      line-height: 1.65;
+      margin-top: 6px;
+    }
+  }
+}
+
+.tooltipAnchor {
+  @include inline-center;
+  background: color(panel-strong);
+  border: 1px solid color(line);
+  border-radius: 999px;
+  color: color(teal);
+  cursor: help;
+  flex: 0 0 auto;
+  height: 24px;
+  justify-content: center;
+  position: relative;
+  width: 24px;
+
+  &:hover,
+  &:focus-visible {
+    .tooltipBubble {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+  }
+}
+
+.tooltipBubble {
+  @include card(panel);
+  box-shadow: var(--shadow);
+  color: color(body-copy);
+  font-size: 0.82rem;
+  font-weight: 650;
+  left: 50%;
+  line-height: 1.6;
+  max-width: min(340px, 70vw);
+  min-width: 260px;
+  opacity: 0;
+  padding: 10px 12px;
+  position: absolute;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  visibility: hidden;
+  z-index: 20;
+}
+
+.analysisCard h3 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.conclusion {
+  border-left: 4px solid color(teal);
+}
+
+.themeBox,
+.modelPanel,
+.timeline div {
+  background: color(subpanel);
+}
+
+.catalystList,
+.methodEvidence,
+.analysisCard div,
+.modelTabs,
+.chartLegend {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.catalystList {
+  gap: 8px;
+  margin-top: 12px;
+
+  span {
+    @include chip;
+  }
+}
+
+.quoteGrid,
+.fundamentalGrid {
+  @include grid(repeat(4, minmax(0, 1fr)));
+}
+
+.quoteGrid {
+  margin-bottom: 14px;
+}
+
+.info {
+  min-height: 78px;
+  padding: 13px;
+}
+
+.analysisGrid {
+  @include grid(repeat(3, minmax(0, 1fr)));
+  margin-bottom: 14px;
+}
+
+.methodBox {
+  @include grid(minmax(0, 1fr) minmax(220px, 0.7fr), 16px);
+
+  strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+}
+
+.methodEvidence {
+  align-content: start;
+  gap: 8px;
+
+  span {
+    @include chip(yellow-soft, yellow-line, yellow);
+    font-size: 0.82rem;
+  }
+}
+
+.qualityLayout {
+  @include grid(auto 1fr, 16px);
+  align-items: center;
+}
+
+.qualityScore {
+  @include card(teal-soft, teal-line);
+  align-items: center;
+  display: grid;
+  height: 88px;
+  justify-items: center;
+  min-width: 92px;
+  padding: 10px;
+
+  strong {
+    color: color(teal);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  span {
+    color: color(teal-ink);
+    font-size: 0.78rem;
+    font-weight: 850;
+  }
+}
+
+.modelTabs {
+  gap: 8px;
+  margin-bottom: 12px;
+
+  button {
+    background: color(white);
+    border: 1px solid color(line);
+    border-radius: $radius;
+    color: color(ink);
+    font-weight: 850;
+    padding: 9px 12px;
+
+    &.active {
+      background: color(ink);
+      border-color: color(ink);
+      color: color(white);
+    }
+  }
+}
+
+.modelPanel {
+  @include card(panel);
+  padding: 14px;
+
+  strong {
+    display: block;
+    margin-bottom: 8px;
+  }
+}
+
+.timeline {
+  @include grid(1fr);
+
+  div {
+    border-left: 4px solid color(teal);
+    border-radius: $radius;
+    padding: 12px 14px;
+  }
+
+  span {
+    @include muted-text(0.78rem, 850);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  small {
+    color: color(muted);
+    line-height: 1.5;
+    margin-top: 5px;
+  }
+}
+
+.longTermPlan {
+  .planGrid {
+    @include grid(repeat(3, minmax(0, 1fr)), 12px);
+  }
+
+  .planGrid > div {
+    @include card(panel-strong);
+    padding: 14px;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  ul {
+    color: color(body-copy);
+    line-height: 1.65;
+    margin: 0;
+    padding-left: 18px;
+  }
+}
+
+.planMetrics {
+  display: grid;
+  gap: 8px;
+
+  span {
+    @include flex-between(8px);
+    @include card(panel);
+    color: color(muted);
+    font-size: 0.8rem;
+    padding: 9px 10px;
+  }
+
+  b {
+    color: color(ink);
+  }
+}
+
+.mindMap {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 14px;
+  position: relative;
+
+  &::before {
+    background: color(line);
+    content: "";
+    height: 2px;
+    left: 8%;
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    z-index: 0;
+  }
+}
+
+.mindMapCore,
+.mindMapNode {
+  @include card(panel);
+  position: relative;
+  z-index: 1;
+}
+
+.mindMapCore {
+  align-items: center;
+  background: color(hero);
+  color: color(white);
+  display: grid;
+  justify-items: center;
+  min-height: 126px;
+  padding: 14px;
+  text-align: center;
+
+  svg {
+    color: color(hero-accent);
+  }
+
+  strong {
+    font-size: 1.4rem;
+  }
+
+  span {
+    color: color(hero-accent);
+    font-size: 0.8rem;
+    font-weight: 850;
+  }
+}
+
+.mindMapNode {
+  min-height: 126px;
+  padding: 12px;
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 7px;
+  }
+
+  p {
+    @include muted-text(0.78rem);
+    line-height: 1.55;
+  }
+}
+
+.peerTableWrap {
+  overflow-x: auto;
+}
+
+.peerTable {
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  min-width: 980px;
+  width: 100%;
+
+  th,
+  td {
+    border-bottom: 1px solid color(line);
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    color: color(muted);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+  }
+
+  tr.selected td {
+    background: color(teal-soft-2);
+    font-weight: 850;
+  }
+}
+
+.sourceLink {
+  @include inline-center(6px);
+  color: color(teal);
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin-top: 12px;
+}
+
+.newsList {
+  @include grid(1fr);
+
+  a {
+    @include card(white);
+    display: block;
+    padding: 12px;
+  }
+
+  span {
+    @include muted-text(0.78rem, 800);
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  strong {
+    @include flex-between(8px, flex-start);
+    line-height: 1.4;
+
+    svg {
+      color: color(teal);
+      flex: 0 0 auto;
+      margin-top: 3px;
+    }
+  }
+
+  p {
+    @include muted-text(0.9rem);
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  em {
+    color: color(teal);
+    display: inline-flex;
+    font-size: 0.82rem;
+    font-style: normal;
+    font-weight: 850;
+    margin-top: 8px;
+  }
+}
+
+.costCallout {
+  @include card(warning-bg, warning-line);
+  color: color(warning-ink);
+  margin-top: 12px;
+  padding: 14px;
+
+  strong {
+    display: block;
+    margin-bottom: 6px;
+  }
+}
+
+.costCallout p,
+.ownershipNote {
+  line-height: 1.7;
+  margin: 0;
+}
+
+.ownershipFilings {
+  @include grid(1fr, 8px);
+  margin-top: 12px;
+
+  a {
+    @include card(panel-strong);
+    align-items: center;
+    display: grid;
+    gap: 4px 10px;
+    grid-template-columns: 1fr auto;
+    padding: 11px 12px;
+
+    svg {
+      color: color(teal);
+      grid-row: 1 / span 3;
+      grid-column: 2;
+    }
+  }
+
+  span,
+  small {
+    @include muted-text(0.76rem, 800);
+  }
+
+  strong {
+    font-size: 0.92rem;
+  }
+}
+
+.chartGrid {
+  @include grid(repeat(2, minmax(0, 1fr)), 12px);
+  margin-top: 14px;
+}
+
+.chartCard {
+  @include card(white);
+  padding: 14px;
+
+  h4 {
+    font-size: 0.96rem;
+    margin: 0 0 10px;
+  }
+}
+
+.svgChart {
+  svg {
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+
+  line {
+    stroke: color(chart-grid);
+    stroke-width: 2;
+  }
+
+  path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 4;
+  }
+
+  text {
+    fill: color(muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.chartLegend {
+  gap: 10px;
+  margin-top: 10px;
+
+  span {
+    @include inline-center(6px);
+    @include muted-text(0.82rem, 800);
+  }
+
+  i {
+    border-radius: 99px;
+    display: inline-block;
+    height: 9px;
+    width: 9px;
+  }
+}
+
+.analysisCard {
+  padding: 15px;
+
+  div {
+    gap: 8px;
+  }
+
+  span {
+    @include chip(chip, chip, chip-ink, 700);
+    font-size: 0.82rem;
+    padding: 7px 9px;
+  }
+}
+
+.zones {
+  @include grid(repeat(3, minmax(0, 1fr)));
+}
+
+.riskList {
+  color: color(body-copy);
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.suggestions {
+  @include grid(repeat(2, minmax(0, 1fr)), 8px);
+
+  button {
+    @include card(white);
+    font-weight: 850;
+    padding: 11px;
+
+    &:disabled {
+      background: color(teal-soft-2);
+      color: color(teal);
+      cursor: default;
+    }
+  }
+}
+
+.suggestionBasis {
+  @include card;
+  background: color(subpanel);
+  margin-bottom: 12px;
+  padding: 12px;
+
+  strong {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    @include muted-text(0.84rem);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  small {
+    @include muted-text(0.75rem, 750);
+    display: block;
+    margin-top: 8px;
+  }
+}
+
+.suggestionGroups {
+  @include grid(1fr, 12px);
+}
+
+.suggestionGroup {
+  @include card(white);
+  padding: 12px;
+
+  h3 {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    @include muted-text(0.84rem);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .suggestions {
+    margin-top: 10px;
+  }
+}
+
+.suggestionItem {
+  align-items: flex-start;
+  min-width: 0;
+
+  span {
+    min-width: 0;
+  }
+
+  strong,
+  small,
+  em {
+    display: block;
+  }
+
+  small {
+    @include muted-text(0.72rem);
+    line-height: 1.35;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  em {
+    color: color(teal);
+    display: block;
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 850;
+    line-height: 1.35;
+    margin-top: 5px;
+  }
+}
+
+.suggestionReasons {
+  border-top: 1px solid color(line);
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+  padding-top: 10px;
+
+  p {
+    font-size: 0.78rem;
+  }
+
+  strong {
+    color: color(ink);
+    margin-right: 6px;
+  }
+}
+
+.railRefresh {
+  @include button-shell(white, teal, line);
+  font-size: 0.8rem;
+  font-weight: 850;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+.deployBox {
+  background: color(hero);
+  border-radius: $radius;
+  color: color(white);
+  margin-top: 16px;
+  padding: 16px;
+
+  .eyebrow {
+    color: color(hero-accent);
+  }
+
+  h3 {
+    margin-bottom: 12px;
+  }
+
+  a {
+    @include flex-between(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 12px 0;
+  }
+}
+
+.appFooter {
+  @include flex-between(12px);
+  @include muted-text(0.82rem);
+  margin: 18px auto 0;
+  max-width: $container;
+  padding: 12px 2px 0;
+}
+
+@media (max-width: 1180px) {
+  .workspace {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .rightRail {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 880px) {
+  .shell {
+    padding: 16px;
+  }
+
+  .topbar,
+  .reportHero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .metricGrid,
+  .workspace,
+  .qualityLayout,
+  .decisionBar,
+  .quoteGrid,
+  .methodBox,
+  .fundamentalGrid,
+  .chartGrid,
+  .analysisGrid,
+  .zones,
+  .longTermPlan .planGrid,
+  .mindMap {
+    grid-template-columns: 1fr;
+  }
+
+  .mindMap::before {
+    bottom: 8%;
+    height: auto;
+    left: 50%;
+    right: auto;
+    top: 8%;
+    width: 2px;
+  }
+
+  .appFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .priceBlock {
+    text-align: left;
+  }
+}
