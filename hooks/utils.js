@@ -1,47 +1,47 @@
 import { valueCopy } from "./copy";
 
 export function cls(...names) {
-  return names.filter(Boolean).join(" ");
+	return names.filter(Boolean).join(" ");
 }
 
 export function displayValue(value, language) {
-  return language === "en" ? valueCopy.en[value] || value : value;
+	return language === "en" ? valueCopy.en[value] || value : value;
 }
 
 export function thesisText(quote, language) {
-  if (language !== "en") return quote.thesis;
-  return `Theme focus: ${quote.profile.theme}. Current rating is ${displayValue(quote.rating, language)}, valuation is ${displayValue(
-    quote.valuation,
-    language
-  )}, and the technical view is ${displayValue(quote.trend, language)}. Use staged entries and the price zones rather than chasing strength.`;
+	if (language !== "en") return quote.thesis;
+	return `Theme focus: ${quote.profile.theme}. Current rating is ${displayValue(quote.rating, language)}, valuation is ${displayValue(
+		quote.valuation,
+		language
+	)}, and the technical view is ${displayValue(quote.trend, language)}. Use staged entries and the price zones rather than chasing strength.`;
 }
 
 export function safeNumber(value) {
-  return Number.isFinite(value) ? value : null;
+	return Number.isFinite(value) ? value : null;
 }
 
 export function getNewsUrl(item, symbol) {
-  if (item?.url) return item.url;
-  const query = [symbol, item?.source, item?.title].filter(Boolean).join(" ");
-  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+	if (item?.url) return item.url;
+	const query = [symbol, item?.source, item?.title].filter(Boolean).join(" ");
+	return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 export function formatDate(value) {
-  if (!value) return "尚未更新";
-  return new Intl.DateTimeFormat("zh-TW", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    hour12: false
-  }).format(new Date(value));
+	if (!value) return "尚未更新";
+	return new Intl.DateTimeFormat("zh-TW", {
+		dateStyle: "medium",
+		timeStyle: "short",
+		hour12: false,
+	}).format(new Date(value));
 }
 
 export function generateMarkdown(quote, language = "zh") {
-  const locale = language === "en" ? "en-US" : "zh-TW";
-  const today = new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date());
-  const profile = quote.profile;
+	const locale = language === "en" ? "en-US" : "zh-TW";
+	const today = new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date());
+	const profile = quote.profile;
 
-  if (language === "en") {
-    return `# ${quote.symbol} / ${quote.name}: Weekly Analysis Report
+	if (language === "en") {
+		return `# ${quote.symbol} / ${quote.name}: Weekly Analysis Report
 
 Last updated: ${today}
 
@@ -112,9 +112,9 @@ Evidence: ${quote.valuationMethod.evidence.join(", ") || "Insufficient data"}
 
 This report is a rule-based research framework. It is not personalized investment advice and does not guarantee investment returns.
 `;
-  }
+	}
 
-  return `# ${quote.symbol} / ${quote.name}：每週分析報告
+	return `# ${quote.symbol} / ${quote.name}：每週分析報告
 
 最後更新：${today}
 
@@ -185,11 +185,13 @@ ${quote.rating}
 }
 
 export function downloadMarkdown(quote, language = "zh") {
-  const blob = new Blob([generateMarkdown(quote, language)], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `${quote.symbol}-${language}.md`;
-  anchor.click();
-  URL.revokeObjectURL(url);
+	const blob = new Blob([generateMarkdown(quote, language)], {
+		type: "text/markdown;charset=utf-8",
+	});
+	const url = URL.createObjectURL(blob);
+	const anchor = document.createElement("a");
+	anchor.href = url;
+	anchor.download = `${quote.symbol}-${language}.md`;
+	anchor.click();
+	URL.revokeObjectURL(url);
 }

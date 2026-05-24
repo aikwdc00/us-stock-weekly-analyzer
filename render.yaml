@@ -1,15 +1,15 @@
 services:
-  - type: web
-    name: us-stock-weekly-analyzer
-    runtime: node
-    plan: free
-    healthCheckPath: /
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_VERSION
-        value: 20.13.1
-      - key: NODE_ENV
-        value: production
-      - key: SEC_USER_AGENT
-        value: us-stock-weekly-analyzer aikwdc00@hotmail.com
+    - type: web
+      name: us-stock-weekly-analyzer
+      runtime: node
+      plan: free
+      healthCheckPath: /
+      buildCommand: npm install && npm run build
+      startCommand: npm run start
+      envVars:
+          - key: NODE_VERSION
+            value: 20.13.1
+          - key: NODE_ENV
+            value: production
+          - key: SEC_USER_AGENT
+            value: us-stock-weekly-analyzer aikwdc00@hotmail.com

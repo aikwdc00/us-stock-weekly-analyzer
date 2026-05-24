@@ -1,803 +1,815 @@
 $colors: (
-  bg: #f6f7f9,
-  panel: #ffffff,
-  panel-strong: #f0f5f7,
-  ink: #172026,
-  muted: #66737f,
-  line: #dce3e8,
-  blue: #2563eb,
-  green: #0f8a5f,
-  red: #c2413b,
-  teal: #117c8b,
-  teal-soft: #e8f4f5,
-  teal-soft-2: #eef6f6,
-  teal-line: #bfdee2,
-  teal-line-2: #8fc8ce,
-  teal-ink: #1e6670,
-  yellow: #936b00,
-  yellow-soft: #f7f0db,
-  yellow-line: #ead89b,
-  warning-bg: #fff7ed,
-  warning-line: #fed7aa,
-  warning-ink: #7c2d12,
-  hero: #102026,
-  hero-muted: #cdd8dc,
-  hero-accent: #7dd3d8,
-  body-copy: #34424d,
-  chip: #edf3f5,
-  chip-ink: #2f4858,
-  chart-grid: #cbd5dd,
-  subpanel: #f8fbfb,
-  toggle-active: #e5f3f5,
-  white: #ffffff,
-  text-white: #ffffff,
+	bg: #f6f7f9,
+	panel: #ffffff,
+	panel-strong: #f0f5f7,
+	ink: #172026,
+	muted: #66737f,
+	line: #dce3e8,
+	blue: #2563eb,
+	green: #0f8a5f,
+	red: #c2413b,
+	teal: #117c8b,
+	teal-soft: #e8f4f5,
+	teal-soft-2: #eef6f6,
+	teal-line: #bfdee2,
+	teal-line-2: #8fc8ce,
+	teal-ink: #1e6670,
+	yellow: #936b00,
+	yellow-soft: #f7f0db,
+	yellow-line: #ead89b,
+	warning-bg: #fff7ed,
+	warning-line: #fed7aa,
+	warning-ink: #7c2d12,
+	hero: #102026,
+	hero-muted: #cdd8dc,
+	hero-accent: #7dd3d8,
+	body-copy: #34424d,
+	chip: #edf3f5,
+	chip-ink: #2f4858,
+	chart-grid: #cbd5dd,
+	subpanel: #f8fbfb,
+	toggle-active: #e5f3f5,
+	white: #ffffff,
+	text-white: #ffffff,
 );
 
 $dark-colors: (
-  bg: #0e1418,
-  panel: #151d22,
-  panel-strong: #1c272e,
-  ink: #eef4f6,
-  muted: #95a5af,
-  line: #2b3942,
-  teal: #5fc7d1,
-  teal-soft: #12333a,
-  teal-soft-2: #163940,
-  teal-line: #28535b,
-  teal-line-2: #3a7079,
-  teal-ink: #9adbe1,
-  yellow: #f3c35f,
-  yellow-soft: #332810,
-  yellow-line: #5b4615,
-  warning-bg: #321d12,
-  warning-line: #70401e,
-  warning-ink: #ffc08a,
-  hero: #081014,
-  hero-muted: #a8b8bf,
-  hero-accent: #80dbe3,
-  body-copy: #c7d2d8,
-  chip: #1c2a31,
-  chip-ink: #d7e4e8,
-  chart-grid: #394852,
-  subpanel: #111b20,
-  toggle-active: #173840,
-  white: #151d22, 
-  text-white: #ffffff,
+	bg: #0e1418,
+	panel: #151d22,
+	panel-strong: #1c272e,
+	ink: #eef4f6,
+	muted: #95a5af,
+	line: #2b3942,
+	teal: #5fc7d1,
+	teal-soft: #12333a,
+	teal-soft-2: #163940,
+	teal-line: #28535b,
+	teal-line-2: #3a7079,
+	teal-ink: #9adbe1,
+	yellow: #f3c35f,
+	yellow-soft: #332810,
+	yellow-line: #5b4615,
+	warning-bg: #321d12,
+	warning-line: #70401e,
+	warning-ink: #ffc08a,
+	hero: #081014,
+	hero-muted: #a8b8bf,
+	hero-accent: #80dbe3,
+	body-copy: #c7d2d8,
+	chip: #1c2a31,
+	chip-ink: #d7e4e8,
+	chart-grid: #394852,
+	subpanel: #111b20,
+	toggle-active: #173840,
+	white: #151d22,
+	text-white: #ffffff,
 );
 
 $radius: 8px;
 $container: 1480px;
 $shadow: 0 14px 36px rgba(23, 32, 38, 0.08);
-$font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+$font-family:
+	Inter,
+	ui-sans-serif,
+	system-ui,
+	-apple-system,
+	BlinkMacSystemFont,
+	"Segoe UI",
+	"Noto Sans TC",
+	sans-serif;
 
 @function color($name) {
-  @return var(--#{"" + $name});
+	@return var(--#{"" + $name});
 }
 
 @mixin card($bg: panel, $border: line, $shadowed: false) {
-  background: color($bg);
-  border: 1px solid color($border);
-  border-radius: $radius;
+	background: color($bg);
+	border: 1px solid color($border);
+	border-radius: $radius;
 
-  @if $shadowed {
-    box-shadow: var(--shadow);
-  }
+	@if $shadowed {
+		box-shadow: var(--shadow);
+	}
 }
 
 @mixin inline-center($gap: 8px) {
-  align-items: center;
-  display: inline-flex;
-  gap: $gap;
+	align-items: center;
+	display: inline-flex;
+	gap: $gap;
 }
 
 @mixin flex-between($gap: 12px, $align: center) {
-  align-items: $align;
-  display: flex;
-  gap: $gap;
-  justify-content: space-between;
+	align-items: $align;
+	display: flex;
+	gap: $gap;
+	justify-content: space-between;
 }
 
 @mixin grid($columns, $gap: 10px) {
-  display: grid;
-  gap: $gap;
-  grid-template-columns: $columns;
+	display: grid;
+	gap: $gap;
+	grid-template-columns: $columns;
 }
 
 @mixin button-shell($bg: ink, $fg: white, $border: $bg) {
-  @include inline-center;
-  background: color($bg);
-  border: 1px solid color($border);
-  border-radius: $radius;
-  color: color($fg);
-  font-weight: 800;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  white-space: nowrap;
+	@include inline-center;
+	background: color($bg);
+	border: 1px solid color($border);
+	border-radius: $radius;
+	color: color($fg);
+	font-weight: 800;
+	justify-content: center;
+	min-height: 42px;
+	padding: 0 16px;
+	white-space: nowrap;
 }
 
 @mixin muted-text($size: 0.82rem, $weight: 400) {
-  color: color(muted);
-  font-size: $size;
-  font-weight: $weight;
+	color: color(muted);
+	font-size: $size;
+	font-weight: $weight;
 }
 
 @mixin chip($bg: teal-soft, $border: teal-line, $fg: teal-ink, $weight: 800) {
-  background: color($bg);
-  border: 1px solid color($border);
-  border-radius: $radius;
-  color: color($fg);
-  font-size: 0.84rem;
-  font-weight: $weight;
-  padding: 8px 10px;
+	background: color($bg);
+	border: 1px solid color($border);
+	border-radius: $radius;
+	color: color($fg);
+	font-size: 0.84rem;
+	font-weight: $weight;
+	padding: 8px 10px;
 }
 
 :root {
-  @each $name, $value in $colors {
-    --#{"" + $name}: #{$value};
-  }
+	@each $name, $value in $colors {
+		--#{"" + $name}: #{$value};
+	}
 
-  --shadow: #{$shadow};
+	--shadow: #{$shadow};
 }
 
 :root[data-theme="dark"] {
-  @each $name, $value in $dark-colors {
-    --#{"" + $name}: #{$value};
-  }
+	@each $name, $value in $dark-colors {
+		--#{"" + $name}: #{$value};
+	}
 
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+	--shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
 
 * {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  background: color(bg);
-  color: color(ink);
-  font-family: $font-family;
-  margin: 0;
+	background: color(bg);
+	color: color(ink);
+	font-family: $font-family;
+	margin: 0;
 }
 
 button,
 input {
-  font: inherit;
+	font: inherit;
 }
 
 button {
-  cursor: pointer;
+	cursor: pointer;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+	color: inherit;
+	text-decoration: none;
 }
 
 h1,
 h2,
 h3,
 p {
-  margin-top: 0;
+	margin-top: 0;
 }
 
 h1 {
-  font-size: clamp(2rem, 3vw, 3.2rem);
-  letter-spacing: 0;
-  line-height: 1.05;
-  margin-bottom: 10px;
+	font-size: clamp(2rem, 3vw, 3.2rem);
+	letter-spacing: 0;
+	line-height: 1.05;
+	margin-bottom: 10px;
 }
 
 .shell {
-  min-height: 100vh;
-  padding: 28px;
+	min-height: 100vh;
+	padding: 28px;
 }
 
 .topbar {
-  @include flex-between(18px, flex-end);
-  margin: 0 auto 22px;
-  max-width: $container;
+	@include flex-between(18px, flex-end);
+	margin: 0 auto 22px;
+	max-width: $container;
 }
 
 .eyebrow {
-  color: color(teal);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  margin: 0 0 6px;
-  text-transform: uppercase;
+	color: color(teal);
+	font-size: 0.76rem;
+	font-weight: 800;
+	letter-spacing: 0;
+	margin: 0 0 6px;
+	text-transform: uppercase;
 }
 
 .subtitle {
-  @include muted-text(1rem);
-  line-height: 1.7;
-  margin: 0;
-  max-width: 780px;
+	@include muted-text(1rem);
+	line-height: 1.7;
+	margin: 0;
+	max-width: 780px;
 }
 
 .topActions {
-  @include flex-between(10px);
-  flex-wrap: wrap;
-  justify-content: flex-end;
+	@include flex-between(10px);
+	flex-wrap: wrap;
+	justify-content: flex-end;
 }
 
 .languageToggle {
-  @include inline-center(4px);
-  @include card;
-  min-height: 42px;
-  padding: 4px;
+	@include inline-center(4px);
+	@include card;
+	min-height: 42px;
+	padding: 4px;
 
-  svg {
-    color: color(teal);
-    margin: 0 4px;
-  }
+	svg {
+		color: color(teal);
+		margin: 0 4px;
+	}
 
-  button {
-    background: transparent;
-    border: 0;
-    border-radius: 6px;
-    color: color(muted);
-    font-size: 0.82rem;
-    font-weight: 850;
-    min-height: 32px;
-    min-width: 42px;
-    padding: 0 8px;
+	button {
+		background: transparent;
+		border: 0;
+		border-radius: 6px;
+		color: color(muted);
+		font-size: 0.82rem;
+		font-weight: 850;
+		min-height: 32px;
+		min-width: 42px;
+		padding: 0 8px;
 
-    &.active {
-      background: color(toggle-active);
-      color: color(teal);
-    }
-  }
+		&.active {
+			background: color(toggle-active);
+			color: color(teal);
+		}
+	}
 }
 
 .themeToggle {
-  @include button-shell(white, teal, line);
-  min-height: 42px;
+	@include button-shell(white, teal, line);
+	min-height: 42px;
 }
 
 .primaryButton,
 .decisionBar button,
 .searchBox button {
-  @include button-shell;
+	@include button-shell;
 
-  &:disabled {
-    opacity: 0.6;
-  }
+	&:disabled {
+		opacity: 0.6;
+	}
 }
 
 .spin {
-  animation: spin 1s linear infinite;
+	animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .metricGrid {
-  @include grid(repeat(4, minmax(0, 1fr)), 12px);
-  margin: 0 auto 16px;
-  max-width: $container;
+	@include grid(repeat(4, minmax(0, 1fr)), 12px);
+	margin: 0 auto 16px;
+	max-width: $container;
 }
 
 .metric {
-  @include card;
-  @include grid(auto 1fr, 4px 12px);
-  align-items: center;
-  padding: 16px;
+	@include card;
+	@include grid(auto 1fr, 4px 12px);
+	align-items: center;
+	padding: 16px;
 
-  svg {
-    color: color(teal);
-    grid-row: span 2;
-  }
+	svg {
+		color: color(teal);
+		grid-row: span 2;
+	}
 
-  span {
-    @include muted-text;
-  }
+	span {
+		@include muted-text;
+	}
 
-  strong {
-    font-size: 1.35rem;
-  }
+	strong {
+		font-size: 1.35rem;
+	}
 }
 
 .alert {
-  @include card(warning-bg, warning-line);
-  color: #9a3412;
-  margin: 0 auto 16px;
-  max-width: $container;
-  padding: 12px 14px;
+	@include card(warning-bg, warning-line);
+	color: #9a3412;
+	margin: 0 auto 16px;
+	max-width: $container;
+	padding: 12px 14px;
 }
 
 .notice {
-  @include card(panel, line);
-//   @include inline-center(8px);
-  color: color(body-copy);
-  margin: 0 auto 16px;
-  max-width: $container;
-  padding: 12px 14px;
+	@include card(panel, line);
+	//   @include inline-center(8px);
+	color: color(body-copy);
+	margin: 0 auto 16px;
+	max-width: $container;
+	padding: 12px 14px;
 
-  strong {
-    color: color(teal);
-    white-space: nowrap;
-  }
+	strong {
+		color: color(teal);
+		white-space: nowrap;
+	}
 
-  span {
-    line-height: 1.5;
-  }
+	span {
+		line-height: 1.5;
+	}
 }
 
 .workspace {
-  @include grid(minmax(260px, 1fr) minmax(0, 2.2fr) minmax(260px, 1fr), 16px);
-  align-items: start;
-  margin: 0 auto;
-  max-width: $container;
+	@include grid(minmax(260px, 1fr) minmax(0, 2.2fr) minmax(260px, 1fr), 16px);
+	align-items: start;
+	margin: 0 auto;
+	max-width: $container;
 }
 
 .panel,
 .mainPanel {
-  @include card(panel, line, true);
-  min-width: 0;
+	@include card(panel, line, true);
+	min-width: 0;
 }
 
 .sidebar,
 .rightRail {
-  align-self: start;
-  max-height: calc(100vh - 56px);
-  overflow: auto;
-  padding: 16px;
-  position: sticky;
-  top: 20px;
+	align-self: start;
+	max-height: calc(100vh - 56px);
+	overflow: auto;
+	padding: 16px;
+	position: sticky;
+	top: 20px;
 }
 
 .panelHeader {
-  @include flex-between(12px, flex-start);
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
+	@include flex-between(12px, flex-start);
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 14px;
 
-  h2 {
-    color: color(ink);
-    font-size: 1.05rem;
-    margin: 0;
-  }
+	h2 {
+		color: color(ink);
+		font-size: 1.05rem;
+		margin: 0;
+	}
 
-  > div:first-child {
-    flex: 1 1 160px;
-    min-width: 0;
-  }
+	> div:first-child {
+		flex: 1 1 160px;
+		min-width: 0;
+	}
 }
 
 .timestamp {
-  @include muted-text(0.75rem);
-  flex: 0 0 auto;
-  line-height: 1.4;
-  max-width: 140px;
-  text-align: right;
-  white-space: nowrap;
+	@include muted-text(0.75rem);
+	flex: 0 0 auto;
+	line-height: 1.4;
+	max-width: 140px;
+	text-align: right;
+	white-space: nowrap;
 }
 
 .searchBox {
-  @include card(panel-strong);
-  @include grid(auto 1fr auto, 8px);
-  align-items: center;
-  padding: 8px;
+	@include card(panel-strong);
+	@include grid(auto 1fr auto, 8px);
+	align-items: center;
+	padding: 8px;
 
-  input {
-    background: transparent;
-    border: 0;
-    color: color(ink);
-    min-width: 0;
-    outline: none;
-  }
+	input {
+		background: transparent;
+		border: 0;
+		color: color(ink);
+		min-width: 0;
+		outline: none;
+	}
 
-  button {
-    min-height: 34px;
-    padding: 0 10px;
-  }
+	button {
+		min-height: 34px;
+		padding: 0 10px;
+	}
 }
 
 .manualAdd {
-  @include inline-center;
-  background: color(white);
-  border: 1px dashed color(teal-line-2);
-  border-radius: $radius;
-  color: color(teal);
-  display: flex;
-  font-weight: 850;
-  justify-content: center;
-  margin-top: 10px;
-  min-height: 40px;
-  width: 100%;
+	@include inline-center;
+	background: color(white);
+	border: 1px dashed color(teal-line-2);
+	border-radius: $radius;
+	color: color(teal);
+	display: flex;
+	font-weight: 850;
+	justify-content: center;
+	margin-top: 10px;
+	min-height: 40px;
+	width: 100%;
 
-  &:disabled {
-    color: color(muted);
-    cursor: default;
-    opacity: 0.55;
-  }
+	&:disabled {
+		color: color(muted);
+		cursor: default;
+		opacity: 0.55;
+	}
 }
 
 .searchResults {
-  @include card;
-  margin-top: 10px;
-  max-height: 230px;
-  overflow: auto;
+	@include card;
+	margin-top: 10px;
+	max-height: 230px;
+	overflow: auto;
 
-  button {
-    border-bottom: 1px solid color(line);
+	button {
+		border-bottom: 1px solid color(line);
 
-    &:last-child {
-      border-bottom: 0;
-    }
-  }
+		&:last-child {
+			border-bottom: 0;
+		}
+	}
 }
 
 .searchResults button,
 .suggestions button {
-  @include flex-between(10px);
-  background: color(white);
-  border: 0;
-  color: color(ink);
-  padding: 12px;
-  text-align: left;
-  width: 100%;
+	@include flex-between(10px);
+	background: color(white);
+	border: 0;
+	color: color(ink);
+	padding: 12px;
+	text-align: left;
+	width: 100%;
 }
 
 .searchResults small,
 .watchItem small {
-  @include muted-text(0.75rem);
-  display: block;
-  line-height: 1.35;
-  margin-top: 2px;
+	@include muted-text(0.75rem);
+	display: block;
+	line-height: 1.35;
+	margin-top: 2px;
 }
 
 .watchlist {
-  @include grid(1fr, 8px);
-  margin-top: 14px;
+	@include grid(1fr, 8px);
+	margin-top: 14px;
 }
 
 .watchItem {
-  @include card;
-  align-items: center;
-  background: color(white);
-  border: 0;
-  color: color(ink);
-  display: grid;
-  gap: 8px 10px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  padding: 12px;
-  text-align: left;
-  width: 100%;
+	@include card;
+	align-items: center;
+	background: color(white);
+	border: 0;
+	color: color(ink);
+	display: grid;
+	gap: 8px 10px;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	padding: 12px;
+	text-align: left;
+	width: 100%;
 
-  &:last-child {
-    border-bottom: 0;
-  }
+	&:last-child {
+		border-bottom: 0;
+	}
 
-  &.active {
-    background: color(teal-soft-2);
-    border-color: color(teal-line-2);
-  }
+	&.active {
+		background: color(teal-soft-2);
+		border-color: color(teal-line-2);
+	}
 }
 
 .watchItemMain {
-  min-width: 0;
+	min-width: 0;
 
-  strong {
-    display: block;
-  }
+	strong {
+		display: block;
+	}
 
-  small {
-    @include muted-text(0.75rem);
-    display: block;
-    line-height: 1.35;
-    margin-top: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+	small {
+		@include muted-text(0.75rem);
+		display: block;
+		line-height: 1.35;
+		margin-top: 2px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 }
 
 .watchItemRemove {
-  @include inline-center;
-  color: color(muted);
-  flex: 0 0 auto;
+	@include inline-center;
+	color: color(muted);
+	flex: 0 0 auto;
 
-  &:hover {
-    color: color(red);
-  }
+	&:hover {
+		color: color(red);
+	}
 }
 
 .move {
-  color: color(muted);
-  flex: 0 0 auto;
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-align: right;
-  white-space: nowrap;
+	color: color(muted);
+	flex: 0 0 auto;
+	font-size: 0.82rem;
+	font-weight: 800;
+	text-align: right;
+	white-space: nowrap;
 }
 
 .up {
-  color: color(green);
+	color: color(green);
 }
 
 .down {
-  color: color(red);
+	color: color(red);
 }
 
 .mainPanel {
-  container-name: report;
-  container-type: inline-size;
-  min-height: 740px;
-  min-width: 0;
-  overflow: hidden;
+	container-name: report;
+	container-type: inline-size;
+	min-height: 740px;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .emptyState {
-  align-items: center;
-  display: grid;
-  min-height: 520px;
-  padding: 32px;
-  place-items: center;
-  text-align: center;
+	align-items: center;
+	display: grid;
+	min-height: 520px;
+	padding: 32px;
+	place-items: center;
+	text-align: center;
 }
 
 .report {
-  max-width: 100%;
-  min-width: 0;
-  padding: 20px;
+	max-width: 100%;
+	min-width: 0;
+	padding: 20px;
 }
 
 .reportTabs {
-  margin-top: 4px;
+	margin-top: 4px;
 }
 
 .reportTabList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding: 4px;
-  background: color(panel-strong);
-  border: 1px solid color(line);
-  border-radius: $radius;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+	padding: 4px;
+	background: color(panel-strong);
+	border: 1px solid color(line);
+	border-radius: $radius;
 }
 
 .reportTabButton {
-  position: relative;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: color(muted);
-  cursor: pointer;
-  flex: 1 1 0;
-  font-size: 0.86rem;
-  font-weight: 850;
-  min-height: 40px;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0 10px;
-  transition: color 0.18s ease;
+	position: relative;
+	background: transparent;
+	border: 0;
+	border-radius: 6px;
+	color: color(muted);
+	cursor: pointer;
+	flex: 1 1 0;
+	font-size: 0.86rem;
+	font-weight: 850;
+	min-height: 40px;
+	min-width: 0;
+	overflow: hidden;
+	padding: 0 10px;
+	transition: color 0.18s ease;
 
-  &.active {
-    color: color(teal-ink);
-  }
+	&.active {
+		color: color(teal-ink);
+	}
 
-  &:hover:not(.active) {
-    color: color(ink);
-  }
+	&:hover:not(.active) {
+		color: color(ink);
+	}
 }
 
 .reportTabIndicator {
-  background: color(white);
-  border: 1px solid color(teal-line);
-  border-radius: 6px;
-  inset: 0;
-  position: absolute;
-  z-index: 0;
+	background: color(white);
+	border: 1px solid color(teal-line);
+	border-radius: 6px;
+	inset: 0;
+	position: absolute;
+	z-index: 0;
 }
 
 .reportTabLabel {
-  position: relative;
-  z-index: 1;
+	position: relative;
+	z-index: 1;
 }
 
 .reportTabContent {
-  max-width: 100%;
-  min-height: 320px;
-  min-width: 0;
+	max-width: 100%;
+	min-height: 320px;
+	min-width: 0;
 }
 
 .reportTabPane {
-  max-width: 100%;
-  min-width: 0;
-  width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	width: 100%;
 }
 
 .reportTabPanel {
-  display: grid;
-  gap: 0;
-  max-width: 100%;
-  min-width: 0;
+	display: grid;
+	gap: 0;
+	max-width: 100%;
+	min-width: 0;
 }
 
 .reportHero {
-  @include flex-between(16px, flex-start);
-  background: color(hero);
-  color: color(white);
-  margin: -20px -20px 18px;
-  padding: 24px;
+	@include flex-between(16px, flex-start);
+	background: color(hero);
+	color: color(white);
+	margin: -20px -20px 18px;
+	padding: 24px;
 
-  .eyebrow {
-    color: color(hero-accent);
-  }
+	.eyebrow {
+		color: color(hero-accent);
+	}
 
-  h2 {
-    font-size: clamp(2rem, 4vw, 4rem);
-    color: color(text-white);
-    letter-spacing: 0;
-    line-height: 1;
-    margin: 0;
+	h2 {
+		font-size: clamp(2rem, 4vw, 4rem);
+		color: color(text-white);
+		letter-spacing: 0;
+		line-height: 1;
+		margin: 0;
 
-    span {
-      color: color(hero-muted);
-      display: block;
-      font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-top: 8px;
-    }
-  }
+		span {
+			color: color(hero-muted);
+			display: block;
+			font-size: 1rem;
+			font-weight: 600;
+			line-height: 1.4;
+			margin-top: 8px;
+		}
+	}
 }
 
 .priceBlock {
-  text-align: right;
+	text-align: right;
 
-  strong {
-    display: block;
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-  }
+	strong {
+		color: color(text-white);
+		display: block;
+		font-size: clamp(1.5rem, 3vw, 2.5rem);
+	}
 
-  span {
-    font-weight: 900;
-  }
+	span {
+		font-weight: 900;
+	}
 }
 
 .decisionBar {
-  @include grid(repeat(3, minmax(0, 1fr)));
-  align-items: stretch;
-  gap: 10px;
-  margin-bottom: 16px;
+	@include grid(repeat(3, minmax(0, 1fr)));
+	align-items: stretch;
+	gap: 10px;
+	margin-bottom: 16px;
 
-  > div {
-    @include card(panel-strong);
-    padding: 12px;
-  }
+	> div {
+		@include card(panel-strong);
+		padding: 12px;
+	}
 
-  > button {
-    @include button-shell;
-    grid-column: 1 / -1;
-    justify-self: end;
-    min-width: 148px;
-    width: fit-content;
-  }
+	> button {
+		@include button-shell;
+		grid-column: 1 / -1;
+		justify-self: end;
+		min-width: 148px;
+		width: fit-content;
+	}
 }
 
 .decisionBar span,
 .info span {
-  @include muted-text(0.78rem);
-  display: block;
-  margin-bottom: 5px;
+	@include muted-text(0.78rem);
+	display: block;
+	margin-bottom: 5px;
 }
 
 .decisionBar strong,
 .info strong {
-  font-size: 1rem;
+	font-size: 1rem;
 }
 
 .analysisSection,
 .analysisCard,
 .info {
-  @include card(white);
+	@include card(white);
 }
 
 .analysisSection {
-  margin-bottom: 14px;
-  max-width: 100%;
-  min-width: 0;
-  padding: 16px;
+	margin-bottom: 14px;
+	max-width: 100%;
+	min-width: 0;
+	padding: 16px;
 
-  h3 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
+	h3 {
+		font-size: 1rem;
+		margin-bottom: 10px;
+	}
 
-  p {
-    color: color(body-copy);
-    line-height: 1.75;
-    margin: 0;
-  }
+	p {
+		color: color(body-copy);
+		line-height: 1.75;
+		margin: 0;
+	}
 
-  &.analysisSectionScroll {
-    overflow: hidden;
-  }
+	&.analysisSectionScroll {
+		overflow: hidden;
+	}
 }
 
 .sectionTitle {
-  @include inline-center(8px);
-  align-items: flex-start;
-  margin-bottom: 10px;
-  position: relative;
+	@include inline-center(8px);
+	align-items: flex-start;
+	margin-bottom: 10px;
+	position: relative;
 
-  h3 {
-    margin: 0;
-  }
+	h3 {
+		margin: 0;
+	}
 
-  &.static {
-    display: block;
+	&.static {
+		display: block;
 
-    p {
-      @include muted-text(0.9rem);
-      line-height: 1.65;
-      margin-top: 6px;
-    }
-  }
+		p {
+			@include muted-text(0.9rem);
+			line-height: 1.65;
+			margin-top: 6px;
+		}
+	}
 }
 
 .tooltipAnchor {
-  @include inline-center;
-  background: color(panel-strong);
-  border: 1px solid color(line);
-  border-radius: 999px;
-  color: color(teal);
-  cursor: help;
-  flex: 0 0 auto;
-  height: 24px;
-  justify-content: center;
-  position: relative;
-  width: 24px;
+	@include inline-center;
+	background: color(panel-strong);
+	border: 1px solid color(line);
+	border-radius: 999px;
+	color: color(teal);
+	cursor: help;
+	flex: 0 0 auto;
+	height: 24px;
+	justify-content: center;
+	position: relative;
+	width: 24px;
 
-  &:hover,
-  &:focus-visible {
-    .tooltipBubble {
-      opacity: 1;
-      transform: translateY(0);
-      visibility: visible;
-    }
-  }
+	&:hover,
+	&:focus-visible {
+		.tooltipBubble {
+			opacity: 1;
+			transform: translateY(0);
+			visibility: visible;
+		}
+	}
 }
 
 .tooltipBubble {
-  @include card(panel);
-  box-shadow: var(--shadow);
-  color: color(body-copy);
-  font-size: 0.82rem;
-  font-weight: 650;
-  left: 50%;
-  line-height: 1.6;
-  max-width: min(340px, 70vw);
-  min-width: 260px;
-  opacity: 0;
-  padding: 10px 12px;
-  position: absolute;
-  top: calc(100% + 8px);
-  transform: translate(-50%, -4px);
-  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-  visibility: hidden;
-  z-index: 20;
+	@include card(panel);
+	box-shadow: var(--shadow);
+	color: color(body-copy);
+	font-size: 0.82rem;
+	font-weight: 650;
+	left: 50%;
+	line-height: 1.6;
+	max-width: min(340px, 70vw);
+	min-width: 260px;
+	opacity: 0;
+	padding: 10px 12px;
+	position: absolute;
+	top: calc(100% + 8px);
+	transform: translate(-50%, -4px);
+	transition:
+		opacity 0.18s ease,
+		transform 0.18s ease,
+		visibility 0.18s ease;
+	visibility: hidden;
+	z-index: 20;
 }
 
 .analysisCard h3 {
-  font-size: 1rem;
-  margin-bottom: 10px;
+	font-size: 1rem;
+	margin-bottom: 10px;
 }
 
 .conclusion {
-  border-left: 4px solid color(teal);
+	border-left: 4px solid color(teal);
 }
 
 .themeBox,
 .modelPanel,
 .timeline div {
-  background: color(subpanel);
+	background: color(subpanel);
 }
 
 .catalystList,
@@ -805,831 +817,851 @@ h1 {
 .analysisCardTags,
 .modelTabs,
 .chartLegend {
-  display: flex;
-  flex-wrap: wrap;
+	display: flex;
+	flex-wrap: wrap;
 }
 
 .catalystList {
-  gap: 8px;
-  margin-top: 12px;
+	gap: 8px;
+	margin-top: 12px;
 
-  span {
-    @include chip;
-  }
+	span {
+		@include chip;
+	}
 }
 
 .quoteGrid,
 .fundamentalGrid,
 .zones {
-  @include grid(repeat(auto-fit, minmax(min(100%, 200px), 1fr)));
+	@include grid(repeat(auto-fit, minmax(min(100%, 200px), 1fr)));
 }
 
 .quoteGrid {
-  margin-bottom: 14px;
+	margin-bottom: 14px;
 }
 
 .info {
-  min-height: 78px;
-  padding: 13px;
+	min-height: 78px;
+	padding: 13px;
 }
 
 .analysisGrid {
-  @include grid(repeat(3, minmax(0, 1fr)));
-  align-items: stretch;
-  margin-bottom: 14px;
+	@include grid(repeat(3, minmax(0, 1fr)));
+	align-items: stretch;
+	margin-bottom: 14px;
 }
 
 .methodBox {
-  @include grid(repeat(2, minmax(0, 1fr)), 16px);
+	@include grid(repeat(2, minmax(0, 1fr)), 16px);
 
-  strong {
-    display: block;
-    font-size: 1.1rem;
-    margin-bottom: 8px;
-  }
+	strong {
+		display: block;
+		font-size: 1.1rem;
+		margin-bottom: 8px;
+	}
 }
 
 .methodEvidence {
-  align-content: start;
-  gap: 8px;
+	align-content: start;
+	gap: 8px;
 
-  span {
-    @include chip(yellow-soft, yellow-line, yellow);
-    font-size: 0.82rem;
-  }
+	span {
+		@include chip(yellow-soft, yellow-line, yellow);
+		font-size: 0.82rem;
+	}
 }
 
 .qualityLayout {
-  @include grid(auto 1fr, 16px);
-  align-items: center;
+	@include grid(auto 1fr, 16px);
+	align-items: center;
 }
 
 .qualityScore {
-  @include card(teal-soft, teal-line);
-  align-items: center;
-  display: grid;
-  height: 88px;
-  justify-items: center;
-  min-width: 92px;
-  padding: 10px;
+	@include card(teal-soft, teal-line);
+	align-items: center;
+	display: grid;
+	height: 88px;
+	justify-items: center;
+	min-width: 92px;
+	padding: 10px;
 
-  strong {
-    color: color(teal);
-    font-size: 2rem;
-    line-height: 1;
-  }
+	strong {
+		color: color(teal);
+		font-size: 2rem;
+		line-height: 1;
+	}
 
-  span {
-    color: color(teal-ink);
-    font-size: 0.78rem;
-    font-weight: 850;
-  }
+	span {
+		color: color(teal-ink);
+		font-size: 0.78rem;
+		font-weight: 850;
+	}
 }
 
 .modelTabs {
-  gap: 8px;
-  margin-bottom: 12px;
+	gap: 8px;
+	margin-bottom: 12px;
 
-  button {
-    background: color(white);
-    border: 1px solid color(line);
-    border-radius: $radius;
-    color: color(ink);
-    font-weight: 850;
-    padding: 9px 12px;
+	button {
+		background: color(white);
+		border: 1px solid color(line);
+		border-radius: $radius;
+		color: color(ink);
+		font-weight: 850;
+		padding: 9px 12px;
 
-    &.active {
-      background: color(ink);
-      border-color: color(ink);
-      color: color(white);
-    }
-  }
+		&.active {
+			background: color(ink);
+			border-color: color(ink);
+			color: color(white);
+		}
+	}
 }
 
 .modelPanel {
-  @include card(panel);
-  padding: 14px;
+	@include card(panel);
+	padding: 14px;
 
-  strong {
-    display: block;
-    margin-bottom: 8px;
-  }
+	strong {
+		display: block;
+		margin-bottom: 8px;
+	}
 }
 
 .timeline {
-  @include grid(1fr);
+	@include grid(1fr);
 
-  div {
-    border-left: 4px solid color(teal);
-    border-radius: $radius;
-    padding: 12px 14px;
-  }
+	div {
+		border-left: 4px solid color(teal);
+		border-radius: $radius;
+		padding: 12px 14px;
+	}
 
-  span {
-    @include muted-text(0.78rem, 850);
-    display: block;
-    margin-bottom: 4px;
-  }
+	span {
+		@include muted-text(0.78rem, 850);
+		display: block;
+		margin-bottom: 4px;
+	}
 
-  strong,
-  small {
-    display: block;
-  }
+	strong,
+	small {
+		display: block;
+	}
 
-  small {
-    color: color(muted);
-    line-height: 1.5;
-    margin-top: 5px;
-  }
+	small {
+		color: color(muted);
+		line-height: 1.5;
+		margin-top: 5px;
+	}
 }
 
 .longTermPlan {
-  .planGrid {
-    @include grid(repeat(3, minmax(0, 1fr)), 12px);
-  }
+	.planGrid {
+		@include grid(repeat(3, minmax(0, 1fr)), 12px);
+	}
 
-  .planGrid > div {
-    @include card(panel-strong);
-    padding: 14px;
-  }
+	.planGrid > div {
+		@include card(panel-strong);
+		padding: 14px;
+	}
 
-  strong {
-    display: block;
-    margin-bottom: 8px;
-  }
+	strong {
+		display: block;
+		margin-bottom: 8px;
+	}
 
-  ul {
-    color: color(body-copy);
-    line-height: 1.65;
-    margin: 0;
-    padding-left: 18px;
-  }
+	ul {
+		color: color(body-copy);
+		line-height: 1.65;
+		margin: 0;
+		padding-left: 18px;
+	}
 }
 
 .planMetrics {
-  display: grid;
-  gap: 8px;
+	display: grid;
+	gap: 8px;
 
-  span {
-    @include flex-between(8px);
-    @include card(panel);
-    color: color(muted);
-    font-size: 0.8rem;
-    padding: 9px 10px;
-  }
+	span {
+		@include flex-between(8px);
+		@include card(panel);
+		color: color(muted);
+		font-size: 0.8rem;
+		padding: 9px 10px;
+	}
 
-  b {
-    color: color(ink);
-  }
+	b {
+		color: color(ink);
+	}
 }
 
 .mindMapFlow {
-  background: color(subpanel);
-  border: 1px solid color(line);
-  border-radius: $radius;
-  height: min(480px, 62vh);
-  margin-top: 14px;
-  max-width: 100%;
-  min-height: 360px;
-  min-width: 0;
-  overflow: hidden;
-  width: 100%;
+	background: color(subpanel);
+	border: 1px solid color(line);
+	border-radius: $radius;
+	height: min(480px, 62vh);
+	margin-top: 14px;
+	max-width: 100%;
+	min-height: 360px;
+	min-width: 0;
+	overflow: hidden;
+	width: 100%;
 
-  .react-flow__pane {
-    cursor: grab;
-  }
+	.react-flow__pane {
+		cursor: grab;
+	}
 }
 
 .mindMapFlowCore {
-  align-items: center;
-  background: color(hero);
-  border: 1px solid color(hero);
-  border-radius: $radius;
-  box-shadow: var(--shadow);
-  color: color(white);
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-  min-height: 96px;
-  padding: 14px 16px;
-  text-align: center;
-  width: 168px;
+	align-items: center;
+	background: color(hero);
+	border: 1px solid color(hero);
+	border-radius: $radius;
+	box-shadow: var(--shadow);
+	color: color(text-white);
+	display: grid;
+	gap: 6px;
+	justify-items: center;
+	min-height: 96px;
+	padding: 14px 16px;
+	text-align: center;
+	width: 168px;
 
-  strong {
-    font-size: 1.35rem;
-    line-height: 1.1;
-  }
+	strong {
+		font-size: 1.35rem;
+		line-height: 1.1;
+	}
 
-  span {
-    color: color(hero-accent);
-    font-size: 0.8rem;
-    font-weight: 850;
-  }
+	span {
+		color: color(hero-accent);
+		font-size: 0.8rem;
+		font-weight: 850;
+	}
 }
 
 .mindMapFlowBranch {
-  @include card(panel);
-  box-shadow: var(--shadow);
-  max-width: 196px;
-  min-height: 118px;
-  padding: 12px;
-  width: 196px;
+	@include card(panel);
+	box-shadow: var(--shadow);
+	max-width: 196px;
+	min-height: 132px;
+	padding: 12px;
+	width: 196px;
 
-  strong {
-    color: color(teal);
-    display: block;
-    font-size: 0.88rem;
-    margin-bottom: 6px;
-  }
+	strong {
+		color: color(teal);
+		display: block;
+		font-size: 0.88rem;
+		margin-bottom: 6px;
+	}
 
-  p {
-    @include muted-text(0.76rem);
-    line-height: 1.5;
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
+	p {
+		@include muted-text(0.76rem);
+		line-height: 1.5;
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
 }
 
 .mindMapFlowHandle {
-  border: 0;
-  height: 1px;
-  opacity: 0;
-  width: 1px;
+	border: 0;
+	height: 1px;
+	opacity: 0;
+	width: 1px;
 }
 
 .summaryText {
-  @include muted-text(0.88rem);
-  line-height: 1.6;
-  margin: 0;
+	@include muted-text(0.88rem);
+	line-height: 1.6;
+	margin: 0;
 }
 
 .sourceIconLink {
-  color: color(teal);
-  display: inline-flex;
-  margin-left: 6px;
-  
-  &:hover {
-    color: color(ink);
-  }
+	color: color(teal);
+	display: inline-flex;
+	margin-left: 6px;
+
+	&:hover {
+		color: color(ink);
+	}
 }
 
 .swotGrid {
-  @include grid(repeat(2, minmax(0, 1fr)), 12px);
-  margin-top: 10px;
+	@include grid(repeat(2, minmax(0, 1fr)), 12px);
+	margin-top: 10px;
 }
 
 .swotItem {
-  @include card(panel-strong);
-  padding: 12px;
+	@include card(panel-strong);
+	padding: 12px;
 
-  h4 {
-    font-size: 0.82rem;
-    font-weight: 850;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
+	h4 {
+		font-size: 0.82rem;
+		font-weight: 850;
+		margin-bottom: 8px;
+		text-transform: uppercase;
+	}
 
-  ul {
-    color: color(body-copy);
-    font-size: 0.8rem;
-    line-height: 1.55;
-    margin: 0;
-    padding-left: 16px;
-  }
+	ul {
+		color: color(body-copy);
+		font-size: 0.8rem;
+		line-height: 1.55;
+		margin: 0;
+		padding-left: 16px;
+	}
 
-  &.s { border-left: 4px solid color(green); h4 { color: color(green); } }
-  &.w { border-left: 4px solid color(red); h4 { color: color(red); } }
-  &.o { border-left: 4px solid color(blue); h4 { color: color(blue); } }
-  &.t { border-left: 4px solid color(yellow); h4 { color: color(yellow); } }
+	&.s {
+		border-left: 4px solid color(green);
+		h4 {
+			color: color(green);
+		}
+	}
+	&.w {
+		border-left: 4px solid color(red);
+		h4 {
+			color: color(red);
+		}
+	}
+	&.o {
+		border-left: 4px solid color(blue);
+		h4 {
+			color: color(blue);
+		}
+	}
+	&.t {
+		border-left: 4px solid color(yellow);
+		h4 {
+			color: color(yellow);
+		}
+	}
 }
 
 .swotSource {
-  @include muted-text(0.72rem);
-  font-weight: 700;
-  margin-top: 14px;
-  text-align: right;
-  text-transform: uppercase;
+	@include muted-text(0.72rem);
+	font-weight: 700;
+	margin-top: 14px;
+	text-align: right;
+	text-transform: uppercase;
 }
 
 .peerTableWrap {
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid color(line);
-  border-radius: $radius;
-  max-width: 100%;
-  overflow-x: auto;
-  width: 100%;
+	-webkit-overflow-scrolling: touch;
+	border: 1px solid color(line);
+	border-radius: $radius;
+	max-width: 100%;
+	overflow-x: auto;
+	width: 100%;
 }
 
 .peerTable {
-  border-collapse: collapse;
-  font-size: 0.86rem;
-  min-width: 720px;
-  width: 100%;
+	border-collapse: collapse;
+	font-size: 0.86rem;
+	min-width: 720px;
+	width: 100%;
 
-  th,
-  td {
-    border-bottom: 1px solid color(line);
-    padding: 10px;
-    text-align: left;
-    white-space: nowrap;
+	th,
+	td {
+		border-bottom: 1px solid color(line);
+		padding: 10px;
+		text-align: left;
+		white-space: nowrap;
 
-    &:first-child {
-      background: color(panel);
-      border-right: 1px solid color(line);
-      left: 0;
-      position: sticky;
-      z-index: 5;
-    }
-  }
+		&:first-child {
+			background: color(panel);
+			border-right: 1px solid color(line);
+			left: 0;
+			position: sticky;
+			z-index: 5;
+		}
+	}
 
-  th {
-    color: color(muted);
-    font-size: 0.76rem;
-    text-transform: uppercase;
-    
-    &:first-child {
-      z-index: 6;
-    }
-  }
+	th {
+		color: color(muted);
+		font-size: 0.76rem;
+		text-transform: uppercase;
 
-  tr.selected td {
-    background: color(teal-soft-2);
-    font-weight: 850;
-    
-    &:first-child {
-      background: color(teal-soft-2);
-    }
-  }
+		&:first-child {
+			z-index: 6;
+		}
+	}
+
+	tr.selected td {
+		background: color(teal-soft-2);
+		font-weight: 850;
+
+		&:first-child {
+			background: color(teal-soft-2);
+		}
+	}
 }
 
 .sourceLink {
-  @include inline-center(6px);
-  color: color(teal);
-  font-size: 0.84rem;
-  font-weight: 800;
-  margin-top: 12px;
+	@include inline-center(6px);
+	color: color(teal);
+	font-size: 0.84rem;
+	font-weight: 800;
+	margin-top: 12px;
 }
 
 .newsList {
-  @include grid(1fr);
+	@include grid(1fr);
 
-  a {
-    @include card(white);
-    display: block;
-    padding: 12px;
-  }
+	a {
+		@include card(white);
+		display: block;
+		padding: 12px;
+	}
 
-  span {
-    @include muted-text(0.78rem, 800);
-    display: block;
-    margin-bottom: 5px;
-  }
+	span {
+		@include muted-text(0.78rem, 800);
+		display: block;
+		margin-bottom: 5px;
+	}
 
-  strong {
-    @include flex-between(8px, flex-start);
-    line-height: 1.4;
+	strong {
+		@include flex-between(8px, flex-start);
+		line-height: 1.4;
 
-    svg {
-      color: color(teal);
-      flex: 0 0 auto;
-      margin-top: 3px;
-    }
-  }
+		svg {
+			color: color(teal);
+			flex: 0 0 auto;
+			margin-top: 3px;
+		}
+	}
 
-  p {
-    @include muted-text(0.9rem);
-    line-height: 1.6;
-    margin-top: 6px;
-  }
+	p {
+		@include muted-text(0.9rem);
+		line-height: 1.6;
+		margin-top: 6px;
+	}
 
-  em {
-    color: color(teal);
-    display: inline-flex;
-    font-size: 0.82rem;
-    font-style: normal;
-    font-weight: 850;
-    margin-top: 8px;
-  }
+	em {
+		color: color(teal);
+		display: inline-flex;
+		font-size: 0.82rem;
+		font-style: normal;
+		font-weight: 850;
+		margin-top: 8px;
+	}
 }
 
 .costCallout {
-  @include card(warning-bg, warning-line);
-  color: color(warning-ink);
-  margin-top: 12px;
-  padding: 14px;
+	@include card(warning-bg, warning-line);
+	color: color(warning-ink);
+	margin-top: 12px;
+	padding: 14px;
 
-  strong {
-    display: block;
-    margin-bottom: 6px;
-  }
+	strong {
+		display: block;
+		margin-bottom: 6px;
+	}
 }
 
 .costCallout p,
 .ownershipNote {
-  line-height: 1.7;
-  margin: 0;
+	line-height: 1.7;
+	margin: 0;
 }
 
 .ownershipFilings {
-  @include grid(1fr, 8px);
-  margin-top: 12px;
+	@include grid(1fr, 8px);
+	margin-top: 12px;
 
-  a {
-    @include card(panel-strong);
-    align-items: center;
-    display: grid;
-    gap: 4px 10px;
-    grid-template-columns: 1fr auto;
-    padding: 11px 12px;
+	a {
+		@include card(panel-strong);
+		align-items: center;
+		display: grid;
+		gap: 4px 10px;
+		grid-template-columns: 1fr auto;
+		padding: 11px 12px;
 
-    svg {
-      color: color(teal);
-      grid-row: 1 / span 3;
-      grid-column: 2;
-    }
-  }
+		svg {
+			color: color(teal);
+			grid-row: 1 / span 3;
+			grid-column: 2;
+		}
+	}
 
-  span,
-  small {
-    @include muted-text(0.76rem, 800);
-  }
+	span,
+	small {
+		@include muted-text(0.76rem, 800);
+	}
 
-  strong {
-    font-size: 0.92rem;
-  }
+	strong {
+		font-size: 0.92rem;
+	}
 }
 
 .chartGrid {
-  @include grid(repeat(2, minmax(0, 1fr)), 12px);
-  margin-top: 14px;
+	@include grid(repeat(2, minmax(0, 1fr)), 12px);
+	margin-top: 14px;
 }
 
 .chartCard {
-  @include card(white);
-  min-width: 0;
-  padding: 14px;
+	@include card(white);
+	min-width: 0;
+	padding: 14px;
 
-  h4 {
-    font-size: 0.96rem;
-    margin: 0;
-  }
+	h4 {
+		font-size: 0.96rem;
+		margin: 0;
+	}
 }
 
 .chartCardHeader {
-  @include flex-between(8px, flex-start);
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-bottom: 10px;
+	@include flex-between(8px, flex-start);
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	margin-bottom: 10px;
 }
 
 .chartUnitNote {
-  @include muted-text(0.75rem, 700);
-  white-space: nowrap;
+	@include muted-text(0.75rem, 700);
+	white-space: nowrap;
 }
 
 .chartCanvas {
-  height: 260px;
-  max-width: 100%;
-  min-width: 0;
-  position: relative;
-  width: 100%;
+	height: 260px;
+	max-width: 100%;
+	min-width: 0;
+	position: relative;
+	width: 100%;
 }
 
 .svgChart {
-  svg {
-    display: block;
-    height: auto;
-    width: 100%;
-  }
+	svg {
+		display: block;
+		height: auto;
+		width: 100%;
+	}
 
-  line {
-    stroke: color(chart-grid);
-    stroke-width: 2;
-  }
+	line {
+		stroke: color(chart-grid);
+		stroke-width: 2;
+	}
 
-  path {
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 4;
-  }
+	path {
+		fill: none;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 4;
+	}
 
-  text {
-    fill: color(muted);
-    font-size: 12px;
-    font-weight: 700;
-  }
+	text {
+		fill: color(muted);
+		font-size: 12px;
+		font-weight: 700;
+	}
 }
 
 .chartLegend {
-  gap: 10px;
-  margin-top: 10px;
+	gap: 10px;
+	margin-top: 10px;
 
-  span {
-    @include inline-center(6px);
-    @include muted-text(0.82rem, 800);
-  }
+	span {
+		@include inline-center(6px);
+		@include muted-text(0.82rem, 800);
+	}
 
-  i {
-    border-radius: 99px;
-    display: inline-block;
-    height: 9px;
-    width: 9px;
-  }
+	i {
+		border-radius: 99px;
+		display: inline-block;
+		height: 9px;
+		width: 9px;
+	}
 }
 
 .analysisCard {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-width: 0;
-  overflow: visible;
-  padding: 15px;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-width: 0;
+	overflow: visible;
+	padding: 15px;
 
-  .analysisCardTags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    min-width: 0;
-  }
+	.analysisCardTags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		min-width: 0;
+	}
 
-  span {
-    @include chip(chip, chip, chip-ink, 700);
-    font-size: 0.82rem;
-    line-height: 1.35;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    padding: 7px 9px;
-    white-space: normal;
-  }
+	span {
+		@include chip(chip, chip, chip-ink, 700);
+		font-size: 0.82rem;
+		line-height: 1.35;
+		max-width: 100%;
+		overflow-wrap: anywhere;
+		padding: 7px 9px;
+		white-space: normal;
+	}
 }
 
 .riskList {
-  color: color(body-copy);
-  line-height: 1.7;
-  margin: 0;
-  padding-left: 18px;
+	color: color(body-copy);
+	line-height: 1.7;
+	margin: 0;
+	padding-left: 18px;
 }
 
 .suggestions {
-  @include grid(1fr, 8px);
+	@include grid(1fr, 8px);
 
-  button {
-    @include card(white);
-    font-weight: 850;
-    padding: 11px;
+	button {
+		@include card(white);
+		font-weight: 850;
+		padding: 11px;
 
-    &:disabled {
-      background: color(teal-soft-2);
-      color: color(teal);
-      cursor: default;
-    }
-  }
+		&:disabled {
+			background: color(teal-soft-2);
+			color: color(teal);
+			cursor: default;
+		}
+	}
 }
 
 .suggestionBasis {
-  @include card;
-  background: color(subpanel);
-  margin-bottom: 12px;
-  padding: 12px;
+	@include card;
+	background: color(subpanel);
+	margin-bottom: 12px;
+	padding: 12px;
 
-  strong {
-    display: block;
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-  }
+	strong {
+		display: block;
+		font-size: 0.95rem;
+		margin-bottom: 6px;
+	}
 
-  p {
-    @include muted-text(0.84rem);
-    line-height: 1.6;
-    margin: 0;
-  }
+	p {
+		@include muted-text(0.84rem);
+		line-height: 1.6;
+		margin: 0;
+	}
 
-  small {
-    @include muted-text(0.75rem, 750);
-    display: block;
-    margin-top: 8px;
-  }
+	small {
+		@include muted-text(0.75rem, 750);
+		display: block;
+		margin-top: 8px;
+	}
 }
 
 .suggestionGroups {
-  @include grid(1fr, 12px);
+	@include grid(1fr, 12px);
 }
 
 .suggestionGroup {
-  @include card(white);
-  padding: 12px;
+	@include card(white);
+	padding: 12px;
 
-  h3 {
-    color: color(ink);
-    display: block;
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-  }
+	h3 {
+		color: color(ink);
+		display: block;
+		font-size: 0.95rem;
+		margin-bottom: 6px;
+	}
 
-  p {
-    @include muted-text(0.84rem);
-    line-height: 1.6;
-    margin: 0;
-  }
+	p {
+		@include muted-text(0.84rem);
+		line-height: 1.6;
+		margin: 0;
+	}
 
-  .suggestions {
-    margin-top: 10px;
-  }
+	.suggestions {
+		margin-top: 10px;
+	}
 }
 
 .suggestionItem {
-  align-items: flex-start;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-width: 0;
-  text-align: left;
+	align-items: flex-start;
+	display: grid;
+	gap: 10px;
+	grid-template-columns: minmax(0, 1fr) auto;
+	min-width: 0;
+	text-align: left;
 }
 
 .suggestionItemBody {
-  min-width: 0;
+	min-width: 0;
 
-  strong,
-  small,
-  em {
-    display: block;
-  }
+	strong,
+	small,
+	em {
+		display: block;
+	}
 
-  small {
-    @include muted-text(0.72rem);
-    line-height: 1.35;
-    margin-top: 2px;
-    overflow-wrap: anywhere;
-  }
+	small {
+		@include muted-text(0.72rem);
+		line-height: 1.35;
+		margin-top: 2px;
+		overflow-wrap: anywhere;
+	}
 
-  em {
-    color: color(teal);
-    font-size: 0.72rem;
-    font-style: normal;
-    font-weight: 850;
-    line-height: 1.45;
-    margin-top: 5px;
-    overflow-wrap: anywhere;
-  }
+	em {
+		color: color(teal);
+		font-size: 0.72rem;
+		font-style: normal;
+		font-weight: 850;
+		line-height: 1.45;
+		margin-top: 5px;
+		overflow-wrap: anywhere;
+	}
 }
 
 .suggestionItemAction {
-  @include inline-center;
-  color: color(teal);
-  flex: 0 0 auto;
-  margin-top: 2px;
+	@include inline-center;
+	color: color(teal);
+	flex: 0 0 auto;
+	margin-top: 2px;
 }
 
 .suggestionReasons {
-  border-top: 1px solid color(line);
-  display: grid;
-  gap: 7px;
-  margin-top: 10px;
-  padding-top: 10px;
+	border-top: 1px solid color(line);
+	display: grid;
+	gap: 7px;
+	margin-top: 10px;
+	padding-top: 10px;
 
-  p {
-    font-size: 0.78rem;
-  }
+	p {
+		font-size: 0.78rem;
+	}
 
-  strong {
-    color: color(ink);
-    margin-right: 6px;
-  }
+	strong {
+		color: color(ink);
+		margin-right: 6px;
+	}
 }
 
 .railRefresh {
-  @include button-shell(white, teal, line);
-  flex: 0 1 auto;
-  font-size: 0.78rem;
-  font-weight: 850;
-  gap: 6px;
-  max-width: 100%;
-  min-height: 34px;
-  padding: 0 10px;
-  white-space: nowrap;
+	@include button-shell(white, teal, line);
+	flex: 0 1 auto;
+	font-size: 0.78rem;
+	font-weight: 850;
+	gap: 6px;
+	max-width: 100%;
+	min-height: 34px;
+	padding: 0 10px;
+	white-space: nowrap;
 }
 
 .deployBox {
-  background: color(hero);
-  border-radius: $radius;
-  color: color(white);
-  margin-top: 16px;
-  padding: 16px;
+	background: color(hero);
+	border-radius: $radius;
+	color: color(white);
+	margin-top: 16px;
+	padding: 16px;
 
-  .eyebrow {
-    color: color(hero-accent);
-  }
+	.eyebrow {
+		color: color(hero-accent);
+	}
 
-  h3 {
-    margin-bottom: 12px;
-  }
+	h3 {
+		margin-bottom: 12px;
+	}
 
-  a {
-    @include flex-between(8px);
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    padding: 12px 0;
-  }
+	a {
+		@include flex-between(8px);
+		border-top: 1px solid rgba(255, 255, 255, 0.14);
+		padding: 12px 0;
+	}
 }
 
 .appFooter {
-  @include flex-between(12px);
-  @include muted-text(0.82rem);
-  margin: 18px auto 0;
-  max-width: $container;
-  padding: 12px 2px 0;
+	@include flex-between(12px);
+	@include muted-text(0.82rem);
+	margin: 18px auto 0;
+	max-width: $container;
+	padding: 12px 2px 0;
 }
 
 @container report (max-width: 860px) {
-  .analysisGrid {
-    grid-template-columns: 1fr;
-  }
+	.analysisGrid {
+		grid-template-columns: 1fr;
+	}
 
-  .quoteGrid,
-  .fundamentalGrid,
-  .zones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+	.quoteGrid,
+	.fundamentalGrid,
+	.zones {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 
-  .methodBox,
-  .analysisGrid,
-  .longTermPlan .planGrid {
-    grid-template-columns: 1fr;
-  }
+	.methodBox,
+	.analysisGrid,
+	.longTermPlan .planGrid {
+		grid-template-columns: 1fr;
+	}
 }
 
 @container report (max-width: 520px) {
-  .quoteGrid,
-  .fundamentalGrid,
-  .zones {
-    grid-template-columns: 1fr;
-  }
+	.quoteGrid,
+	.fundamentalGrid,
+	.zones {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 1180px) {
-  .workspace {
-    grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
-  }
+	.workspace {
+		grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+	}
 
-  .rightRail {
-    grid-column: 1 / -1;
-    max-height: none;
-    position: static;
-  }
+	.rightRail {
+		grid-column: 1 / -1;
+		max-height: none;
+		position: static;
+	}
 
-  .sidebar {
-    max-height: none;
-    position: static;
-  }
+	.sidebar {
+		max-height: none;
+		position: static;
+	}
 }
 
 @media (max-width: 880px) {
-  .shell {
-    padding: 16px;
-  }
+	.shell {
+		padding: 16px;
+	}
 
-  .topbar,
-  .reportHero {
-    align-items: stretch;
-    flex-direction: column;
-  }
+	.topbar,
+	.reportHero {
+		align-items: stretch;
+		flex-direction: column;
+	}
 
-  .metricGrid,
-  .workspace,
-  .qualityLayout,
-  .decisionBar {
-    grid-template-columns: 1fr;
+	.metricGrid,
+	.workspace,
+	.qualityLayout,
+	.decisionBar {
+		grid-template-columns: 1fr;
 
-    > button {
-      justify-self: stretch;
-      width: 100%;
-    }
-  }
+		> button {
+			justify-self: stretch;
+			width: 100%;
+		}
+	}
 
-  .reportTabButton {
-    flex: 1 1 calc(50% - 4px);
-  }
+	.reportTabButton {
+		flex: 1 1 calc(50% - 4px);
+	}
 
-  .chartGrid,
-  .longTermPlan .planGrid {
-    grid-template-columns: 1fr;
-  }
+	.chartGrid,
+	.longTermPlan .planGrid {
+		grid-template-columns: 1fr;
+	}
 
-  .mindMapFlow {
-    height: 420px;
-    min-height: 320px;
-  }
+	.mindMapFlow {
+		height: 420px;
+		min-height: 320px;
+	}
 
-  .chartCanvas {
-    height: 220px;
-  }
+	.chartCanvas {
+		height: 220px;
+	}
 
-  .appFooter {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+	.appFooter {
+		align-items: flex-start;
+		flex-direction: column;
+	}
 
-  .priceBlock {
-    text-align: left;
-  }
+	.priceBlock {
+		text-align: left;
+	}
 }
