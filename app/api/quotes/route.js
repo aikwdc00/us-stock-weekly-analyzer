@@ -1,6 +1,7 @@
 import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
 import { fetchSecOwnershipFilings } from "../../../lib/secOwnershipProvider";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
+import { fetchFinnhubData } from "../../../lib/finnhubProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -133,13 +134,15 @@ export async function GET(request) {
       rawQuotes = rawQuotes.filter(Boolean);
     }
 
-    const [snapshots, ownershipFilings] = await Promise.all([
+    const [snapshots, ownershipFilings, finnhubData] = await Promise.all([
       Promise.all(rawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-      Promise.all(rawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null)))
+      Promise.all(rawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null))),
+      Promise.all(rawQuotes.map((quote) => fetchFinnhubData(quote.symbol).catch(() => null)))
     ]);
     const quotes = rawQuotes.map((quote, index) => {
       const snapshot = snapshots[index] || {};
       const secOwnership = ownershipFilings[index] || null;
+      const finnhub = finnhubData[index] || {};
       const metrics = snapshot.metrics || {};
       const mergedQuote = {
         ...quote,
@@ -168,11 +171,12 @@ export async function GET(request) {
         financials: snapshot.financials,
         news: snapshot.news,
         secOwnership,
+        finnhub,
         fundamentalsSource: snapshot.source,
         fundamentalsSourceUrl: snapshot.sourceUrl
       };
 
-      return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol));
+      return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshot));
     });
 
     return Response.json({
@@ -183,13 +187,15 @@ export async function GET(request) {
     try {
       const rawQuotes = await Promise.all(symbols.map((symbol) => fetchStooqQuote(symbol)));
       const validRawQuotes = rawQuotes.filter(Boolean);
-      const [snapshots, ownershipFilings] = await Promise.all([
+      const [snapshots, ownershipFilings, finnhubData] = await Promise.all([
         Promise.all(validRawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-        Promise.all(validRawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null)))
+        Promise.all(validRawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol).catch(() => null))),
+        Promise.all(validRawQuotes.map((quote) => fetchFinnhubData(quote.symbol).catch(() => null)))
       ]);
       const quotes = validRawQuotes.map((quote, index) => {
         const snapshot = snapshots[index] || {};
         const secOwnership = ownershipFilings[index] || null;
+        const finnhub = finnhubData[index] || {};
         const metrics = snapshot.metrics || {};
         return enrichQuote(
           {
@@ -219,10 +225,11 @@ export async function GET(request) {
             financials: snapshot.financials,
             news: snapshot.news,
             secOwnership,
+            finnhub,
             fundamentalsSource: snapshot.source,
             fundamentalsSourceUrl: snapshot.sourceUrl
           },
-          getProfileForSymbol(quote.symbol)
+          getProfileForSymbol(quote.symbol, snapshot)
         );
       });
 

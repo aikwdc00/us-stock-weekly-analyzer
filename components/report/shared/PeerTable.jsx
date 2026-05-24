@@ -1,25 +1,40 @@
 import { displayValue } from "../../../hooks/utils";
 
-export function PeerTable({ quotes, selectedSymbol, language }) {
+export function PeerTable({ quotes, selectedSymbol, language, t }) {
   const rows = quotes.filter(Boolean);
   if (!rows.length) return <p>目前沒有可比較標的。</p>;
+
+  // Fallback if t is not provided (though it should be)
+  const headers = {
+    symbol: t?.tableSymbol || "Symbol",
+    marketCap: t?.tableMarketCap || "Market Cap",
+    pe: t?.tablePE || "PE",
+    forwardPe: t?.tableForwardPE || "Forward PE",
+    ps: t?.tablePS || "PS",
+    fcfYield: t?.tableFCFYield || "FCF Yield",
+    revGrowth: t?.tableRevGrowth || "Rev Growth",
+    grossMargin: t?.tableGrossMargin || "Gross Margin",
+    netMargin: t?.tableNetMargin || "Net Margin",
+    priceTarget: t?.tablePriceTarget || "Target Gap",
+    rating: t?.tableRating || "Rating"
+  };
 
   return (
     <div className="peerTableWrap">
       <table className="peerTable">
         <thead>
           <tr>
-            <th>標的</th>
-            <th>市值</th>
-            <th>PE</th>
-            <th>Forward PE</th>
-            <th>PS</th>
-            <th>FCF Yield</th>
-            <th>營收成長</th>
-            <th>毛利率</th>
-            <th>淨利率</th>
-            <th>目標價差距</th>
-            <th>評級</th>
+            <th>{headers.symbol}</th>
+            <th>{headers.marketCap}</th>
+            <th>{headers.pe}</th>
+            <th>{headers.forwardPe}</th>
+            <th>{headers.ps}</th>
+            <th>{headers.fcfYield}</th>
+            <th>{headers.revGrowth}</th>
+            <th>{headers.grossMargin}</th>
+            <th>{headers.netMargin}</th>
+            <th>{headers.priceTarget}</th>
+            <th>{headers.rating}</th>
           </tr>
         </thead>
         <tbody>
