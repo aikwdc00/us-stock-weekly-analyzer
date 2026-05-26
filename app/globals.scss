@@ -768,19 +768,10 @@ h1 {
 
 .tooltipAnchor {
 	@include inline-center;
-	background: color(panel-strong);
-	border: 1px solid color(line);
-	border-radius: 999px;
-	color: color(teal);
-	cursor: help;
 	flex: 0 0 auto;
-	height: 24px;
-	justify-content: center;
 	position: relative;
-	width: 24px;
 
-	&:hover,
-	&:focus-visible {
+	&[data-visible="true"] {
 		.tooltipBubble {
 			opacity: 1;
 			transform: translateY(0);
@@ -789,27 +780,65 @@ h1 {
 	}
 }
 
+.tooltipTrigger {
+	@include inline-center;
+	background: color(panel-strong);
+	border: 1px solid color(line);
+	border-radius: 999px;
+	color: color(teal);
+	cursor: help;
+	height: 28px;
+	justify-content: center;
+	padding: 0;
+	width: 28px;
+
+	&:focus-visible {
+		outline: 2px solid color(teal);
+		outline-offset: 2px;
+	}
+}
+
 .tooltipBubble {
 	@include card(panel);
+	box-sizing: border-box;
 	box-shadow: var(--shadow);
 	color: color(body-copy);
 	font-size: 0.82rem;
 	font-weight: 650;
-	left: 50%;
+	inline-size: min(var(--tooltip-max-width, 320px), calc(100vw - 32px));
 	line-height: 1.6;
-	max-width: min(340px, calc(100vw - 40px));
-	min-width: 0;
+	max-inline-size: calc(100vw - 32px);
+	min-inline-size: min(240px, calc(100vw - 32px));
 	opacity: 0;
 	padding: 10px 12px;
 	position: absolute;
+	overflow-wrap: break-word;
+	text-wrap: pretty;
 	top: calc(100% + 8px);
-	transform: translate(-50%, -4px);
+	transform: translateY(-4px);
 	transition:
 		opacity 0.18s ease,
 		transform 0.18s ease,
 		visibility 0.18s ease;
 	visibility: hidden;
 	z-index: 20;
+
+	.tooltipAnchor[data-align="start"] & {
+		left: 0;
+	}
+
+	.tooltipAnchor[data-align="center"] & {
+		left: 50%;
+		transform: translate(-50%, -4px);
+	}
+
+	.tooltipAnchor[data-align="center"][data-visible="true"] & {
+		transform: translate(-50%, 0);
+	}
+
+	.tooltipAnchor[data-align="end"] & {
+		right: 0;
+	}
 }
 
 .analysisCard h3 {
@@ -858,6 +887,28 @@ h1 {
 .info {
 	min-height: 78px;
 	padding: 13px;
+
+	strong {
+		display: block;
+	}
+}
+
+.infoLabelRow {
+	@include inline-center(8px);
+	align-items: flex-start;
+	margin-bottom: 8px;
+
+	span {
+		color: color(muted);
+		font-size: 0.94rem;
+		font-weight: 700;
+		line-height: 1.35;
+	}
+
+	.tooltipTrigger {
+		height: 22px;
+		width: 22px;
+	}
 }
 
 .analysisGrid {
@@ -884,6 +935,25 @@ h1 {
 		@include chip(yellow-soft, yellow-line, yellow);
 		font-size: 0.82rem;
 	}
+}
+
+.metricChip {
+	@include chip(yellow-soft, yellow-line, yellow);
+	align-items: center;
+	display: inline-flex;
+	gap: 6px;
+
+	.tooltipTrigger {
+		background: transparent;
+		border-color: rgba(255, 196, 84, 0.28);
+		color: color(yellow);
+		height: 18px;
+		width: 18px;
+	}
+}
+
+.metricChipLabel {
+	line-height: 1.3;
 }
 
 .qualityLayout {
@@ -1275,6 +1345,52 @@ h1 {
 .ownershipNote {
 	line-height: 1.7;
 	margin: 0;
+}
+
+.forecastCallout {
+	p + p {
+		margin-top: 8px;
+	}
+}
+
+.dataTableWrap {
+	overflow-x: auto;
+}
+
+.dataTable {
+	border-collapse: collapse;
+	margin-top: 12px;
+	min-width: 100%;
+	width: 100%;
+
+	th,
+	td {
+		border-bottom: 1px solid color(line);
+		padding: 11px 12px;
+		text-align: left;
+		vertical-align: middle;
+	}
+
+	th {
+		@include muted-text(0.75rem, 800);
+		background: color(panel);
+		white-space: nowrap;
+	}
+
+	td {
+		font-size: 0.92rem;
+	}
+
+	tbody tr:last-child td {
+		border-bottom: none;
+	}
+}
+
+.compactTable {
+	td:nth-child(3),
+	td:nth-child(4) {
+		font-weight: 700;
+	}
 }
 
 .ownershipFilings {
@@ -1685,9 +1801,20 @@ h1 {
 	}
 
 	.tooltipBubble {
-		left: auto;
-		right: 0;
-		transform: translateY(-4px);
-		width: min(320px, calc(100vw - 36px));
+		inline-size: min(var(--tooltip-max-width, 320px), calc(100vw - 24px));
+		max-inline-size: calc(100vw - 24px);
+		min-inline-size: min(220px, calc(100vw - 24px));
+
+		.tooltipAnchor[data-align="center"] &,
+		.tooltipAnchor[data-align="start"] &,
+		.tooltipAnchor[data-align="end"] & {
+			left: 0;
+			right: auto;
+			transform: translateY(-4px);
+		}
+
+		.tooltipAnchor[data-visible="true"] & {
+			transform: translateY(0);
+		}
 	}
 }

@@ -1,4 +1,5 @@
 import { InvestmentMindMap } from "../shared/InvestmentMindMap";
+import { TooltipHint } from "../shared/TooltipHint";
 
 import { formatDate } from "../../../hooks/utils";
 
@@ -13,12 +14,7 @@ export function MindMapSwotPanel({ quote, t, language, updatedAt }) {
 				<section className="analysisSection swotSection">
 					<div className="sectionTitle">
 						<h3>{t.swot}</h3>
-						<div className="tooltipAnchor">
-							<span>i</span>
-							<div className="tooltipBubble">
-								{t.dataSource}: {t.marketDataSourceHint}
-							</div>
-						</div>
+						<TooltipHint content={`${t.dataSource}: ${t.marketDataSourceHint}`} />
 					</div>
 					<div className="swotGrid">
 						<div className="swotItem s">
@@ -55,9 +51,7 @@ export function MindMapSwotPanel({ quote, t, language, updatedAt }) {
 						</div>
 					</div>
 					<p className="swotSource">{t.dataSource}: StockAnalysis / Yahoo Finance Consensus</p>
-					<p className="swotSource">
-						AI: {quote.profile?.aiSupplement?.enabled ? t.aiEnabled : t.aiDisabled}
-					</p>
+					<p className="swotSource">AI: {quote.profile?.aiSupplement?.enabled ? t.aiEnabled : t.aiDisabled}</p>
 					<p className="swotSource">
 						{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}
 					</p>

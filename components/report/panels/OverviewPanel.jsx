@@ -69,6 +69,8 @@ export function OverviewPanel({ quote, language, t }) {
 				<Info label="P/FCF" value={quote.formatted.pfcf} />
 				<Info label="FCF Yield" value={quote.formatted.fcfYield} />
 				<Info label="PEG" value={quote.formatted.pegRatio} />
+				<Info label="Peter Lynch Fair Value" value={quote.peterLynch?.fairValueDisplay || "N/A"} />
+				<Info label="Lynch 比值" value={quote.peterLynch?.ratioDisplay || "N/A"} />
 				<Info label="50 日均線" value={quote.formatted.fiftyDay || "N/A"} />
 				<Info label="200 日均線" value={quote.formatted.twoHundredDay || "N/A"} />
 				<Info label="52 週區間" value={quote.formatted.range52} />

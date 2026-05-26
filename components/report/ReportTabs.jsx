@@ -47,7 +47,7 @@ export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, on
 					<motion.div key={`${quote.symbol}-${activeTab}`} className="reportTabPane" {...panelMotion}>
 						{activeTab === "overview" ? <OverviewPanel quote={quote} language={language} t={t} /> : null}
 						{activeTab === "valuation" ? (
-							<ValuationPanel quote={quote} t={t} activeModel={activeModel} setSelectedModel={setSelectedModel} />
+							<ValuationPanel quote={quote} t={t} language={language} activeModel={activeModel} setSelectedModel={setSelectedModel} />
 						) : null}
 						{activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} language={language} /> : null}
 						{activeTab === "industry" ? <IndustryPanel quote={quote} peerQuotes={peerQuotes} language={language} t={t} /> : null}

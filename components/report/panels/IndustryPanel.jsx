@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import { AnalysisBlock } from "../shared/AnalysisBlock";
 import { Info } from "../shared/Info";
 import { PeerTable } from "../shared/PeerTable";
+import { TooltipHint } from "../shared/TooltipHint";
 import { useIndustryPeers } from "../../../hooks/useIndustryPeers";
 import { displayValue } from "../../../hooks/utils";
 import { translateTerm } from "../../../lib/translationMap";
@@ -31,11 +32,7 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 							</a>
 						)}
 					</div>
-					<p className="summaryText">
-						{quote.profile.description
-							? `${quote.profile.description.slice(0, 300)}...`
-							: t.noDescription}
-					</p>
+					<p className="summaryText">{quote.profile.description ? `${quote.profile.description.slice(0, 300)}...` : t.noDescription}</p>
 				</div>
 			</section>
 
@@ -48,14 +45,15 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 			<section className="analysisSection analysisSectionScroll">
 				<div className="sectionTitle">
 					<h3>{t.industryPeers}</h3>
-					<div className="tooltipAnchor">
-						<span>i</span>
-						<div className="tooltipBubble">
-							{t.peerSource}: Yahoo Finance Recommendations
-							<br />
-							{t.dataSource}: StockAnalysis
-						</div>
-					</div>
+					<TooltipHint
+						content={
+							<>
+								{t.peerSource}: Yahoo Finance Recommendations
+								<br />
+								{t.dataSource}: StockAnalysis
+							</>
+						}
+					/>
 				</div>
 
 				{isLoadingPeers ? (
