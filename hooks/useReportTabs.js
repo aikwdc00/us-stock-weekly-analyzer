@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-export const REPORT_TAB_IDS = ["overview", "valuation", "financials", "industry", "mindmapSwot"];
+export const REPORT_TAB_IDS = ["overview", "valuation", "financials", "industry", "supplyChain", "mindmapSwot"];
 
 export function getReportTabs(t) {
 	return [
@@ -10,6 +10,7 @@ export function getReportTabs(t) {
 		{ id: "valuation", label: t.tabValuation },
 		{ id: "financials", label: t.tabFinancials },
 		{ id: "industry", label: t.tabIndustry },
+		{ id: "supplyChain", label: t.tabSupplyChain },
 		{ id: "mindmapSwot", label: t.tabMindMapSwot },
 	];
 }

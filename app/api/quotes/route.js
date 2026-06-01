@@ -2,6 +2,7 @@ import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
 import { fetchSecOwnershipFilings } from "../../../lib/secOwnershipProvider";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
 import { fetchFinnhubData } from "../../../lib/finnhubProvider";
+import { fetchAiTranslatedNews } from "../../../lib/aiNewsProvider";
 import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskProvider";
 
 export const dynamic = "force-dynamic";
@@ -226,6 +227,9 @@ export async function GET(request) {
 				).catch(() => null)
 			)
 		);
+		const translatedNews = await Promise.all(
+			rawQuotes.map((quote, index) => fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || []))
+		);
 		const quotes = rawQuotes.map((quote, index) => {
 			const snapshot = snapshots[index] || {};
 			const snapshotWithAi = {
@@ -261,7 +265,7 @@ export async function GET(request) {
 				metrics,
 				forecast: snapshot.forecast,
 				financials: snapshot.financials,
-				news: snapshot.news,
+				news: translatedNews[index] || snapshot.news,
 				secOwnership,
 				finnhub,
 				fundamentalsSource: snapshot.source,
@@ -307,6 +311,9 @@ export async function GET(request) {
 					).catch(() => null)
 				)
 			);
+			const translatedNews = await Promise.all(
+				validRawQuotes.map((quote, index) => fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || []))
+			);
 			const quotes = validRawQuotes.map((quote, index) => {
 				const snapshot = snapshots[index] || {};
 				const snapshotWithAi = {
@@ -343,7 +350,7 @@ export async function GET(request) {
 						metrics,
 						forecast: snapshot.forecast,
 						financials: snapshot.financials,
-						news: snapshot.news,
+						news: translatedNews[index] || snapshot.news,
 						secOwnership,
 						finnhub,
 						fundamentalsSource: snapshot.source,

@@ -26,6 +26,16 @@ export function getNewsUrl(item, symbol) {
 	return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
+export function getLocalizedNewsTitle(item, language = "zh") {
+	if (language === "en") return item?.title || "";
+	return item?.translatedTitle || item?.title || "";
+}
+
+export function getLocalizedNewsText(item, language = "zh") {
+	if (language === "en") return item?.text || "";
+	return item?.translatedText || item?.text || "";
+}
+
 export function formatDate(value, language = "zh", fallbackText) {
 	if (!value) return fallbackText || (language === "en" ? "Not updated yet" : "尚未更新");
 	return new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-TW", {
@@ -66,7 +76,7 @@ Catalysts:
 ${quote.catalysts.map((item) => `- ${item}`).join("\n")}
 
 Major news:
-${quote.news.length ? quote.news.map((item) => `- ${item.time} | ${item.source} | ${item.title} | ${getNewsUrl(item, quote.symbol)}`).join("\n") : "- No major news was fetched"}
+${quote.news.length ? quote.news.map((item) => `- ${item.time} | ${item.source} | ${getLocalizedNewsTitle(item, language)} | ${getNewsUrl(item, quote.symbol)}`).join("\n") : "- No major news was fetched"}
 
 ## Financial Position
 
@@ -150,7 +160,7 @@ This report is a rule-based research framework. It is not personalized investmen
 ${quote.catalysts.map((item) => `- ${item}`).join("\n")}
 
 重大新聞：
-${quote.news.length ? quote.news.map((item) => `- ${item.time}｜${item.source}｜${item.title}｜${getNewsUrl(item, quote.symbol)}`).join("\n") : "- 目前沒有抓到重大新聞"}
+${quote.news.length ? quote.news.map((item) => `- ${item.time}｜${item.source}｜${getLocalizedNewsTitle(item, language)}｜${getNewsUrl(item, quote.symbol)}`).join("\n") : "- 目前沒有抓到重大新聞"}
 
 ## 財報與財務狀況
 

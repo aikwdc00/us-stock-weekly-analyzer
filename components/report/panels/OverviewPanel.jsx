@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react";
-import { displayValue, getNewsUrl, thesisText } from "../../../hooks/utils";
+import { displayValue, getLocalizedNewsText, getLocalizedNewsTitle, getNewsUrl, thesisText } from "../../../hooks/utils";
 import { Info } from "../shared/Info";
 import { LongTermPlan } from "../shared/LongTermPlan";
 
@@ -47,10 +47,10 @@ export function OverviewPanel({ quote, language, t }) {
 									{item.source}｜{item.time}
 								</span>
 								<strong>
-									{item.title}
+									{getLocalizedNewsTitle(item, language)}
 									<ExternalLink size={14} />
 								</strong>
-								<p>{item.text}</p>
+								<p>{getLocalizedNewsText(item, language)}</p>
 								<em>{t.openNews}</em>
 							</a>
 						))}

@@ -5,6 +5,7 @@ import { FinancialsPanel } from "./panels/FinancialsPanel";
 import { IndustryPanel } from "./panels/IndustryPanel";
 import { MindMapSwotPanel } from "./panels/MindMapSwotPanel";
 import { OverviewPanel } from "./panels/OverviewPanel";
+import { SupplyChainPanel } from "./panels/SupplyChainPanel";
 import { ValuationPanel } from "./panels/ValuationPanel";
 
 const panelMotion = {
@@ -17,29 +18,31 @@ const panelMotion = {
 export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, onTabChange, activeModel, setSelectedModel, updatedAt }) {
 	return (
 		<div className="reportTabs">
-			<div className="reportTabList" role="tablist" aria-label="Report sections">
-				{tabs.map((tab) => {
-					const isActive = tab.id === activeTab;
-					return (
-						<button
-							key={tab.id}
-							type="button"
-							role="tab"
-							aria-selected={isActive}
-							className={`reportTabButton${isActive ? " active" : ""}`}
-							onClick={() => onTabChange(tab.id)}
-						>
-							{isActive ? (
-								<motion.span
-									layoutId="reportTabIndicator"
-									className="reportTabIndicator"
-									transition={{ type: "spring", stiffness: 420, damping: 34 }}
-								/>
-							) : null}
-							<span className="reportTabLabel">{tab.label}</span>
-						</button>
-					);
-				})}
+			<div className="reportTabScroller">
+				<div className="reportTabList" role="tablist" aria-label="Report sections" style={{ "--tab-count": tabs.length }}>
+					{tabs.map((tab) => {
+						const isActive = tab.id === activeTab;
+						return (
+							<button
+								key={tab.id}
+								type="button"
+								role="tab"
+								aria-selected={isActive}
+								className={`reportTabButton${isActive ? " active" : ""}`}
+								onClick={() => onTabChange(tab.id)}
+							>
+								{isActive ? (
+									<motion.span
+										layoutId="reportTabIndicator"
+										className="reportTabIndicator"
+										transition={{ type: "spring", stiffness: 420, damping: 34 }}
+									/>
+								) : null}
+								<span className="reportTabLabel">{tab.label}</span>
+							</button>
+						);
+					})}
+				</div>
 			</div>
 
 			<div className="reportTabContent">
@@ -51,6 +54,7 @@ export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, on
 						) : null}
 						{activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} language={language} /> : null}
 						{activeTab === "industry" ? <IndustryPanel quote={quote} peerQuotes={peerQuotes} language={language} t={t} /> : null}
+						{activeTab === "supplyChain" ? <SupplyChainPanel quote={quote} language={language} t={t} /> : null}
 						{activeTab === "mindmapSwot" ? <MindMapSwotPanel quote={quote} language={language} t={t} updatedAt={updatedAt} /> : null}
 					</motion.div>
 				</AnimatePresence>
