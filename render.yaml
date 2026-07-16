@@ -4,7 +4,7 @@ services:
       runtime: node
       plan: free
       healthCheckPath: /
-      buildCommand: npm install && npm run build
+      buildCommand: npm ci && npm run build
       startCommand: npm run start
       envVars:
           - key: NODE_VERSION
@@ -13,3 +13,9 @@ services:
             value: production
           - key: SEC_USER_AGENT
             value: us-stock-weekly-analyzer aikwdc00@hotmail.com
+          - key: FINNHUB_API_KEY
+            sync: false
+          - key: OPENAI_API_KEY
+            sync: false
+          - key: AI_ANALYSIS_ENABLED
+            value: "false"

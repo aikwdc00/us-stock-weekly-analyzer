@@ -8,7 +8,7 @@ import { displayValue } from "../../../hooks/utils";
 import { translateTerm } from "../../../lib/translationMap";
 
 export function IndustryPanel({ quote, peerQuotes, language, t }) {
-	const { peers: industryPeers, isLoading: isLoadingPeers } = useIndustryPeers(quote.symbol);
+	const { peers: industryPeers, isLoading: isLoadingPeers, error: peerError } = useIndustryPeers(quote.symbol);
 
 	return (
 		<div className="reportTabPanel">
@@ -60,6 +60,8 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 					<p>{t.industryLoading}</p>
 				) : industryPeers.length ? (
 					<PeerTable quotes={industryPeers} language={language} t={t} />
+				) : peerError ? (
+					<p>{t.industryUnavailable}</p>
 				) : (
 					<p>{t.industryEmpty}</p>
 				)}

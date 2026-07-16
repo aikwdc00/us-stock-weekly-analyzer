@@ -4,6 +4,5 @@
 	"trailingComma": "es5",
 	"printWidth": 150,
 	"useTabs": true,
-	"tabWidth": 4,
-    "formatOnSave": true
+	"tabWidth": 4
 }

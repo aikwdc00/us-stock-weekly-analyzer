@@ -1,9 +1,11 @@
 export function LongTermPlan({ quote, t }) {
+	const customers = quote.profile.customers || [];
+	const suppliers = quote.profile.suppliers || [];
 	const pillars = [
 		quote.profile.theme,
 		quote.profile.moat,
-		`${t.strategicPillars}: ${quote.profile.customers.slice(0, 3).join("、")}`,
-		`${t.executionSignals}: ${quote.profile.suppliers.slice(0, 3).join("、")}`,
+		customers.length ? `${t.strategicPillars}: ${customers.slice(0, 3).join("、")}` : null,
+		suppliers.length ? `${t.executionSignals}: ${suppliers.slice(0, 3).join("、")}` : null,
 	].filter(Boolean);
 	const signals = (quote.catalystTimeline || []).slice(0, 5);
 	const metrics = [

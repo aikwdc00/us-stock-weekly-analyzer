@@ -64,18 +64,8 @@ export function SupplyChainPanel({ quote, language, t }) {
 			</section>
 
 			<section className="supplyChainGrid">
-				<CompanyList
-					title={t.upstreamPartners}
-					description={t.upstreamDescription}
-					items={upstreamItems}
-					tip={t.upstreamTip}
-				/>
-				<CompanyList
-					title={t.downstreamCustomers}
-					description={t.downstreamDescription}
-					items={downstreamItems}
-					tip={t.downstreamTip}
-				/>
+				<CompanyList title={t.upstreamPartners} description={t.upstreamDescription} items={upstreamItems} tip={t.upstreamTip} />
+				<CompanyList title={t.downstreamCustomers} description={t.downstreamDescription} items={downstreamItems} tip={t.downstreamTip} />
 			</section>
 		</div>
 	);

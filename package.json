@@ -11,7 +11,9 @@
 		"start": "next start",
 		"lint": "next lint",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"test:e2e": "playwright test",
+		"verify": "npm run format:check && npm run build && npm run test:e2e"
 	},
 	"dependencies": {
 		"@xyflow/react": "^12.10.2",
@@ -25,6 +27,7 @@
 		"react-dom": "latest"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.61.1",
 		"prettier": "^3.8.3",
 		"sass": "^1.69.5"
 	}

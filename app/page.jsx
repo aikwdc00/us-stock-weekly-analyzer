@@ -53,30 +53,30 @@ export default function Page() {
 						{t.lastUpdated}:{" "}
 						{updatedAt
 							? new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-TW", {
-							dateStyle: "medium",
-							timeStyle: "medium",
-							hour12: language === "en",
-						}).format(new Date(updatedAt))
+									dateStyle: "medium",
+									timeStyle: "medium",
+									hour12: language === "en",
+								}).format(new Date(updatedAt))
 							: t.notUpdated}
 					</span>
 					<div className="topActions">
-					<div className="languageToggle" aria-label="Language">
-						<Languages size={17} />
-						<button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>
-							中
+						<div className="languageToggle" aria-label="Language">
+							<Languages size={17} />
+							<button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>
+								中
+							</button>
+							<button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>
+								EN
+							</button>
+						</div>
+						<button className="themeToggle" onClick={toggleTheme}>
+							{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+							{theme === "dark" ? t.lightMode : t.darkMode}
 						</button>
-						<button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>
-							EN
+						<button className="primaryButton" onClick={() => refreshAll()} disabled={isLoading}>
+							<RefreshCw size={18} className={cls(isLoading && "spin")} />
+							{isLoading ? t.refreshing : t.refresh}
 						</button>
-					</div>
-					<button className="themeToggle" onClick={toggleTheme}>
-						{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-						{theme === "dark" ? t.lightMode : t.darkMode}
-					</button>
-					<button className="primaryButton" onClick={() => refreshAll()} disabled={isLoading}>
-						<RefreshCw size={18} className={cls(isLoading && "spin")} />
-						{isLoading ? t.refreshing : t.refresh}
-					</button>
 					</div>
 				</div>
 			</section>

@@ -49,25 +49,24 @@ export async function GET(request) {
 		return Response.json({ peers: [] });
 	}
 
+	let finnhubError = null;
 	try {
-		let source = "finnhub";
-		let peerSymbols = await fetchFinnhubPeers(symbol);
-		if (!peerSymbols.length) {
-			source = "yahoo";
-			peerSymbols = await fetchYahooPeers(symbol);
-		}
+		const peers = await fetchFinnhubPeers(symbol);
+		if (peers.length) return Response.json({ symbol, peers, source: "finnhub" });
+	} catch (error) {
+		finnhubError = error;
+	}
 
-		return Response.json({
-			symbol,
-			peers: peerSymbols,
-			source,
-		});
+	try {
+		const peers = await fetchYahooPeers(symbol);
+		return Response.json({ symbol, peers, source: "yahoo" });
 	} catch (error) {
 		console.error("Peers API error:", error);
 		return Response.json({
 			symbol,
 			peers: [],
 			error: error.message,
+			fallbackError: finnhubError?.message || null,
 		});
 	}
 }

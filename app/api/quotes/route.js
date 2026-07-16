@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 const YAHOO_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote";
 const YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart";
 const STOOQ_QUOTE_URL = "https://stooq.com/q/l/";
+const AI_ANALYSIS_ENABLED = process.env.AI_ANALYSIS_ENABLED === "true";
 const displayNames = {
 	NVDA: "NVIDIA Corporation",
 	TSLA: "Tesla, Inc.",
@@ -164,6 +165,7 @@ function pickFulfilled(results, fallback) {
 
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
+	const runAiAnalysis = AI_ANALYSIS_ENABLED && searchParams.get("ai") === "true";
 	const symbols = searchParams
 		.get("symbols")
 		?.split(",")
@@ -207,29 +209,37 @@ export async function GET(request) {
 		const snapshots = pickFulfilled(snapshotResults, {});
 		const ownershipFilings = pickFulfilled(ownershipResults, null);
 		const finnhubData = pickFulfilled(finnhubResults, null);
-		const aiRiskInsights = await Promise.all(
-			rawQuotes.map((quote, index) =>
-				fetchAiRiskInsights(
-					quote.symbol,
-					snapshots[index] || {},
-					finnhubData[index] || {},
-					getProfileForSymbol(quote.symbol, snapshots[index] || {})
-				).catch(() => [])
-			)
-		);
-		const aiSwotInsights = await Promise.all(
-			rawQuotes.map((quote, index) =>
-				fetchAiSwotInsights(
-					quote.symbol,
-					snapshots[index] || {},
-					finnhubData[index] || {},
-					getProfileForSymbol(quote.symbol, snapshots[index] || {})
-				).catch(() => null)
-			)
-		);
-		const translatedNews = await Promise.all(
-			rawQuotes.map((quote, index) => fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || []))
-		);
+		const aiRiskInsights = runAiAnalysis
+			? await Promise.all(
+					rawQuotes.map((quote, index) =>
+						fetchAiRiskInsights(
+							quote.symbol,
+							snapshots[index] || {},
+							finnhubData[index] || {},
+							getProfileForSymbol(quote.symbol, snapshots[index] || {})
+						).catch(() => [])
+					)
+				)
+			: rawQuotes.map(() => []);
+		const aiSwotInsights = runAiAnalysis
+			? await Promise.all(
+					rawQuotes.map((quote, index) =>
+						fetchAiSwotInsights(
+							quote.symbol,
+							snapshots[index] || {},
+							finnhubData[index] || {},
+							getProfileForSymbol(quote.symbol, snapshots[index] || {})
+						).catch(() => null)
+					)
+				)
+			: rawQuotes.map(() => null);
+		const translatedNews = runAiAnalysis
+			? await Promise.all(
+					rawQuotes.map((quote, index) =>
+						fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || [])
+					)
+				)
+			: rawQuotes.map((quote, index) => snapshots[index]?.news || quote.news || []);
 		const quotes = rawQuotes.map((quote, index) => {
 			const snapshot = snapshots[index] || {};
 			const snapshotWithAi = {
@@ -291,29 +301,37 @@ export async function GET(request) {
 			const snapshots = pickFulfilled(snapshotResults, {});
 			const ownershipFilings = pickFulfilled(ownershipResults, null);
 			const finnhubData = pickFulfilled(finnhubResults, null);
-			const aiRiskInsights = await Promise.all(
-				validRawQuotes.map((quote, index) =>
-					fetchAiRiskInsights(
-						quote.symbol,
-						snapshots[index] || {},
-						finnhubData[index] || {},
-						getProfileForSymbol(quote.symbol, snapshots[index] || {})
-					).catch(() => [])
-				)
-			);
-			const aiSwotInsights = await Promise.all(
-				validRawQuotes.map((quote, index) =>
-					fetchAiSwotInsights(
-						quote.symbol,
-						snapshots[index] || {},
-						finnhubData[index] || {},
-						getProfileForSymbol(quote.symbol, snapshots[index] || {})
-					).catch(() => null)
-				)
-			);
-			const translatedNews = await Promise.all(
-				validRawQuotes.map((quote, index) => fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || []))
-			);
+			const aiRiskInsights = runAiAnalysis
+				? await Promise.all(
+						validRawQuotes.map((quote, index) =>
+							fetchAiRiskInsights(
+								quote.symbol,
+								snapshots[index] || {},
+								finnhubData[index] || {},
+								getProfileForSymbol(quote.symbol, snapshots[index] || {})
+							).catch(() => [])
+						)
+					)
+				: validRawQuotes.map(() => []);
+			const aiSwotInsights = runAiAnalysis
+				? await Promise.all(
+						validRawQuotes.map((quote, index) =>
+							fetchAiSwotInsights(
+								quote.symbol,
+								snapshots[index] || {},
+								finnhubData[index] || {},
+								getProfileForSymbol(quote.symbol, snapshots[index] || {})
+							).catch(() => null)
+						)
+					)
+				: validRawQuotes.map(() => null);
+			const translatedNews = runAiAnalysis
+				? await Promise.all(
+						validRawQuotes.map((quote, index) =>
+							fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || [])
+						)
+					)
+				: validRawQuotes.map((quote, index) => snapshots[index]?.news || quote.news || []);
 			const quotes = validRawQuotes.map((quote, index) => {
 				const snapshot = snapshots[index] || {};
 				const snapshotWithAi = {
