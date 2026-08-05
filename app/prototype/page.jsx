@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, BarChart3, Check, ChevronDown, Filter, ListFilter, Moon, Plus, Search, ShieldCheck, Sun } from "lucide-react";
+import { BackToTopButton } from "../../components/shared/BackToTopButton";
 import { prototypeDiscover, prototypeEvidence, prototypeWatchlist } from "../../lib/prototypeFixtures";
 
 const views = [
@@ -302,9 +303,14 @@ function ResearchView({ selected }) {
 							<span className="prototypeSectionNumber">02</span>
 							<h3>核心證據</h3>
 						</div>
-						<button type="button" className="prototypeTextButton">
+						<a
+							className="prototypeTextButton"
+							href={prototypeEvidence.find((row) => row.value !== null)?.sourceUrl || "https://www.sec.gov/edgar/search/"}
+							target="_blank"
+							rel="noreferrer"
+						>
 							查看來源 <ArrowUpRight size={15} />
-						</button>
+						</a>
 					</div>
 					<div className="prototypeEvidenceList">
 						{prototypeEvidence
@@ -427,6 +433,7 @@ export default function PrototypePage() {
 			{view === "research" ? <ResearchView selected={selected} /> : null}
 			{view === "discover" ? <DiscoverView added={added} onAdd={(symbol) => setAdded((current) => [...current, symbol])} /> : null}
 			<footer className="prototypeFooter">Prototype data only · 不代表即時行情或投資建議</footer>
+			<BackToTopButton label="回到頂部" />
 		</main>
 	);
 }

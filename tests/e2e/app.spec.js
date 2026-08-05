@@ -97,3 +97,29 @@ test("dashboard loads a report and opens the mind map SWOT tab", async ({ page }
 	await expect(page.getByRole("heading", { name: "投資心智圖" })).toBeVisible();
 	await expect(page.getByRole("heading", { name: "SWOT 客觀分析" })).toBeVisible();
 });
+
+test("dashboard keeps one watchlist, supports dark mode, and stays usable on mobile", async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", quotes: [quoteFixture] }),
+		})
+	);
+	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
+		route.fulfill({ contentType: "application/json", body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", groups: [] }) })
+	);
+	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
+
+	await page.goto("/");
+	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
+	await expect(page.getByRole("heading", { name: "新增追蹤標的", exact: true })).toBeVisible();
+	await page.getByRole("button", { name: "夜間", exact: true }).click();
+	await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+	await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+	await expect(page.getByRole("button", { name: "回到頂部", exact: true })).toBeVisible();
+
+	await page.setViewportSize({ width: 768, height: 1024 });
+	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
+	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+});

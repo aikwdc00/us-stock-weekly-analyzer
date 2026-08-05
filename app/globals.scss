@@ -31,6 +31,8 @@ $colors: (
 	toggle-active: #e5f3f5,
 	white: #ffffff,
 	text-white: #ffffff,
+	action: #172026,
+	action-ink: #ffffff,
 );
 
 $dark-colors: (
@@ -63,6 +65,10 @@ $dark-colors: (
 	toggle-active: #173840,
 	white: #151d22,
 	text-white: #ffffff,
+	action: #5fc7d1,
+	action-ink: #081014,
+	green: #59d39d,
+	red: #ff8b85,
 );
 
 $radius: 8px;
@@ -281,7 +287,7 @@ h1 {
 .primaryButton,
 .decisionBar button,
 .searchBox button {
-	@include button-shell;
+	@include button-shell(action, action-ink, action);
 
 	&:disabled {
 		opacity: 0.6;
@@ -326,7 +332,7 @@ h1 {
 
 .alert {
 	@include card(warning-bg, warning-line);
-	color: #9a3412;
+	color: color(warning-ink);
 	margin: 0 auto 16px;
 	max-width: $container;
 	padding: 12px 14px;
@@ -743,6 +749,34 @@ h1 {
 	overflow: hidden;
 }
 
+.backToTop {
+	align-items: center;
+	background: color(action);
+	border: 1px solid color(action);
+	border-radius: 999px;
+	bottom: max(18px, env(safe-area-inset-bottom));
+	box-shadow: var(--shadow);
+	color: color(action-ink);
+	display: inline-flex;
+	height: 44px;
+	justify-content: center;
+	position: fixed;
+	right: max(18px, env(safe-area-inset-right));
+	width: 44px;
+	z-index: 30;
+
+	&:hover,
+	&:focus-visible {
+		background: color(teal);
+		border-color: color(teal);
+		color: color(text-white);
+	}
+
+	&[hidden] {
+		display: none;
+	}
+}
+
 .emptyState {
 	align-items: center;
 	display: grid;
@@ -995,7 +1029,7 @@ h1 {
 	}
 
 	> button {
-		@include button-shell;
+		@include button-shell(action, action-ink, action);
 		grid-column: 1 / -1;
 		justify-self: end;
 		min-width: 148px;
@@ -1294,9 +1328,9 @@ h1 {
 		padding: 9px 12px;
 
 		&.active {
-			background: color(ink);
-			border-color: color(ink);
-			color: color(white);
+			background: color(action);
+			border-color: color(action);
+			color: color(action-ink);
 		}
 	}
 }
@@ -1631,6 +1665,50 @@ h1 {
 		font-style: normal;
 		font-weight: 850;
 		margin-top: 8px;
+	}
+}
+
+.eventList {
+	@include grid(1fr);
+	gap: 0;
+}
+
+.eventRow {
+	@include flex-between(12px, flex-start);
+	border-bottom: 1px solid color(line);
+	gap: 12px;
+	padding: 12px 0;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+
+	strong,
+	span {
+		display: block;
+	}
+
+	span {
+		@include muted-text(0.78rem);
+		line-height: 1.45;
+		margin-top: 4px;
+	}
+}
+
+.eventRowDate {
+	align-items: flex-end;
+	display: flex;
+	flex: 0 0 auto;
+	gap: 8px;
+
+	b {
+		font-size: 0.84rem;
+		white-space: nowrap;
+	}
+
+	a {
+		color: color(teal);
+		display: inline-flex;
 	}
 }
 
@@ -2105,6 +2183,118 @@ h1 {
 		flex-direction: column;
 	}
 
+	.shell {
+		padding: 12px;
+	}
+
+	.watchlistBoard {
+		margin: 12px 0;
+		padding: 14px;
+	}
+
+	.watchlistBoardHeader {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.watchlistBoardControls {
+		align-items: stretch;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		width: 100%;
+	}
+
+	.watchlistControl,
+	.watchlistSearch {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.watchlistSearch {
+		grid-column: 1 / -1;
+
+		input {
+			min-width: 0;
+			width: 100%;
+		}
+	}
+
+	.watchlistTableWrap {
+		overflow: visible;
+	}
+
+	.watchlistTable {
+		display: block;
+		min-width: 0;
+
+		thead {
+			display: none;
+		}
+
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+
+		tbody tr {
+			@include card(panel, line);
+			margin-bottom: 10px;
+			padding: 8px;
+			position: relative;
+		}
+
+		tbody td {
+			border: 0;
+			font-size: 0.82rem;
+			min-height: 34px;
+			padding: 7px 4px 7px 42%;
+			position: relative;
+			text-align: right;
+			white-space: normal;
+		}
+
+		tbody td[data-label]::before {
+			color: color(muted);
+			content: attr(data-label);
+			font-size: 0.72rem;
+			font-weight: 800;
+			left: 4px;
+			position: absolute;
+			text-align: left;
+			top: 7px;
+		}
+
+		tbody td:first-child {
+			left: 8px;
+			padding: 0;
+			position: absolute;
+			top: 12px;
+			width: 28px;
+		}
+
+		tbody td:nth-child(2) {
+			min-height: 52px;
+			padding-left: 42px;
+			padding-right: 4px;
+			text-align: left;
+		}
+
+		tbody td:last-child {
+			min-height: 30px;
+			padding: 4px;
+			text-align: right;
+		}
+
+		tbody td:last-child::before {
+			content: none;
+		}
+	}
+
+	.mainPanel {
+		min-height: 0;
+	}
+
 	.priceBlock {
 		text-align: left;
 	}
@@ -2244,10 +2434,10 @@ h1 {
 }
 
 .prototypePrimaryButton {
-	background: color(ink);
-	border: 1px solid color(ink);
+	background: color(action);
+	border: 1px solid color(action);
 	border-radius: $radius;
-	color: color(text-white);
+	color: color(action-ink);
 	min-height: 38px;
 	padding: 0 14px;
 
@@ -2855,5 +3045,46 @@ h1 {
 	.prototypeResearchAction {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+}
+
+@media (max-width: 520px) {
+	.topActions {
+		align-items: stretch;
+		width: 100%;
+
+		> * {
+			flex: 1 1 auto;
+		}
+	}
+
+	.languageToggle,
+	.themeToggle,
+	.primaryButton {
+		min-width: 0;
+		padding-left: 9px;
+		padding-right: 9px;
+	}
+
+	.watchlistBoardControls {
+		grid-template-columns: 1fr;
+	}
+
+	.watchlistSearch {
+		grid-column: auto;
+	}
+
+	.watchlistCompareBar {
+		align-items: flex-start;
+		flex-wrap: wrap;
+
+		span {
+			flex-basis: 100%;
+		}
+	}
+
+	.backToTop {
+		bottom: max(14px, env(safe-area-inset-bottom));
+		right: max(14px, env(safe-area-inset-right));
 	}
 }

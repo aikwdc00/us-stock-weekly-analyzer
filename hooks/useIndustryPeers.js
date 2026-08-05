@@ -32,7 +32,6 @@ export function useIndustryPeers(symbol) {
 				const quotesData = await quotesRes.json();
 				setPeers(quotesData.quotes || []);
 			} catch (err) {
-				console.error("Failed to fetch industry peers", err);
 				setError(err.message);
 			} finally {
 				setIsLoading(false);

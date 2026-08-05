@@ -75,7 +75,7 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 				<div className="watchlistBoardControls">
 					<label className="watchlistControl">
 						<span>{t.filter}</span>
-						<select value={filter} onChange={(event) => setFilter(event.target.value)}>
+						<select suppressHydrationWarning value={filter} onChange={(event) => setFilter(event.target.value)}>
 							<option value="all">{t.all}</option>
 							<option value="review">{t.needsReview}</option>
 							<option value="loaded">{t.loaded}</option>
@@ -84,7 +84,7 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 					</label>
 					<label className="watchlistControl">
 						<span>{t.sort}</span>
-						<select value={sortKey} onChange={(event) => toggleSort(event.target.value)}>
+						<select suppressHydrationWarning value={sortKey} onChange={(event) => toggleSort(event.target.value)}>
 							<option value="symbol">{t.tableSymbol}</option>
 							<option value="changePercent">{t.move}</option>
 							<option value="quality">{t.dataQuality}</option>
@@ -131,7 +131,7 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 								const compared = compareSymbols.includes(row.symbol);
 								return (
 									<tr key={row.symbol} className={selected ? "selected" : ""}>
-										<td>
+										<td data-label={t.compare}>
 											<button
 												type="button"
 												className={`watchlistCheck${compared ? " checked" : ""}`}
@@ -141,19 +141,19 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 												{compared ? <Check size={14} /> : null}
 											</button>
 										</td>
-										<td>
+										<td data-label={t.tableSymbol}>
 											<button type="button" className="watchlistSymbolButton" onClick={() => setSelectedSymbol(row.symbol)}>
 												<strong>{row.symbol}</strong>
 												<span>{row.name}</span>
 											</button>
 										</td>
-										<td>{row.quote?.formatted?.price || EMPTY}</td>
-										<td className={row.changePercent >= 0 ? "positiveText" : "negativeText"}>
+										<td data-label={t.price}>{row.quote?.formatted?.price || EMPTY}</td>
+										<td data-label={t.move} className={row.changePercent >= 0 ? "positiveText" : "negativeText"}>
 											{row.quote?.formatted?.changePercent || EMPTY}
 										</td>
-										<td>{row.industry}</td>
-										<td>{row.valuation}</td>
-										<td>{row.quote ? `${row.quality}/100` : t.waitQuote}</td>
+										<td data-label={t.industry}>{row.industry}</td>
+										<td data-label={t.valuation}>{row.valuation}</td>
+										<td data-label={t.dataQuality}>{row.quote ? `${row.quality}/100` : t.waitQuote}</td>
 										<td>
 											<button
 												type="button"

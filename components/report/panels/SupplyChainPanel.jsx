@@ -63,6 +63,16 @@ export function SupplyChainPanel({ quote, language, t }) {
 				<CompanyList title={t.upstreamPartners} description={t.upstreamDescription} items={upstreamItems} tip={t.upstreamTip} />
 				<CompanyList title={t.downstreamCustomers} description={t.downstreamDescription} items={downstreamItems} tip={t.downstreamTip} />
 			</section>
+			{!upstreamItems.length && !downstreamItems.length ? (
+				<section className="analysisSection supplyChainEvidence">
+					<p className="evidenceEmpty">{t.undisclosedValueChain}</p>
+					{quote.ownership.latestDisclosure?.indexUrl ? (
+						<a href={quote.ownership.latestDisclosure.indexUrl} target="_blank" rel="noreferrer" className="sourceLink">
+							{t.latestFiling}: {quote.ownership.latestDisclosure.form} · {quote.ownership.latestDisclosure.filingDate}
+						</a>
+					) : null}
+				</section>
+			) : null}
 		</div>
 	);
 }

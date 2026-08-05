@@ -20,6 +20,9 @@ test("prototype supports the weekly review flow and hides unsupported fields", a
 	await expect(page.getByRole("heading", { name: "決策摘要" })).toBeVisible();
 	await expect(page.getByRole("heading", { name: "產業與長線監控" })).toBeVisible();
 	await expect(page.getByText("月營收", { exact: true })).toHaveCount(0);
+
+	const sourceLink = page.getByRole("link", { name: /查看來源/ });
+	await expect(sourceLink).toHaveAttribute("href", /stockanalysis\.com|sec\.gov/);
 });
 
 test("prototype remains usable on a mobile viewport", async ({ page }) => {

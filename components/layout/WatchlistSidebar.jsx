@@ -1,28 +1,13 @@
-import { ListPlus, RefreshCw, Search, Trash2 } from "lucide-react";
-import { cls, formatDate } from "../../hooks/utils";
+import { ListPlus, Search } from "lucide-react";
+import { formatDate } from "../../hooks/utils";
 
-export function WatchlistSidebar({
-	t,
-	language,
-	updatedAt,
-	searchTerm,
-	setSearchTerm,
-	searchSymbols,
-	isSearching,
-	addSymbol,
-	results,
-	watchlist,
-	quotes,
-	selectedSymbol,
-	setSelectedSymbol,
-	removeSymbol,
-}) {
+export function WatchlistSidebar({ t, language, updatedAt, searchTerm, setSearchTerm, searchSymbols, isSearching, addSymbol, results }) {
 	return (
 		<aside className="panel sidebar">
 			<div className="panelHeader">
 				<div>
-					<p className="eyebrow">Watchlist</p>
-					<h2>{t.watchlist}</h2>
+					<p className="eyebrow">Add to watchlist</p>
+					<h2>{t.addToWatchlist}</h2>
 				</div>
 				<span className="timestamp">
 					{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}
@@ -61,44 +46,6 @@ export function WatchlistSidebar({
 					))}
 				</div>
 			) : null}
-
-			<div className="watchlist">
-				{watchlist.map((symbol) => {
-					const quote = quotes.find((item) => item.symbol === symbol);
-					return (
-						<button
-							key={symbol}
-							className={cls("watchItem", selectedSymbol === symbol && "active")}
-							onClick={() => setSelectedSymbol(symbol)}
-						>
-							<span className="watchItemMain">
-								<strong>{symbol}</strong>
-								<small>{quote?.name || t.waitQuote}</small>
-							</span>
-							<span className={cls("move", quote?.changePercent >= 0 ? "up" : "down")}>{quote?.formatted.changePercent || "N/A"}</span>
-							<span
-								className="watchItemRemove"
-								role="button"
-								tabIndex={0}
-								aria-label={`Remove ${symbol}`}
-								onClick={(event) => {
-									event.stopPropagation();
-									removeSymbol(symbol);
-								}}
-								onKeyDown={(event) => {
-									if (event.key === "Enter" || event.key === " ") {
-										event.preventDefault();
-										event.stopPropagation();
-										removeSymbol(symbol);
-									}
-								}}
-							>
-								<Trash2 size={16} />
-							</span>
-						</button>
-					);
-				})}
-			</div>
 		</aside>
 	);
 }

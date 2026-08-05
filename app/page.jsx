@@ -5,6 +5,7 @@ import { IdeasRail } from "../components/layout/IdeasRail";
 import { WatchlistBoard } from "../components/layout/WatchlistBoard";
 import { WatchlistSidebar } from "../components/layout/WatchlistSidebar";
 import { StockReport } from "../components/report/StockReport";
+import { BackToTopButton } from "../components/shared/BackToTopButton";
 import { useStockAnalyzer } from "../hooks/useStockAnalyzer";
 import { cls } from "../hooks/utils";
 
@@ -133,11 +134,6 @@ export default function Page() {
 					isSearching={isSearching}
 					addSymbol={addSymbol}
 					results={results}
-					watchlist={watchlist}
-					quotes={quotes}
-					selectedSymbol={selectedSymbol}
-					setSelectedSymbol={setSelectedSymbol}
-					removeSymbol={removeSymbol}
 				/>
 
 				<section className="mainPanel">
@@ -175,6 +171,7 @@ export default function Page() {
 				<span>© 2026 Fred Li. All rights reserved.</span>
 				<span>{t.footer}</span>
 			</footer>
+			<BackToTopButton label={t.backToTop} />
 		</main>
 	);
 }

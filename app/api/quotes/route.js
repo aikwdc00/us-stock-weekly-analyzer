@@ -6,6 +6,7 @@ import { fetchFinnhubData } from "../../../lib/finnhubProvider";
 import { fetchAiTranslatedNews } from "../../../lib/aiNewsProvider";
 import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskProvider";
 import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { fetchMarketEvents } from "../../../lib/marketEventsProvider";
 import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
@@ -169,7 +170,7 @@ function pickFulfilled(results, fallback) {
 	return results.map((result) => (result.status === "fulfilled" ? result.value : fallback));
 }
 
-function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translatedNews) {
+function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translatedNews, marketEvents) {
 	const metrics = snapshot.metrics || {};
 
 	return {
@@ -200,6 +201,7 @@ function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translat
 		news: translatedNews || snapshot.news || quote.news || [],
 		secOwnership,
 		finnhub,
+		events: marketEvents?.events || [],
 		fundamentalsSource: snapshot.source,
 		fundamentalsSourceUrl: snapshot.sourceUrl,
 		updated: snapshot.updated || quote.updated || null,
@@ -212,9 +214,11 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchSecOwnershipFilings(quote.symbol)),
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchFinnhubData(quote.symbol)),
 	]);
+	const eventResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchMarketEvents(quote.symbol, quote));
 	const snapshots = pickFulfilled(snapshotResults, {});
 	const ownershipFilings = pickFulfilled(ownershipResults, null);
 	const finnhubData = pickFulfilled(finnhubResults, null);
+	const marketEvents = pickFulfilled(eventResults, { events: [] });
 	const aiRiskInsights = runAiAnalysis
 		? await mapWithConcurrency(rawQuotes, 2, (quote, index) =>
 				fetchAiRiskInsights(
@@ -253,7 +257,8 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 			snapshot,
 			ownershipFilings[index] || null,
 			finnhubData[index] || {},
-			translatedNews[index] || []
+			translatedNews[index] || [],
+			marketEvents[index] || { events: [] }
 		);
 
 		return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshotWithAi));

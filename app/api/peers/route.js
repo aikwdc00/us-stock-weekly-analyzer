@@ -61,19 +61,17 @@ export async function GET(request) {
 
 	const [symbol] = parsed.symbols;
 
-	let finnhubError = null;
 	try {
 		const peers = await fetchFinnhubPeers(symbol);
 		if (peers.length) return Response.json({ symbol, peers, source: "finnhub" });
-	} catch (error) {
-		finnhubError = error;
+	} catch {
+		// Fall back to Yahoo recommendations when Finnhub is unavailable.
 	}
 
 	try {
 		const peers = await fetchYahooPeers(symbol);
 		return Response.json({ symbol, peers, source: "yahoo" });
-	} catch (error) {
-		console.error("Peers API error:", error?.message || error);
+	} catch {
 		return Response.json({ symbol, peers: [], error: "同業資料暫時無法取得，請稍後再試。" }, { status: 502 });
 	}
 }
