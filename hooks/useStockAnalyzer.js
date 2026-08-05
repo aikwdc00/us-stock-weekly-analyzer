@@ -21,9 +21,10 @@ export function useStockAnalyzer() {
 		setError("");
 	}, []);
 
-	const quotesState = useQuotes(watchlistState.watchlist, { onError: reportError });
+	const quotesState = useQuotes(watchlistState.watchlist, { onError: reportError, enabled: watchlistState.hydrated });
 	const recommendationsState = useRecommendations(watchlistState.watchlist, {
 		onError: reportError,
+		enabled: watchlistState.hydrated,
 	});
 	const searchState = useSymbolSearch({ onError: reportError });
 
@@ -33,9 +34,10 @@ export function useStockAnalyzer() {
 			const next = watchlistState.addSymbol(rawSymbol);
 			if (!next || next === watchlistState.watchlist) return;
 			searchState.clearSearch();
-			await Promise.all([quotesState.refreshQuotes(next), recommendationsState.refreshRecommendations(next)]);
+			const symbol = next[next.length - 1];
+			await quotesState.refreshQuotes([symbol], { merge: true });
 		},
-		[clearError, quotesState, recommendationsState, searchState, watchlistState]
+		[clearError, quotesState, searchState, watchlistState]
 	);
 
 	const removeSymbol = useCallback(
@@ -46,13 +48,10 @@ export function useStockAnalyzer() {
 		[clearError, watchlistState]
 	);
 
-	const refreshAll = useCallback(async () => {
+	const refreshQuotes = useCallback(async () => {
 		clearError();
-		await Promise.all([
-			quotesState.refreshQuotes(undefined, { force: true }),
-			recommendationsState.refreshRecommendations(undefined, { force: true }),
-		]);
-	}, [clearError, quotesState, recommendationsState]);
+		await quotesState.refreshQuotes(undefined, { force: true });
+	}, [clearError, quotesState]);
 
 	const refreshIdeas = useCallback(async () => {
 		clearError();
@@ -89,7 +88,7 @@ export function useStockAnalyzer() {
 		isLoadingRecommendations: recommendationsState.isLoading,
 		addSymbol,
 		removeSymbol,
-		refreshAll,
+		refreshAll: refreshQuotes,
 		refreshIdeas,
 	};
 }

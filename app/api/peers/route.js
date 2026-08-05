@@ -1,5 +1,9 @@
 export const dynamic = "force-dynamic";
 
+import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
+import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
+
 const YAHOO_PEERS_URL = "https://query2.finance.yahoo.com/v6/finance/recommendationsbysymbol";
 const FINNHUB_PEERS_URL = "https://finnhub.io/api/v1/stock/peers";
 const FINNHUB_TOKEN = process.env.FINNHUB_API_KEY;
@@ -11,7 +15,7 @@ async function fetchFinnhubPeers(symbol) {
 	url.searchParams.set("grouping", "industry");
 	url.searchParams.set("token", FINNHUB_TOKEN);
 
-	const response = await fetch(url, { next: { revalidate: 86400 } });
+	const response = await fetchWithTimeout(url, { timeoutMs: 8_000, next: { revalidate: 86400 } });
 	if (!response.ok) {
 		throw new Error(`Finnhub peers failed: ${response.status}`);
 	}
@@ -22,7 +26,8 @@ async function fetchFinnhubPeers(symbol) {
 
 async function fetchYahooPeers(symbol) {
 	const url = `${YAHOO_PEERS_URL}/${symbol}`;
-	const response = await fetch(url, {
+	const response = await fetchWithTimeout(url, {
+		timeoutMs: 8_000,
 		headers: {
 			"User-Agent": "Mozilla/5.0",
 		},
@@ -43,11 +48,18 @@ async function fetchYahooPeers(symbol) {
 
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
-	const symbol = searchParams.get("symbol")?.toUpperCase();
+	const parsed = normalizeSymbols(searchParams.get("symbol"), { maxSymbols: 1 });
+	const rateLimit = checkRateLimit(getClientKey(request, "peers"), { limit: 90, windowMs: 60_000 });
 
-	if (!symbol) {
-		return Response.json({ peers: [] });
+	if (!rateLimit.allowed) {
+		return Response.json({ peers: [], error: "請求過於頻繁，請稍後再試。" }, { status: 429, headers: rateLimitHeaders(rateLimit) });
 	}
+
+	if (parsed.error) {
+		return Response.json({ peers: [], error: parsed.error }, { status: 400 });
+	}
+
+	const [symbol] = parsed.symbols;
 
 	let finnhubError = null;
 	try {
@@ -61,12 +73,7 @@ export async function GET(request) {
 		const peers = await fetchYahooPeers(symbol);
 		return Response.json({ symbol, peers, source: "yahoo" });
 	} catch (error) {
-		console.error("Peers API error:", error);
-		return Response.json({
-			symbol,
-			peers: [],
-			error: error.message,
-			fallbackError: finnhubError?.message || null,
-		});
+		console.error("Peers API error:", error?.message || error);
+		return Response.json({ symbol, peers: [], error: "同業資料暫時無法取得，請稍後再試。" }, { status: 502 });
 	}
 }

@@ -1,5 +1,6 @@
 import { InvestmentMindMap } from "../shared/InvestmentMindMap";
 import { TooltipHint } from "../shared/TooltipHint";
+import { ExternalLink } from "lucide-react";
 
 import { formatDate } from "../../../hooks/utils";
 
@@ -50,7 +51,14 @@ export function MindMapSwotPanel({ quote, t, language, updatedAt }) {
 							</ul>
 						</div>
 					</div>
-					<p className="swotSource">{t.dataSource}: StockAnalysis / Yahoo Finance Consensus</p>
+					<p className="swotSource">
+						{t.dataSource}: {quote.fundamentals.source || t.insufficientEvidence}
+						{quote.fundamentals.sourceUrl ? (
+							<a className="sourceInlineLink" href={quote.fundamentals.sourceUrl} target="_blank" rel="noreferrer">
+								<ExternalLink size={13} />
+							</a>
+						) : null}
+					</p>
 					<p className="swotSource">AI: {quote.profile?.aiSupplement?.enabled ? t.aiEnabled : t.aiDisabled}</p>
 					<p className="swotSource">
 						{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}

@@ -538,6 +538,195 @@ h1 {
 	white-space: nowrap;
 }
 
+.watchlistBoard {
+	@include card(panel, line, true);
+	margin: 18px 0;
+	min-width: 0;
+	padding: 18px;
+}
+
+.watchlistBoardHeader {
+	@include flex-between(16px, flex-end);
+	margin-bottom: 14px;
+
+	h2 {
+		font-size: 1.45rem;
+		margin: 2px 0 0;
+	}
+}
+
+.watchlistBoardControls {
+	align-items: flex-end;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.watchlistControl {
+	align-items: center;
+	background: color(subpanel);
+	border: 1px solid color(line);
+	border-radius: $radius;
+	display: inline-flex;
+	gap: 7px;
+	min-height: 38px;
+	padding: 0 10px;
+
+	span {
+		@include muted-text(0.72rem, 750);
+	}
+
+	select {
+		appearance: none;
+		background: transparent;
+		border: 0;
+		color: color(ink);
+		font-size: 0.8rem;
+		font-weight: 800;
+		max-width: 116px;
+		outline: none;
+	}
+}
+
+.watchlistSearch {
+	@include inline-center(7px);
+	@include card(subpanel, line);
+	min-height: 38px;
+	padding: 0 10px;
+
+	input {
+		background: transparent;
+		border: 0;
+		color: color(ink);
+		min-width: 190px;
+		outline: none;
+	}
+}
+
+.watchlistCompareBar {
+	@include flex-between(10px);
+	background: color(teal-soft);
+	border: 1px solid color(teal-line);
+	border-radius: $radius;
+	color: color(teal-ink);
+	font-size: 0.82rem;
+	margin-bottom: 12px;
+	padding: 9px 12px;
+
+	span {
+		margin-right: auto;
+	}
+
+	button {
+		background: transparent;
+		border: 0;
+		color: inherit;
+		font-size: 0.78rem;
+		font-weight: 800;
+	}
+}
+
+.watchlistTableWrap {
+	overflow-x: auto;
+}
+
+.watchlistTable {
+	border-collapse: collapse;
+	min-width: 900px;
+	width: 100%;
+
+	th {
+		@include muted-text(0.72rem, 800);
+		padding: 10px 12px;
+		text-align: left;
+		white-space: nowrap;
+	}
+
+	td {
+		border-top: 1px solid color(line);
+		font-size: 0.82rem;
+		padding: 10px 12px;
+		white-space: nowrap;
+	}
+
+	tbody tr:hover,
+	tbody tr.selected {
+		background: color(subpanel);
+	}
+}
+
+.watchlistSymbolButton {
+	background: transparent;
+	border: 0;
+	color: color(ink);
+	padding: 0;
+	text-align: left;
+
+	strong,
+	span {
+		display: block;
+	}
+
+	strong {
+		color: color(teal);
+	}
+
+	span {
+		@include muted-text(0.72rem);
+		margin-top: 3px;
+		max-width: 210px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.watchlistCheck,
+.iconButton {
+	align-items: center;
+	background: transparent;
+	border: 1px solid color(line);
+	border-radius: 5px;
+	color: color(muted);
+	display: inline-flex;
+	height: 26px;
+	justify-content: center;
+	padding: 0;
+	width: 26px;
+}
+
+.watchlistCheck.checked {
+	background: color(teal);
+	border-color: color(teal);
+	color: color(text-white);
+}
+
+.iconButton:hover {
+	border-color: color(red);
+	color: color(red);
+}
+
+.watchlistEmpty {
+	color: color(muted);
+	padding: 28px 12px !important;
+	text-align: center;
+}
+
+.evidenceEmpty {
+	color: color(muted);
+	font-size: 0.86rem;
+	margin: 0;
+}
+
+.srOnly {
+	clip: rect(0, 0, 0, 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
 .up {
 	color: color(green);
 }
@@ -660,6 +849,30 @@ h1 {
 	gap: 0;
 	max-width: 100%;
 	min-width: 0;
+}
+
+.panelLoading {
+	background: linear-gradient(90deg, color(subpanel), color(panel-strong), color(subpanel));
+	background-size: 200% 100%;
+	border-radius: $radius;
+	height: 220px;
+	margin: 10px 0;
+	animation: panelLoading 1.4s ease-in-out infinite;
+}
+
+@keyframes panelLoading {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.panelLoading {
+		animation: none;
+	}
 }
 
 .supplyChainIntro {
@@ -1372,6 +1585,13 @@ h1 {
 	margin-top: 12px;
 }
 
+.sourceInlineLink {
+	@include inline-center(4px);
+	color: color(teal);
+	margin-left: 4px;
+	vertical-align: middle;
+}
+
 .newsList {
 	@include grid(1fr);
 
@@ -1905,5 +2125,735 @@ h1 {
 		.tooltipAnchor[data-visible="true"] & {
 			transform: translateY(0);
 		}
+	}
+}
+
+.prototypeShell {
+	background: color(bg);
+	color: color(ink);
+	min-height: 100vh;
+	padding: 32px clamp(16px, 4vw, 56px) 48px;
+}
+
+.prototypeHeader,
+.prototypeView {
+	margin: 0 auto;
+	max-width: 1240px;
+}
+
+.prototypeHeader {
+	border-bottom: 1px solid color(line);
+	padding-bottom: 22px;
+}
+
+.prototypeBrand,
+.prototypeActions,
+.prototypeNav,
+.prototypeViewIntro,
+.prototypeToolbar,
+.prototypeCompareBar,
+.prototypeSectionHeading,
+.prototypeResearchHero,
+.prototypeResearchAction,
+.prototypeDiscoverTop {
+	align-items: center;
+	display: flex;
+	gap: 14px;
+	justify-content: space-between;
+}
+
+.prototypeBrand {
+	align-items: flex-start;
+}
+
+.prototypeBrandMark {
+	align-items: center;
+	background: color(hero);
+	border-radius: 10px;
+	color: color(text-white);
+	display: flex;
+	height: 42px;
+	justify-content: center;
+	width: 42px;
+}
+
+.prototypeBrand h1,
+.prototypeView h2,
+.prototypeResearchHero h2 {
+	font-size: clamp(1.8rem, 3vw, 2.65rem);
+	letter-spacing: 0;
+	line-height: 1.1;
+	margin: 0;
+}
+
+.prototypeBrand h1 {
+	font-size: clamp(1.45rem, 2.4vw, 2.1rem);
+}
+
+.prototypeBrand p:not(.eyebrow),
+.prototypeViewIntro p:not(.eyebrow),
+.prototypeResearchHero p:not(.eyebrow) {
+	color: color(muted);
+	line-height: 1.6;
+	margin: 8px 0 0;
+}
+
+.prototypeActions {
+	justify-content: flex-end;
+}
+
+.prototypeFreshness {
+	color: color(muted);
+	font-size: 0.78rem;
+}
+
+.prototypeLiveDot {
+	background: color(green);
+	border-radius: 999px;
+	display: inline-block;
+	height: 7px;
+	margin-right: 6px;
+	width: 7px;
+}
+
+.prototypeIconButton,
+.prototypeQuietButton,
+.prototypePrimaryButton,
+.prototypeTextButton,
+.prototypeCheckButton {
+	align-items: center;
+	display: inline-flex;
+	font-weight: 800;
+	gap: 7px;
+	justify-content: center;
+}
+
+.prototypeIconButton,
+.prototypeQuietButton {
+	background: color(panel);
+	border: 1px solid color(line);
+	border-radius: $radius;
+	color: color(ink);
+	min-height: 38px;
+	padding: 0 12px;
+}
+
+.prototypeIconButton {
+	padding: 0;
+	width: 38px;
+}
+
+.prototypePrimaryButton {
+	background: color(ink);
+	border: 1px solid color(ink);
+	border-radius: $radius;
+	color: color(text-white);
+	min-height: 38px;
+	padding: 0 14px;
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.55;
+	}
+}
+
+.prototypeTextButton {
+	background: transparent;
+	border: 0;
+	color: color(teal);
+	padding: 5px;
+}
+
+.prototypeNav {
+	justify-content: flex-start;
+	margintop: 26px;
+	overflow-x: auto;
+	padding-bottom: 1px;
+
+	button {
+		background: transparent;
+		border: 0;
+		border-bottom: 2px solid transparent;
+		color: color(muted);
+		font-weight: 850;
+		min-height: 42px;
+		padding: 0 4px;
+		white-space: nowrap;
+
+		&.active {
+			border-bottom-color: color(teal);
+			color: color(ink);
+		}
+	}
+}
+
+.prototypeView {
+	padding-top: 34px;
+}
+
+.prototypeViewIntro {
+	align-items: flex-end;
+	margin-bottom: 22px;
+}
+
+.prototypeViewIntro > div {
+	min-width: 0;
+}
+
+.prototypePanel {
+	@include card(panel, line, true);
+	min-width: 0;
+	padding: 20px;
+}
+
+.prototypeQueueGrid,
+.prototypeResearchGrid,
+.prototypeDiscoverGrid {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.prototypeQueuePanel,
+.prototypeHealthPanel,
+.prototypeNextPanel,
+.prototypeIndustryPanel {
+	min-height: 238px;
+}
+
+.prototypeSectionHeading {
+	margin-bottom: 18px;
+
+	> div {
+		align-items: center;
+		display: flex;
+		gap: 10px;
+	}
+
+	h3 {
+		font-size: 1rem;
+		margin: 0;
+	}
+}
+
+.prototypeSectionNumber {
+	color: color(teal);
+	font-size: 0.72rem;
+	font-weight: 900;
+}
+
+.prototypeBadge {
+	background: color(chip);
+	border: 1px solid color(line);
+	border-radius: 999px;
+	color: color(chip-ink);
+	display: inline-flex;
+	font-size: 0.72rem;
+	font-weight: 850;
+	padding: 5px 9px;
+	white-space: nowrap;
+
+	&.positive {
+		background: color(teal-soft);
+		border-color: color(teal-line);
+		color: color(teal-ink);
+	}
+
+	&.warning {
+		background: color(yellow-soft);
+		border-color: color(yellow-line);
+		color: color(yellow);
+	}
+}
+
+.prototypeQueueRow {
+	align-items: center;
+	background: color(subpanel);
+	border: 1px solid transparent;
+	border-radius: $radius;
+	color: color(ink);
+	display: grid;
+	gap: 12px;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	margin-bottom: 8px;
+	padding: 13px;
+	text-align: left;
+	width: 100%;
+
+	&.selected,
+	&:hover {
+		border-color: color(teal-line-2);
+	}
+}
+
+.prototypeTicker {
+	color: color(teal);
+	font-size: 0.84rem;
+	font-weight: 900;
+}
+
+.prototypeQueueCopy {
+	min-width: 0;
+
+	strong,
+	small {
+		display: block;
+	}
+
+	small {
+		color: color(muted);
+		line-height: 1.45;
+		margin-top: 4px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.prototypeHealthScore {
+	align-items: baseline;
+	display: flex;
+	gap: 5px;
+
+	strong {
+		font-size: 3.4rem;
+		line-height: 1;
+	}
+
+	span {
+		color: color(muted);
+	}
+
+	small {
+		color: color(teal);
+		margin-left: 8px;
+	}
+}
+
+.prototypeHealthList {
+	display: grid;
+	gap: 10px;
+	margin-top: 25px;
+
+	span {
+		align-items: center;
+		color: color(muted);
+		display: flex;
+		font-size: 0.84rem;
+		gap: 8px;
+	}
+
+	i {
+		border-radius: 99px;
+		display: inline-block;
+		height: 8px;
+		width: 8px;
+
+		&.positive {
+			background: color(green);
+		}
+		&.warning {
+			background: color(yellow);
+		}
+		&.muted {
+			background: color(muted);
+		}
+	}
+}
+
+.prototypeNextPanel {
+	margin-top: 16px;
+}
+
+.prototypeEventGrid {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.prototypeEvent {
+	background: color(subpanel);
+	border-left: 3px solid color(teal);
+	border-radius: $radius;
+	display: grid;
+	gap: 4px;
+	padding: 12px;
+
+	span,
+	small {
+		color: color(muted);
+		font-size: 0.75rem;
+	}
+}
+
+.prototypeResearchHero {
+	align-items: flex-end;
+	margin-bottom: 22px;
+}
+
+.prototypeResearchHero h2 span {
+	color: color(muted);
+	display: inline-block;
+	font-size: 0.9rem;
+	font-weight: 550;
+	margin-left: 8px;
+}
+
+.prototypeResearchPrice {
+	display: grid;
+	gap: 7px;
+	justify-items: end;
+
+	strong {
+		font-size: 2rem;
+	}
+}
+
+.prototypeResearchGrid {
+	grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+}
+
+.prototypeThesis {
+	border-left: 3px solid color(teal);
+	padding-left: 14px;
+
+	p {
+		font-size: 1.05rem;
+		line-height: 1.7;
+		margin: 8px 0 16px;
+	}
+
+	div {
+		color: color(muted);
+		display: grid;
+		font-size: 0.78rem;
+		gap: 7px;
+	}
+}
+
+.prototypeResearchAction {
+	border-top: 1px solid color(line);
+	margin-top: 24px;
+	padding-top: 16px;
+
+	span {
+		color: color(muted);
+		font-size: 0.76rem;
+	}
+}
+
+.prototypeEvidenceList {
+	display: grid;
+	gap: 2px;
+}
+
+.prototypeEvidenceRow {
+	align-items: center;
+	border-bottom: 1px solid color(line);
+	display: flex;
+	gap: 10px;
+	justify-content: space-between;
+	padding: 11px 0;
+
+	span {
+		min-width: 0;
+	}
+
+	strong,
+	small {
+		display: block;
+	}
+
+	small {
+		color: color(muted);
+		font-size: 0.72rem;
+		margin-top: 3px;
+	}
+
+	b {
+		font-size: 0.96rem;
+		white-space: nowrap;
+
+		&.positive {
+			color: color(green);
+		}
+		&.warning {
+			color: color(yellow);
+		}
+	}
+}
+
+.prototypeUnsupported {
+	align-items: flex-start;
+	background: color(warning-bg);
+	border: 1px solid color(warning-line);
+	border-radius: $radius;
+	color: color(warning-ink);
+	display: flex;
+	font-size: 0.77rem;
+	gap: 8px;
+	line-height: 1.5;
+	margin-top: 14px;
+	padding: 10px;
+}
+
+.prototypeIndustryPanel {
+	margin-top: 16px;
+}
+
+.prototypeIndustryGrid {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+
+	div {
+		background: color(subpanel);
+		border-radius: $radius;
+		display: grid;
+		gap: 5px;
+		padding: 13px;
+	}
+
+	small,
+	span {
+		color: color(muted);
+		font-size: 0.75rem;
+	}
+}
+
+.prototypeToolbar {
+	justify-content: flex-start;
+	margin-bottom: 14px;
+
+	> :last-child {
+		margin-left: auto;
+	}
+}
+
+.prototypeSearch {
+	align-items: center;
+	background: color(subpanel);
+	border: 1px solid color(line);
+	border-radius: $radius;
+	display: flex;
+	gap: 8px;
+	max-width: 360px;
+	padding: 0 11px;
+	width: 100%;
+
+	input {
+		background: transparent;
+		border: 0;
+		color: color(ink);
+		min-height: 38px;
+		min-width: 0;
+		outline: none;
+		width: 100%;
+	}
+}
+
+.prototypeCompareBar {
+	background: color(teal-soft);
+	border: 1px solid color(teal-line);
+	border-radius: $radius;
+	color: color(teal-ink);
+	font-size: 0.8rem;
+	margin-bottom: 12px;
+	padding: 9px 12px;
+
+	span {
+		font-weight: 850;
+		margin-right: auto;
+	}
+
+	button:not(.prototypePrimaryButton) {
+		background: transparent;
+		border: 0;
+		color: color(teal-ink);
+		font-size: 0.78rem;
+		font-weight: 800;
+	}
+}
+
+.prototypeTableWrap {
+	overflow-x: auto;
+}
+
+.prototypeTable {
+	border-collapse: collapse;
+	min-width: 880px;
+	width: 100%;
+
+	th {
+		color: color(muted);
+		font-size: 0.72rem;
+		font-weight: 800;
+		padding: 10px 12px;
+		text-align: left;
+		white-space: nowrap;
+	}
+
+	td {
+		border-top: 1px solid color(line);
+		font-size: 0.82rem;
+		padding: 12px;
+		white-space: nowrap;
+	}
+
+	tbody tr:hover,
+	tbody tr.selected {
+		background: color(subpanel);
+	}
+
+	small,
+	span {
+		color: color(muted);
+		display: block;
+		font-size: 0.72rem;
+		margin-top: 3px;
+	}
+}
+
+.prototypeTableTicker {
+	background: transparent;
+	border: 0;
+	color: color(ink);
+	display: block;
+	padding: 0;
+	text-align: left;
+
+	strong,
+	span,
+	small {
+		display: block;
+	}
+
+	strong {
+		color: color(teal);
+	}
+}
+
+.prototypeCheckButton {
+	background: transparent;
+	border: 1px solid color(line);
+	border-radius: 5px;
+	height: 24px;
+	padding: 0;
+	width: 24px;
+
+	&.checked {
+		background: color(teal);
+		border-color: color(teal);
+		color: color(text-white);
+	}
+}
+
+.positiveText {
+	color: color(green);
+}
+.negativeText {
+	color: color(red);
+}
+
+.prototypeDiscoverGrid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.prototypeDiscoverCard {
+	display: grid;
+	gap: 10px;
+
+	h3,
+	p {
+		margin: 0;
+	}
+
+	> span,
+	p {
+		color: color(muted);
+		font-size: 0.82rem;
+		line-height: 1.5;
+	}
+
+	> .prototypePrimaryButton {
+		margin-top: 7px;
+	}
+}
+
+.prototypeDiscoverTop {
+	justify-content: space-between;
+
+	strong {
+		color: color(teal);
+		font-size: 1.7rem;
+	}
+}
+
+.prototypeFooter {
+	color: color(muted);
+	font-size: 0.75rem;
+	margin: 22px auto 0;
+	max-width: 1240px;
+}
+
+@media (max-width: 780px) {
+	.prototypeShell {
+		padding: 20px 14px 32px;
+	}
+
+	.prototypeHeader {
+		padding-bottom: 16px;
+	}
+
+	.prototypeBrand,
+	.prototypeViewIntro,
+	.prototypeResearchHero {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.prototypeActions {
+		justify-content: space-between;
+		width: 100%;
+	}
+
+	.prototypeQueueGrid,
+	.prototypeResearchGrid,
+	.prototypeDiscoverGrid,
+	.prototypeIndustryGrid,
+	.prototypeEventGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.prototypePanel {
+		padding: 16px;
+	}
+
+	.prototypeToolbar {
+		align-items: stretch;
+		flex-wrap: wrap;
+
+		> :last-child {
+			margin-left: 0;
+		}
+	}
+
+	.prototypeSearch {
+		max-width: none;
+	}
+
+	.prototypeQuietButton,
+	.prototypePrimaryButton {
+		min-height: 40px;
+	}
+
+	.prototypeResearchPrice {
+		align-items: start;
+		justify-items: start;
+	}
+
+	.prototypeResearchAction {
+		align-items: flex-start;
+		flex-direction: column;
 	}
 }

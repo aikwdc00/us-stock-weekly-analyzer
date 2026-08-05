@@ -7,7 +7,6 @@ export function FinancialsPanel({ quote, t, language }) {
 	const text =
 		language === "en"
 			? {
-					monthlyRevenue: "Monthly Revenue",
 					latestQuarterRevenue: "Latest Quarterly Revenue",
 					latestQuarterEps: "Latest Quarterly EPS",
 					quarterDate: "Quarter Date",
@@ -64,7 +63,6 @@ export function FinancialsPanel({ quote, t, language }) {
 					nextYearEstimate: "Next year estimate",
 				}
 			: {
-					monthlyRevenue: "月營收",
 					latestQuarterRevenue: "最新季度營收",
 					latestQuarterEps: "最新季度 EPS",
 					quarterDate: "季度日期",
@@ -123,8 +121,6 @@ export function FinancialsPanel({ quote, t, language }) {
 	const tips =
 		language === "en"
 			? {
-					monthlyRevenue:
-						"Most US companies do not report monthly revenue. Use this field as a note about the company's reporting cadence.",
 					latestQuarterRevenue: "The latest reported quarter's revenue and its year-over-year growth.",
 					latestQuarterEps: "The latest reported quarter's EPS and its year-over-year growth.",
 					quarterDate: "The fiscal quarter-end date tied to the latest reported revenue and EPS.",
@@ -167,7 +163,6 @@ export function FinancialsPanel({ quote, t, language }) {
 					roic: "Return on invested capital. Measures efficiency of capital allocation across debt and equity.",
 				}
 			: {
-					monthlyRevenue: "多數美股公司不公告月營收，這裡主要提示公司通常用什麼節奏揭露營收。",
 					latestQuarterRevenue: "最近一季已公布的營收，以及相對去年同期的成長幅度。",
 					latestQuarterEps: "最近一季已公布的 EPS，以及相對去年同期的成長幅度。",
 					quarterDate: "最新一季財報對應的季度截止日期。",
@@ -252,7 +247,9 @@ export function FinancialsPanel({ quote, t, language }) {
 			<section className="analysisSection">
 				<h3>{t.revenueTrend}</h3>
 				<div className="fundamentalGrid">
-					<Info label={text.monthlyRevenue} value={quote.fundamentals.monthlyRevenue || "N/A"} tip={tips.monthlyRevenue} />
+					{quote.fundamentals.monthlyRevenue ? (
+						<Info label={language === "en" ? "Monthly Revenue" : "月營收"} value={quote.fundamentals.monthlyRevenue} />
+					) : null}
 					<Info
 						label={text.latestQuarterRevenue}
 						value={

@@ -5,7 +5,7 @@ import { useReportTabs } from "../../hooks/useReportTabs";
 import { ReportHeader } from "./ReportHeader";
 import { ReportTabs } from "./ReportTabs";
 
-export function StockReport({ quote, peerQuotes, language, t, updatedAt }) {
+export function StockReport({ quote, language, t, updatedAt }) {
 	const { activeTab, setActiveTab, tabs } = useReportTabs(quote.symbol, t);
 	const { activeModel, setSelectedModel } = useValuationModel(quote);
 
@@ -14,7 +14,6 @@ export function StockReport({ quote, peerQuotes, language, t, updatedAt }) {
 			<ReportHeader quote={quote} language={language} t={t} />
 			<ReportTabs
 				quote={quote}
-				peerQuotes={peerQuotes}
 				language={language}
 				t={t}
 				tabs={tabs}

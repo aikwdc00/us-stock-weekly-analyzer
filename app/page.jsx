@@ -2,6 +2,7 @@
 
 import { Activity, BarChart3, CircleDollarSign, Languages, Moon, RefreshCw, ShieldCheck, Sparkles, Sun } from "lucide-react";
 import { IdeasRail } from "../components/layout/IdeasRail";
+import { WatchlistBoard } from "../components/layout/WatchlistBoard";
 import { WatchlistSidebar } from "../components/layout/WatchlistSidebar";
 import { StockReport } from "../components/report/StockReport";
 import { useStockAnalyzer } from "../hooks/useStockAnalyzer";
@@ -112,6 +113,15 @@ export default function Page() {
 				</div>
 			) : null}
 
+			<WatchlistBoard
+				t={t}
+				watchlist={watchlist}
+				quotes={quotes}
+				selectedSymbol={selectedSymbol}
+				setSelectedSymbol={setSelectedSymbol}
+				removeSymbol={removeSymbol}
+			/>
+
 			<section className="workspace">
 				<WatchlistSidebar
 					t={t}
@@ -132,7 +142,7 @@ export default function Page() {
 
 				<section className="mainPanel">
 					{selectedQuote ? (
-						<StockReport quote={selectedQuote} peerQuotes={quotes} language={language} t={t} updatedAt={updatedAt} />
+						<StockReport quote={selectedQuote} language={language} t={t} updatedAt={updatedAt} />
 					) : selectedSymbol ? (
 						<div className="emptyState">
 							<RefreshCw size={30} className={cls(isLoading && "spin")} />

@@ -1,19 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useRecommendations(watchlist, { onError } = {}) {
+export function useRecommendations(watchlist, { onError, enabled = true } = {}) {
 	const [groups, setGroups] = useState([]);
 	const [updatedAt, setUpdatedAt] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
+	const watchlistRef = useRef(watchlist);
+	watchlistRef.current = watchlist;
 
 	const refreshRecommendations = useCallback(
-		async (excludedSymbols = watchlist, options = {}) => {
+		async (excludedSymbols, options = {}) => {
 			setIsLoading(true);
 
 			try {
+				const targetSymbols = excludedSymbols || watchlistRef.current;
 				const force = Boolean(options?.force);
-				const query = force ? `exclude=${excludedSymbols.join(",")}&_ts=${Date.now()}` : `exclude=${excludedSymbols.join(",")}`;
+				const query = force ? `exclude=${targetSymbols.join(",")}&_ts=${Date.now()}` : `exclude=${targetSymbols.join(",")}`;
 				const response = await fetch(`/api/recommendations?${query}`, {
 					cache: "no-store",
 				});
@@ -32,14 +35,15 @@ export function useRecommendations(watchlist, { onError } = {}) {
 				setIsLoading(false);
 			}
 		},
-		[onError, watchlist]
+		[onError]
 	);
 
 	useEffect(() => {
-		refreshRecommendations(watchlist);
-		const interval = window.setInterval(() => refreshRecommendations(watchlist), 60 * 60 * 1000);
+		if (!enabled) return undefined;
+		refreshRecommendations();
+		const interval = window.setInterval(() => refreshRecommendations(), 60 * 60 * 1000);
 		return () => window.clearInterval(interval);
-	}, [watchlist.join(","), refreshRecommendations]);
+	}, [enabled, refreshRecommendations]);
 
 	return {
 		groups,

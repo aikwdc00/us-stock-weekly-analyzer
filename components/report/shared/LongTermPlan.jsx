@@ -25,20 +25,20 @@ export function LongTermPlan({ quote, t }) {
 			<div className="planGrid">
 				<div>
 					<strong>{t.strategicPillars}</strong>
-					<ul>
-						{pillars.slice(0, 4).map((item) => (
-							<li key={item}>{item}</li>
-						))}
-					</ul>
+					<ul>{pillars.length ? pillars.slice(0, 4).map((item) => <li key={item}>{item}</li>) : <li>{t.insufficientEvidence}</li>}</ul>
 				</div>
 				<div>
 					<strong>{t.executionSignals}</strong>
 					<ul>
-						{signals.map((item) => (
-							<li key={`${item.label}-${item.signal}`}>
-								{item.label}：{item.signal}
-							</li>
-						))}
+						{signals.length ? (
+							signals.map((item) => (
+								<li key={`${item.label}-${item.signal}`}>
+									{item.label}：{item.signal}
+								</li>
+							))
+						) : (
+							<li>{t.insufficientEvidence}</li>
+						)}
 					</ul>
 				</div>
 				<div>

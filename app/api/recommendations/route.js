@@ -1,5 +1,10 @@
 import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
+import { getOrCreateCached } from "../../../lib/cache.mjs";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
+import { mapWithConcurrency } from "../../../lib/concurrency.mjs";
+import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
+import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +51,8 @@ function parseCompanyRows(html) {
 }
 
 async function fetchMarketUniverse() {
-	const response = await fetch(BIGGEST_COMPANIES_URL, {
+	const response = await fetchWithTimeout(BIGGEST_COMPANIES_URL, {
+		timeoutMs: 12_000,
 		headers: { "User-Agent": "Mozilla/5.0" },
 		next: { revalidate: 60 * 60 },
 	});
@@ -167,76 +173,86 @@ function toItem(quote, result, row) {
 	};
 }
 
+async function generateRecommendations(exclude) {
+	const universe = (await fetchMarketUniverse()).map((row, index) => ({
+		...row,
+		rank: index + 1,
+	}));
+	const snapshots = await mapWithConcurrency(universe, 4, (row) => fetchStockAnalysisSnapshot(row.symbol).catch(() => ({ metrics: {} })));
+	const enriched = universe
+		.map((row, index) => enrichQuote(makeSyntheticQuote(row, snapshots[index] || {}), getProfileForSymbol(row.symbol)))
+		.filter((quote) => quote.price && !exclude.has(quote.symbol));
+
+	const stable = enriched
+		.map((quote) => {
+			const row = universe.find((item) => item.symbol === quote.symbol) || {};
+			return { quote, row, result: scoreStable(quote, row.rank || 99) };
+		})
+		.filter((item) => item.result.score >= 62)
+		.sort((a, b) => b.result.score - a.result.score)
+		.slice(0, MAX_PER_GROUP)
+		.map((item) => toItem(item.quote, item.result, item.row));
+
+	const aggressive = enriched
+		.map((quote) => {
+			const row = universe.find((item) => item.symbol === quote.symbol) || {};
+			return { quote, row, result: scoreAggressive(quote) };
+		})
+		.filter((item) => item.result.score >= 58)
+		.sort((a, b) => b.result.score - a.result.score)
+		.slice(0, MAX_PER_GROUP)
+		.map((item) => toItem(item.quote, item.result, item.row));
+
+	return {
+		updatedAt: new Date().toISOString(),
+		source: "StockAnalysis biggest companies + app weekly-rule scoring",
+		universeCount: universe.length,
+		groups: [
+			{
+				id: "steadyGrowth",
+				title: "穩定成長",
+				titleEn: "Stable Growth",
+				criteria: "即時候選池中，優先篩選大型企業、資料完整、FCF Yield 為正、Forward PE 較可控、毛利率/淨利率較佳且仍有營收成長者。",
+				criteriaEn:
+					"From the live candidate pool, prioritizes large companies with good data quality, positive FCF yield, controlled forward PE, stronger margins, and continuing revenue growth.",
+				items: stable,
+			},
+			{
+				id: "aggressiveGrowth",
+				title: "積極成長",
+				titleEn: "Aggressive Growth",
+				criteria: "即時候選池中，優先篩選預估營收成長、下一年度成長、最新季度成長、毛利率與技術面動能較強者，同時扣除估值過熱風險。",
+				criteriaEn:
+					"From the live candidate pool, prioritizes estimated revenue growth, next-year growth, latest-quarter growth, gross margin, and technical momentum while penalizing overheated valuation.",
+				items: aggressive,
+			},
+		],
+	};
+}
+
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
-	const exclude = new Set(
-		searchParams
-			.get("exclude")
-			?.split(",")
-			.map((symbol) => symbol.trim().toUpperCase())
-			.filter(Boolean) || []
-	);
+	const rawExclude = searchParams.get("exclude");
+	const parsedExclude = rawExclude ? normalizeSymbols(rawExclude, { maxSymbols: 50 }) : { symbols: [], error: null };
+	const rateLimit = checkRateLimit(getClientKey(request, "recommendations"), { limit: 20, windowMs: 60_000 });
+
+	if (!rateLimit.allowed) {
+		return Response.json({ groups: [], error: "探索請求過於頻繁，請稍後再試。" }, { status: 429, headers: rateLimitHeaders(rateLimit) });
+	}
+	if (parsedExclude.error) {
+		return Response.json({ groups: [], error: parsedExclude.error }, { status: 400 });
+	}
+
+	const exclude = new Set(parsedExclude.symbols);
+	const cacheKey = `recommendations:${[...exclude].sort().join(",")}`;
 
 	try {
-		const universe = (await fetchMarketUniverse()).map((row, index) => ({
-			...row,
-			rank: index + 1,
-		}));
-		const snapshots = await Promise.all(universe.map((row) => fetchStockAnalysisSnapshot(row.symbol).catch(() => ({ metrics: {} }))));
-		const enriched = universe
-			.map((row, index) => enrichQuote(makeSyntheticQuote(row, snapshots[index] || {}), getProfileForSymbol(row.symbol)))
-			.filter((quote) => quote.price && !exclude.has(quote.symbol));
-
-		const stable = enriched
-			.map((quote) => {
-				const row = universe.find((item) => item.symbol === quote.symbol) || {};
-				return { quote, row, result: scoreStable(quote, row.rank || 99) };
-			})
-			.filter((item) => item.result.score >= 62)
-			.sort((a, b) => b.result.score - a.result.score)
-			.slice(0, MAX_PER_GROUP)
-			.map((item) => toItem(item.quote, item.result, item.row));
-
-		const aggressive = enriched
-			.map((quote) => {
-				const row = universe.find((item) => item.symbol === quote.symbol) || {};
-				return { quote, row, result: scoreAggressive(quote) };
-			})
-			.filter((item) => item.result.score >= 58)
-			.sort((a, b) => b.result.score - a.result.score)
-			.slice(0, MAX_PER_GROUP)
-			.map((item) => toItem(item.quote, item.result, item.row));
-
-		return Response.json({
-			updatedAt: new Date().toISOString(),
-			source: "StockAnalysis biggest companies + app weekly-rule scoring",
-			universeCount: universe.length,
-			groups: [
-				{
-					id: "steadyGrowth",
-					title: "穩定成長",
-					titleEn: "Stable Growth",
-					criteria: "即時候選池中，優先篩選大型企業、資料完整、FCF Yield 為正、Forward PE 較可控、毛利率/淨利率較佳且仍有營收成長者。",
-					criteriaEn:
-						"From the live candidate pool, prioritizes large companies with good data quality, positive FCF yield, controlled forward PE, stronger margins, and continuing revenue growth.",
-					items: stable,
-				},
-				{
-					id: "aggressiveGrowth",
-					title: "積極成長",
-					titleEn: "Aggressive Growth",
-					criteria: "即時候選池中，優先篩選預估營收成長、下一年度成長、最新季度成長、毛利率與技術面動能較強者，同時扣除估值過熱風險。",
-					criteriaEn:
-						"From the live candidate pool, prioritizes estimated revenue growth, next-year growth, latest-quarter growth, gross margin, and technical momentum while penalizing overheated valuation.",
-					items: aggressive,
-				},
-			],
-		});
+		const payload = await getOrCreateCached(cacheKey, () => generateRecommendations(exclude), { ttlMs: 15 * 60 * 1000 });
+		return Response.json(payload);
 	} catch (error) {
 		return Response.json(
 			{
 				error: "目前無法產生動態建議標的，請稍後再試。",
-				detail: error.message,
 				groups: [],
 			},
 			{ status: 502 }

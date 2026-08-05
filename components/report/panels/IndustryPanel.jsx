@@ -4,10 +4,9 @@ import { Info } from "../shared/Info";
 import { PeerTable } from "../shared/PeerTable";
 import { TooltipHint } from "../shared/TooltipHint";
 import { useIndustryPeers } from "../../../hooks/useIndustryPeers";
-import { displayValue } from "../../../hooks/utils";
 import { translateTerm } from "../../../lib/translationMap";
 
-export function IndustryPanel({ quote, peerQuotes, language, t }) {
+export function IndustryPanel({ quote, language, t }) {
 	const { peers: industryPeers, isLoading: isLoadingPeers, error: peerError } = useIndustryPeers(quote.symbol);
 
 	return (
@@ -16,8 +15,9 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 				<AnalysisBlock
 					title={t.industry || "產業分類"}
 					items={[translateTerm(quote.profile.sector, language), translateTerm(quote.profile.industry, language)].filter(Boolean)}
+					emptyLabel={t.insufficientEvidence}
 				/>
-				<AnalysisBlock title={t.competitorWatchlist} items={quote.profile.competitors} />
+				<AnalysisBlock title={t.competitorWatchlist} items={quote.profile.competitors} emptyLabel={t.insufficientEvidence} />
 				<div className="analysisCard">
 					<div className="sectionTitle">
 						<h3>{t.companySummary}</h3>
@@ -36,12 +36,6 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 				</div>
 			</section>
 
-			<section className="analysisSection analysisSectionScroll">
-				<h3>{t.watchlistCompare}</h3>
-				<PeerTable quotes={peerQuotes} selectedSymbol={quote.symbol} language={language} t={t} />
-			</section>
-
-			{/* 新增的同業比較區塊 */}
 			<section className="analysisSection analysisSectionScroll">
 				<div className="sectionTitle">
 					<h3>{t.industryPeers}</h3>
@@ -69,7 +63,7 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 
 			<section className="analysisSection">
 				<h3>{t.moat}</h3>
-				<p>{quote.profile.moat}</p>
+				<p>{quote.profile.moat || t.insufficientEvidence}</p>
 			</section>
 
 			<section className="analysisSection">
@@ -103,11 +97,21 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 
 			<section className="analysisSection">
 				<h3>{t.risks}</h3>
-				<ul className="riskList">
-					{(quote.profile.risks || []).map((risk, index) => (
-						<li key={index}>{risk}</li>
-					))}
-				</ul>
+				{quote.profile.risks?.length ? (
+					<ul className="riskList">
+						{quote.profile.risks.map((risk, index) => (
+							<li key={index}>{risk}</li>
+						))}
+					</ul>
+				) : (
+					<p className="evidenceEmpty">{t.insufficientEvidence}</p>
+				)}
+				{quote.fundamentals.sourceUrl ? (
+					<a className="sourceLink" href={quote.fundamentals.sourceUrl} target="_blank" rel="noreferrer">
+						{t.dataSource}: {quote.fundamentals.source || t.insufficientEvidence}
+						<ExternalLink size={14} />
+					</a>
+				) : null}
 			</section>
 		</div>
 	);

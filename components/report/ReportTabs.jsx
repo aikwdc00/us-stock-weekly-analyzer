@@ -1,12 +1,26 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { FinancialsPanel } from "./panels/FinancialsPanel";
-import { IndustryPanel } from "./panels/IndustryPanel";
-import { MindMapSwotPanel } from "./panels/MindMapSwotPanel";
+import dynamic from "next/dynamic";
 import { OverviewPanel } from "./panels/OverviewPanel";
-import { SupplyChainPanel } from "./panels/SupplyChainPanel";
 import { ValuationPanel } from "./panels/ValuationPanel";
+
+const FinancialsPanel = dynamic(() => import("./panels/FinancialsPanel").then((module) => module.FinancialsPanel), {
+	loading: () => <PanelLoading />,
+});
+const IndustryPanel = dynamic(() => import("./panels/IndustryPanel").then((module) => module.IndustryPanel), {
+	loading: () => <PanelLoading />,
+});
+const MindMapSwotPanel = dynamic(() => import("./panels/MindMapSwotPanel").then((module) => module.MindMapSwotPanel), {
+	loading: () => <PanelLoading />,
+});
+const SupplyChainPanel = dynamic(() => import("./panels/SupplyChainPanel").then((module) => module.SupplyChainPanel), {
+	loading: () => <PanelLoading />,
+});
+
+function PanelLoading() {
+	return <div className="panelLoading" role="status" aria-live="polite" />;
+}
 
 const panelMotion = {
 	initial: { opacity: 0, y: 14 },
@@ -15,7 +29,7 @@ const panelMotion = {
 	transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
 };
 
-export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, onTabChange, activeModel, setSelectedModel, updatedAt }) {
+export function ReportTabs({ quote, language, t, tabs, activeTab, onTabChange, activeModel, setSelectedModel, updatedAt }) {
 	return (
 		<div className="reportTabs">
 			<div className="reportTabScroller">
@@ -53,7 +67,7 @@ export function ReportTabs({ quote, peerQuotes, language, t, tabs, activeTab, on
 							<ValuationPanel quote={quote} t={t} language={language} activeModel={activeModel} setSelectedModel={setSelectedModel} />
 						) : null}
 						{activeTab === "financials" ? <FinancialsPanel quote={quote} t={t} language={language} /> : null}
-						{activeTab === "industry" ? <IndustryPanel quote={quote} peerQuotes={peerQuotes} language={language} t={t} /> : null}
+						{activeTab === "industry" ? <IndustryPanel quote={quote} language={language} t={t} /> : null}
 						{activeTab === "supplyChain" ? <SupplyChainPanel quote={quote} language={language} t={t} /> : null}
 						{activeTab === "mindmapSwot" ? <MindMapSwotPanel quote={quote} language={language} t={t} updatedAt={updatedAt} /> : null}
 					</motion.div>

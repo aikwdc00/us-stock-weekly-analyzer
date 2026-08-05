@@ -20,15 +20,19 @@ function CompanyList({ title, description, items, tip }) {
 			</div>
 			<p className="summaryText">{description}</p>
 			<div className="supplyChainItems">
-				{items.map((rawItem) => {
-					const item = normalizeSupplyChainItem(rawItem);
-					return (
-						<div key={`${item.name}-${item.role}`} className="supplyChainItem">
-							<strong className="supplyChainItemName">{item.name}</strong>
-							{item.role ? <span className="supplyChainItemRole">{item.role}</span> : null}
-						</div>
-					);
-				})}
+				{items.length ? (
+					items.map((rawItem) => {
+						const item = normalizeSupplyChainItem(rawItem);
+						return (
+							<div key={`${item.name}-${item.role}`} className="supplyChainItem">
+								<strong className="supplyChainItemName">{item.name}</strong>
+								{item.role ? <span className="supplyChainItemRole">{item.role}</span> : null}
+							</div>
+						);
+					})
+				) : (
+					<p className="evidenceEmpty">資料不足</p>
+				)}
 			</div>
 		</section>
 	);
@@ -36,16 +40,8 @@ function CompanyList({ title, description, items, tip }) {
 
 export function SupplyChainPanel({ quote, language, t }) {
 	const supplyChain = quote.profile.supplyChain || {};
-	const upstreamItems = supplyChain.upstream?.length
-		? supplyChain.upstream
-		: quote.profile.suppliers?.length
-			? quote.profile.suppliers
-			: [language === "en" ? "Need more supplier context" : "需補充上游供應商"];
-	const downstreamItems = supplyChain.downstream?.length
-		? supplyChain.downstream
-		: quote.profile.customers?.length
-			? quote.profile.customers
-			: [language === "en" ? "Need more customer context" : "需補充下游客戶"];
+	const upstreamItems = supplyChain.upstream?.length ? supplyChain.upstream : quote.profile.suppliers?.length ? quote.profile.suppliers : [];
+	const downstreamItems = supplyChain.downstream?.length ? supplyChain.downstream : quote.profile.customers?.length ? quote.profile.customers : [];
 
 	return (
 		<div className="reportTabPanel">
