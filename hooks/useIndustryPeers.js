@@ -34,8 +34,10 @@ export function useIndustryPeers(symbol) {
 					return;
 				}
 
-				// 2. Get full quotes for these peers
-				const quotesRes = await fetch(`/api/quotes?symbols=${peerSymbols.map(encodeURIComponent).join(",")}`, { signal: controller.signal });
+				// Peer comparison only needs summary metrics; selected company detail stays on the main report path.
+				const quotesRes = await fetch(`/api/quotes?scope=summary&symbols=${peerSymbols.map(encodeURIComponent).join(",")}`, {
+					signal: controller.signal,
+				});
 				if (!quotesRes.ok) throw new Error(`Peer quotes request failed: ${quotesRes.status}`);
 				const quotesData = await quotesRes.json();
 				if (!unmounted) setPeers(quotesData.quotes || []);

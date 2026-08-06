@@ -9,6 +9,7 @@ import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskPro
 import { fetchWithTimeout } from "../../../lib/fetchPolicy";
 import { fetchMarketEvents } from "../../../lib/marketEventsProvider";
 import { filterQuotesToRequestedSymbols } from "../../../lib/quoteBoundary.mjs";
+import { getProviderForUse } from "../../../lib/providerRegistry.mjs";
 import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
@@ -208,15 +209,35 @@ function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, secFinancials, fi
 		fundamentalsSource: snapshot.source,
 		fundamentalsSourceUrl: snapshot.sourceUrl,
 		updated: snapshot.updated || quote.updated || null,
+		updatedAt: quote.updatedAt || new Date().toISOString(),
 	};
 }
 
-async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
+async function enrichSummaryQuotes(rawQuotes) {
+	return rawQuotes.map((quote) => {
+		const summaryQuote = {
+			...quote,
+			detailLevel: "summary",
+			updatedAt: quote.updatedAt || new Date().toISOString(),
+		};
+		return enrichQuote(summaryQuote, getProfileForSymbol(quote.symbol, {}));
+	});
+}
+
+async function enrichRawQuotes(rawQuotes, { runAiAnalysis = false, scope = "detail" } = {}) {
+	if (scope === "summary") return enrichSummaryQuotes(rawQuotes);
+
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
+	const finnhubAllowed = Boolean(getProviderForUse("finnhub", { capability: "profile", role: "supplementary" }));
 	const [snapshotResults, ownershipResults, secFinancialResults, finnhubResults] = await Promise.all([
-		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchStockAnalysisSnapshot(quote.symbol)),
+		stockAnalysisAllowed
+			? allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchStockAnalysisSnapshot(quote.symbol))
+			: rawQuotes.map(() => ({ status: "fulfilled", value: {} })),
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchSecOwnershipFilings(quote.symbol)),
 		allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchSecFinancials(quote.symbol)),
-		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchFinnhubData(quote.symbol)),
+		finnhubAllowed
+			? allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchFinnhubData(quote.symbol))
+			: rawQuotes.map(() => ({ status: "fulfilled", value: {} })),
 	]);
 	const eventResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchMarketEvents(quote.symbol, quote));
 	const snapshots = pickFulfilled(snapshotResults, {});
@@ -267,13 +288,17 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 			marketEvents[index] || { events: [] }
 		);
 
-		return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, { ...snapshotWithAi, secFinancials: secFinancials[index] || null }));
+		return enrichQuote(
+			{ ...mergedQuote, detailLevel: "detail" },
+			getProfileForSymbol(quote.symbol, { ...snapshotWithAi, secFinancials: secFinancials[index] || null })
+		);
 	});
 }
 
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
 	const runAiAnalysis = AI_ANALYSIS_ENABLED && searchParams.get("ai") === "true";
+	const scope = searchParams.get("scope") === "summary" ? "summary" : "detail";
 	const rawSymbols = searchParams.get("symbols");
 
 	if (!rawSymbols) {
@@ -286,13 +311,22 @@ export async function GET(request) {
 	}
 
 	const symbols = normalized.symbols;
-	if (runAiAnalysis && symbols.length > 1) {
+	if (runAiAnalysis && (symbols.length > 1 || scope !== "detail")) {
 		return Response.json({ quotes: [], error: "AI 分析一次只允許一個股票代號。" }, { status: 400 });
 	}
 
 	const rateLimit = checkRateLimit(getClientKey(request, "quotes"), { limit: 90, windowMs: 60_000 });
 	if (!rateLimit.allowed) {
 		return Response.json({ quotes: [], error: "請求過於頻繁，請稍後再試。" }, { status: 429, headers: rateLimitHeaders(rateLimit) });
+	}
+	if (runAiAnalysis) {
+		const aiRateLimit = checkRateLimit(getClientKey(request, "quotes-ai"), { limit: 3, windowMs: 60_000 });
+		if (!aiRateLimit.allowed) {
+			return Response.json(
+				{ quotes: [], error: "AI 研究請求已達本分鐘上限，請稍後再試。" },
+				{ status: 429, headers: rateLimitHeaders(aiRateLimit) }
+			);
+		}
 	}
 
 	try {
@@ -323,7 +357,7 @@ export async function GET(request) {
 			rawQuotes = [...rawQuotes, ...filterQuotesToRequestedSymbols(backups, missingSymbols)];
 		}
 
-		const quotes = await enrichRawQuotes(rawQuotes, runAiAnalysis);
+		const quotes = await enrichRawQuotes(rawQuotes, { runAiAnalysis, scope });
 
 		return Response.json({
 			updatedAt: new Date().toISOString(),
@@ -333,7 +367,7 @@ export async function GET(request) {
 		try {
 			const rawQuotes = await mapWithConcurrency(symbols, 8, (symbol) => fetchBackupQuote(symbol));
 			const validRawQuotes = filterQuotesToRequestedSymbols(rawQuotes, symbols);
-			const quotes = await enrichRawQuotes(validRawQuotes, runAiAnalysis);
+			const quotes = await enrichRawQuotes(validRawQuotes, { runAiAnalysis, scope });
 
 			if (quotes.length) {
 				return Response.json({

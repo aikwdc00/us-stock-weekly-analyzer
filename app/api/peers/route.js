@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { getProviderForUse } from "../../../lib/providerRegistry.mjs";
 import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
@@ -9,6 +10,7 @@ const FINNHUB_PEERS_URL = "https://finnhub.io/api/v1/stock/peers";
 const FINNHUB_TOKEN = process.env.FINNHUB_API_KEY;
 
 async function fetchFinnhubPeers(symbol) {
+	if (!getProviderForUse("finnhub", { capability: "recommendation", role: "supplementary" })) return [];
 	if (!FINNHUB_TOKEN) return [];
 	const url = new URL(FINNHUB_PEERS_URL);
 	url.searchParams.set("symbol", symbol);
@@ -25,6 +27,7 @@ async function fetchFinnhubPeers(symbol) {
 }
 
 async function fetchYahooPeers(symbol) {
+	if (!getProviderForUse("yahoo-finance", { capability: "consensus", role: "supplementary" })) return [];
 	const url = `${YAHOO_PEERS_URL}/${symbol}`;
 	const response = await fetchWithTimeout(url, {
 		timeoutMs: 8_000,

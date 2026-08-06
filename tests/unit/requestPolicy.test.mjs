@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeSearchQuery, normalizeSymbols } from "../../lib/requestValidation.mjs";
+import { getClientKey, normalizeSearchQuery, normalizeSymbols } from "../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders, resetRateLimits } from "../../lib/rateLimit.mjs";
 import { allSettledWithConcurrency, mapWithConcurrency } from "../../lib/concurrency.mjs";
 
@@ -13,6 +13,20 @@ test("normalizes and deduplicates bounded symbols", () => {
 test("bounds search input", () => {
 	assert.equal(normalizeSearchQuery("  Tesla  ").query, "Tesla");
 	assert.match(normalizeSearchQuery("x".repeat(9), 8).error, /最多/);
+});
+
+test("forwarded IP headers are ignored unless the proxy is explicitly trusted", () => {
+	delete process.env.TRUST_PROXY_HEADERS;
+	const first = getClientKey(
+		new Request("https://example.test", { headers: { "x-forwarded-for": "203.0.113.1", "user-agent": "test" } }),
+		"quotes"
+	);
+	const second = getClientKey(
+		new Request("https://example.test", { headers: { "x-forwarded-for": "203.0.113.2", "user-agent": "test" } }),
+		"quotes"
+	);
+
+	assert.equal(first, second);
 });
 
 test("rate limit returns retry information", () => {

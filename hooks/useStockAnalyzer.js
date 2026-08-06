@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { safeNumber } from "./utils";
 import { usePreferences } from "./usePreferences";
 import { useQuotes } from "./useQuotes";
@@ -30,16 +30,19 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 	const searchState = useSymbolSearch({ onError: reportError });
 
 	const addSymbol = useCallback(
-		async (rawSymbol) => {
+		(rawSymbol) => {
 			clearError();
 			const next = watchlistState.addSymbol(rawSymbol);
 			if (!next || next === watchlistState.watchlist) return;
 			searchState.clearSearch();
-			const symbol = next[next.length - 1];
-			await quotesState.refreshQuotes([symbol], { merge: true });
 		},
-		[clearError, quotesState, searchState, watchlistState]
+		[clearError, searchState, watchlistState]
 	);
+
+	useEffect(() => {
+		if (!watchlistState.hydrated || !watchlistState.selectedSymbol) return;
+		void quotesState.refreshDetail([watchlistState.selectedSymbol]);
+	}, [quotesState.refreshDetail, watchlistState.hydrated, watchlistState.selectedSymbol]);
 
 	const removeSymbol = useCallback(
 		(symbol) => {
@@ -51,7 +54,7 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 
 	const refreshQuotes = useCallback(async () => {
 		clearError();
-		await quotesState.refreshQuotes(undefined, { force: true });
+		await quotesState.refreshQuotes(undefined, { force: true, merge: true, scope: "summary" });
 	}, [clearError, quotesState]);
 
 	const refreshIdeas = useCallback(async () => {
@@ -67,7 +70,7 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 		clearError();
 		setIsAiLoading(true);
 		try {
-			await quotesState.refreshQuotes([symbol], { force: true, merge: true, ai: true });
+			await quotesState.refreshDetail([symbol], { force: true, ai: true });
 		} finally {
 			setIsAiLoading(false);
 		}

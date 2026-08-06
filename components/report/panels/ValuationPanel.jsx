@@ -263,6 +263,7 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					<Info label={text.buyPrice} value={quote.zones.buy} tip={text.buyPriceTip} />
 					<Info label={text.watchPrice} value={quote.zones.watch} tip={text.watchPriceTip} />
 				</div>
+				{quote.zones.basis ? <p className="evidenceEmpty">{quote.zones.basis}</p> : null}
 			</section>
 		</div>
 	);

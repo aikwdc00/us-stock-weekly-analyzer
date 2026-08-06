@@ -24,7 +24,9 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 
 			try {
 				const force = Boolean(options?.force);
+				const scope = options?.scope === "detail" ? "detail" : "summary";
 				const params = new URLSearchParams({ symbols: targetSymbols.join(",") });
+				params.set("scope", scope);
 				if (force) params.set("_ts", String(Date.now()));
 				if (options?.ai) params.set("ai", "true");
 				const query = params.toString();
@@ -41,7 +43,35 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 				setQuotes((currentQuotes) => {
 					if (!options?.merge) return nextQuotes;
 					const bySymbol = new Map(currentQuotes.map((quote) => [quote.symbol, quote]));
-					for (const quote of nextQuotes) bySymbol.set(quote.symbol, quote);
+					for (const quote of nextQuotes) {
+						const current = bySymbol.get(quote.symbol);
+						if (scope === "summary" && current?.detailLevel === "detail") {
+							bySymbol.set(quote.symbol, {
+								...current,
+								...quote,
+								profile: current.profile,
+								ownership: current.ownership,
+								filingFinancials: current.filingFinancials,
+								detailedFinancials: current.detailedFinancials,
+								news: current.news,
+								events: current.events,
+								evidence: { ...current.evidence, market: quote.evidence?.market || current.evidence?.market },
+								quality: { ...current.quality, stale: quote.quality?.stale, asOf: quote.quality?.asOf },
+								catalystTimeline: current.catalystTimeline,
+								valuationModels: current.valuationModels,
+								valuationMethod: current.valuationMethod,
+								catalysts: current.catalysts,
+								aiSupplement: current.aiSupplement,
+								valuation: current.valuation,
+								trend: current.trend,
+								rating: current.rating,
+								thesis: current.thesis,
+								detailLevel: "detail",
+							});
+						} else {
+							bySymbol.set(quote.symbol, quote);
+						}
+					}
 					return [...bySymbol.values()];
 				});
 				setUpdatedAt(payload.updatedAt);
@@ -55,10 +85,15 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 		[onError]
 	);
 
+	const refreshDetail = useCallback(
+		(symbols, options = {}) => refreshQuotes(symbols, { ...options, scope: "detail", merge: true }),
+		[refreshQuotes]
+	);
+
 	useEffect(() => {
 		if (!enabled) return undefined;
-		refreshQuotes();
-		const interval = window.setInterval(() => refreshQuotes(), 15 * 60 * 1000);
+		refreshQuotes(undefined, { merge: true, scope: "summary" });
+		const interval = window.setInterval(() => refreshQuotes(undefined, { merge: true, scope: "summary" }), 15 * 60 * 1000);
 		return () => window.clearInterval(interval);
 	}, [enabled, refreshQuotes]);
 
@@ -72,5 +107,6 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 		isLoading,
 		dataWarning,
 		refreshQuotes,
+		refreshDetail,
 	};
 }

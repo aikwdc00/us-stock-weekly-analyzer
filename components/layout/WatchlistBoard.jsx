@@ -132,6 +132,46 @@ export function WatchlistBoard({
 					</button>
 				</div>
 			) : null}
+			{compareSymbols.length >= 2 ? (
+				<section className="watchlistComparePanel" aria-label={t.compare}>
+					<div className="watchlistCompareHeading">
+						<div>
+							<p className="eyebrow">Compare selected</p>
+							<h3>{t.compare}</h3>
+						</div>
+						<span>{compareSymbols.length} / 4</span>
+					</div>
+					<div className="watchlistCompareGrid">
+						{compareSymbols.map((symbol) => {
+							const quote = quotes.find((item) => item.symbol === symbol);
+							return (
+								<article key={symbol} className="watchlistCompareCard">
+									<strong>{symbol}</strong>
+									<span>{quote?.name || t.waitQuote}</span>
+									<dl>
+										<div>
+											<dt>{t.price}</dt>
+											<dd>{quote?.formatted?.price || EMPTY}</dd>
+										</div>
+										<div>
+											<dt>{t.move}</dt>
+											<dd>{quote?.formatted?.changePercent || EMPTY}</dd>
+										</div>
+										<div>
+											<dt>{t.valuation}</dt>
+											<dd>{quote?.valuation || EMPTY}</dd>
+										</div>
+										<div>
+											<dt>{t.dataQuality}</dt>
+											<dd>{quote ? `${quote.quality?.score ?? 0}/100` : EMPTY}</dd>
+										</div>
+									</dl>
+								</article>
+							);
+						})}
+					</div>
+				</section>
+			) : null}
 
 			<div className="watchlistTableWrap">
 				<table className="watchlistTable">

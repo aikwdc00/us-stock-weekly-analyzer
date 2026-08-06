@@ -3,6 +3,7 @@ import { getOrCreateCached } from "../../../lib/cache.mjs";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
 import { mapWithConcurrency } from "../../../lib/concurrency.mjs";
 import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { getProviderForUse } from "../../../lib/providerRegistry.mjs";
 import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
@@ -58,19 +59,22 @@ function parseCompanyRows(html) {
 }
 
 async function fetchMarketUniverse() {
-	try {
-		const response = await fetchWithTimeout(BIGGEST_COMPANIES_URL, {
-			timeoutMs: 12_000,
-			headers: { "User-Agent": "Mozilla/5.0" },
-			next: { revalidate: 60 * 60 },
-		});
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
+	if (stockAnalysisAllowed) {
+		try {
+			const response = await fetchWithTimeout(BIGGEST_COMPANIES_URL, {
+				timeoutMs: 12_000,
+				headers: { "User-Agent": "Mozilla/5.0" },
+				next: { revalidate: 60 * 60 },
+			});
 
-		if (!response.ok) throw new Error(`StockAnalysis universe failed: ${response.status}`);
+			if (!response.ok) throw new Error(`StockAnalysis universe failed: ${response.status}`);
 
-		const rows = parseCompanyRows(await response.text()).slice(0, MAX_CANDIDATES);
-		if (rows.length) return rows;
-	} catch {
-		// The screener fallback below keeps discovery usable when HTML parsing or the source is unavailable.
+			const rows = parseCompanyRows(await response.text()).slice(0, MAX_CANDIDATES);
+			if (rows.length) return rows;
+		} catch {
+			// The screener fallback keeps discovery usable when the supplementary source is unavailable.
+		}
 	}
 
 	const response = await fetchWithTimeout(YAHOO_SCREENER_URL, {
@@ -211,6 +215,7 @@ async function generateRecommendations(exclude) {
 		...row,
 		rank: index + 1,
 	}));
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
 	const snapshots = await mapWithConcurrency(universe, 4, (row) =>
 		row.provider === "yahoo-screener"
 			? Promise.resolve({
@@ -221,7 +226,9 @@ async function generateRecommendations(exclude) {
 					source: "Yahoo Finance Screener",
 					sourceUrl: "https://finance.yahoo.com/screener/",
 				})
-			: fetchStockAnalysisSnapshot(row.symbol).catch(() => ({ metrics: {} }))
+			: stockAnalysisAllowed
+				? fetchStockAnalysisSnapshot(row.symbol).catch(() => ({ metrics: {} }))
+				: Promise.resolve({ metrics: {} })
 	);
 	const enriched = universe
 		.map((row, index) => enrichQuote(makeSyntheticQuote(row, snapshots[index] || {}), getProfileForSymbol(row.symbol, snapshots[index] || {})))

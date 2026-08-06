@@ -102,6 +102,30 @@ test("dashboard loads a report and opens the mind map SWOT tab", async ({ page }
 	await expect(page.getByRole("heading", { name: "SWOT 客觀分析" })).toBeVisible();
 });
 
+test("market refresh uses the summary path while selected research uses detail", async ({ page }) => {
+	const quoteScopes = [];
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) => {
+		quoteScopes.push(new URL(route.request().url()).searchParams.get("scope"));
+		return route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", quotes: [quoteFixture] }),
+		});
+	});
+	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
+		route.fulfill({ contentType: "application/json", body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", groups: [] }) })
+	);
+	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
+
+	await page.goto("/");
+	await expect.poll(() => quoteScopes.includes("summary")).toBeTruthy();
+	await expect.poll(() => quoteScopes.includes("detail")).toBeTruthy();
+
+	quoteScopes.length = 0;
+	await page.getByRole("button", { name: "更新行情", exact: true }).click();
+	await expect.poll(() => quoteScopes.length).toBeGreaterThan(0);
+	expect(quoteScopes.every((scope) => scope === "summary")).toBeTruthy();
+});
+
 test("explore is a working route with recommendation candidates", async ({ page }) => {
 	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
 		route.fulfill({

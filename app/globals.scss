@@ -897,6 +897,77 @@ h1 {
 	}
 }
 
+.watchlistComparePanel {
+	@include card(subpanel, line);
+	margin-bottom: 14px;
+	padding: 14px;
+}
+
+.watchlistCompareHeading {
+	@include flex-between(12px, flex-end);
+	margin-bottom: 12px;
+
+	h3 {
+		font-size: 1rem;
+		margin: 2px 0 0;
+	}
+
+	> span {
+		@include muted-text(0.78rem, 800);
+	}
+}
+
+.watchlistCompareGrid {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.watchlistCompareCard {
+	@include card(panel, line);
+	min-width: 0;
+	padding: 12px;
+
+	> strong,
+	> span {
+		display: block;
+	}
+
+	> strong {
+		color: color(teal);
+		font-size: 1rem;
+	}
+
+	> span {
+		@include muted-text(0.76rem);
+		margin-top: 3px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	dl {
+		margin: 12px 0 0;
+	}
+
+	dl div {
+		@include flex-between(8px);
+		border-top: 1px solid color(line);
+		padding: 7px 0 0;
+	}
+
+	dt {
+		@include muted-text(0.72rem);
+	}
+
+	dd {
+		font-size: 0.78rem;
+		font-weight: 800;
+		margin: 0;
+		text-align: right;
+	}
+}
+
 .watchlistTableWrap {
 	overflow-x: auto;
 }
