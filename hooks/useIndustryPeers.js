@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+const REQUEST_TIMEOUT_MS = 12_000;
+
 export function useIndustryPeers(symbol) {
 	const [peers, setPeers] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -13,32 +15,43 @@ export function useIndustryPeers(symbol) {
 			return;
 		}
 
+		const controller = new AbortController();
+		let unmounted = false;
+		const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
 		async function fetchPeers() {
 			setIsLoading(true);
 			setError(null);
 			try {
 				// 1. Get peer symbols
-				const peersRes = await fetch(`/api/peers?symbol=${symbol}`);
+				const peersRes = await fetch(`/api/peers?symbol=${encodeURIComponent(symbol)}`, { signal: controller.signal });
+				if (!peersRes.ok) throw new Error(`Peers request failed: ${peersRes.status}`);
 				const peersData = await peersRes.json();
 				const peerSymbols = peersData.peers || [];
 
 				if (peerSymbols.length === 0) {
-					setPeers([]);
+					if (!unmounted) setPeers([]);
 					return;
 				}
 
 				// 2. Get full quotes for these peers
-				const quotesRes = await fetch(`/api/quotes?symbols=${peerSymbols.join(",")}`);
+				const quotesRes = await fetch(`/api/quotes?symbols=${peerSymbols.map(encodeURIComponent).join(",")}`, { signal: controller.signal });
+				if (!quotesRes.ok) throw new Error(`Peer quotes request failed: ${quotesRes.status}`);
 				const quotesData = await quotesRes.json();
-				setPeers(quotesData.quotes || []);
+				if (!unmounted) setPeers(quotesData.quotes || []);
 			} catch (err) {
-				setError(err.message);
+				if (!unmounted) setError(err.name === "AbortError" ? "Peers request timed out" : err.message);
 			} finally {
-				setIsLoading(false);
+				if (!unmounted) setIsLoading(false);
 			}
 		}
 
 		fetchPeers();
+		return () => {
+			unmounted = true;
+			window.clearTimeout(timeoutId);
+			controller.abort();
+		};
 	}, [symbol]);
 
 	return { peers, isLoading, error };

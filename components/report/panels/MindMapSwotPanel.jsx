@@ -1,75 +1,49 @@
 import { InvestmentMindMap } from "../shared/InvestmentMindMap";
-import { TooltipHint } from "../shared/TooltipHint";
-import { formatDate } from "../../../hooks/utils";
-import { Icon } from "../../shared/Icon";
 
 export function MindMapSwotPanel({ quote, t, language, updatedAt }) {
-	const swot = quote.profile.swot;
+	const swot = quote.profile.swot || { s: [], w: [], o: [], t: [] };
 
 	return (
 		<div className="reportTabPanel">
 			<InvestmentMindMap quote={quote} t={t} language={language} />
 
-			{swot && (
-				<section className="analysisSection swotSection">
-					<div className="sectionTitle">
-						<h3>{t.swot}</h3>
-						<TooltipHint content={`${t.dataSource}: ${t.marketDataSourceHint}`} />
+			<section className="analysisSection swotSection">
+				<h3>{t.swot}</h3>
+				<div className="swotGrid">
+					<div className="swotItem s">
+						<h4>{t.swotS}</h4>
+						<ul>
+							{swot.s.map((item, i) => (
+								<li key={i}>{item}</li>
+							))}
+						</ul>
 					</div>
-					<div className="swotGrid">
-						<div className="swotItem s">
-							<h4>{t.swotS}</h4>
-							<ul>
-								{swot.s.map((item, i) => (
-									<li key={i}>{item}</li>
-								))}
-							</ul>
-						</div>
-						<div className="swotItem w">
-							<h4>{t.swotW}</h4>
-							<ul>
-								{swot.w.map((item, i) => (
-									<li key={i}>{item}</li>
-								))}
-							</ul>
-						</div>
-						<div className="swotItem o">
-							<h4>{t.swotO}</h4>
-							<ul>
-								{swot.o.map((item, i) => (
-									<li key={i}>{item}</li>
-								))}
-							</ul>
-						</div>
-						<div className="swotItem t">
-							<h4>{t.swotT}</h4>
-							<ul>
-								{swot.t.map((item, i) => (
-									<li key={i}>{item}</li>
-								))}
-							</ul>
-						</div>
+					<div className="swotItem w">
+						<h4>{t.swotW}</h4>
+						<ul>
+							{swot.w.map((item, i) => (
+								<li key={i}>{item}</li>
+							))}
+						</ul>
 					</div>
-					<p className="swotSource">
-						{t.dataSource}: {quote.fundamentals.source || t.insufficientEvidence}
-						{quote.fundamentals.sourceUrl ? (
-							<a
-								className="sourceInlineLink"
-								href={quote.fundamentals.sourceUrl}
-								target="_blank"
-								rel="noreferrer"
-								aria-label={`${t.dataSource}: ${quote.fundamentals.source || t.insufficientEvidence}`}
-							>
-								<Icon name="ExternalLink" size={13} />
-							</a>
-						) : null}
-					</p>
-					<p className="swotSource">AI: {quote.profile?.aiSupplement?.enabled ? t.aiEnabled : t.aiDisabled}</p>
-					<p className="swotSource">
-						{t.lastUpdated}: {formatDate(updatedAt, language, t.notUpdated)}
-					</p>
-				</section>
-			)}
+					<div className="swotItem o">
+						<h4>{t.swotO}</h4>
+						<ul>
+							{swot.o.map((item, i) => (
+								<li key={i}>{item}</li>
+							))}
+						</ul>
+					</div>
+					<div className="swotItem t">
+						<h4>{t.swotT}</h4>
+						<ul>
+							{swot.t.map((item, i) => (
+								<li key={i}>{item}</li>
+							))}
+						</ul>
+					</div>
+				</div>
+			</section>
 		</div>
 	);
 }

@@ -29,8 +29,8 @@ const quoteFixture = {
 		theme: "AI 加速運算",
 		moat: "軟硬體生態與開發者工具。",
 		competitors: ["AMD"],
-		customers: ["雲端服務商"],
-		suppliers: ["半導體供應鏈"],
+		customers: [{ name: "雲端服務商", role: "需求來源" }],
+		suppliers: [{ name: "半導體供應鏈", role: "關鍵投入" }],
 		sector: "Technology",
 		industry: "Semiconductors",
 		description: "NVIDIA develops accelerated computing platforms.",
@@ -92,6 +92,7 @@ test("dashboard loads a report and opens the mind map SWOT tab", async ({ page }
 
 	await page.goto("/");
 	await expect(page.getByRole("heading", { name: "美股週報分析工作台" })).toBeVisible();
+	await expect(page.getByText("[object Object]", { exact: true })).toHaveCount(0);
 
 	const mindMapTab = page.getByRole("tab", { name: "心智圖與 SWOT" });
 	await expect(mindMapTab).toBeVisible();
@@ -99,6 +100,45 @@ test("dashboard loads a report and opens the mind map SWOT tab", async ({ page }
 
 	await expect(page.getByRole("heading", { name: "投資心智圖" })).toBeVisible();
 	await expect(page.getByRole("heading", { name: "SWOT 客觀分析" })).toBeVisible();
+});
+
+test("explore is a working route with recommendation candidates", async ({ page }) => {
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", quotes: [quoteFixture] }),
+		})
+	);
+	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({
+				updatedAt: "2026-08-06T00:00:00.000Z",
+				groups: [
+					{
+						id: "stableGrowth",
+						title: "穩定成長",
+						criteria: "候選池排序",
+						items: [
+							{
+								symbol: "AVGO",
+								name: "Broadcom Inc.",
+								score: 84,
+								valuation: "合理",
+								revenueGrowth: "+20%",
+								reasons: ["FCF Yield 為正"],
+							},
+						],
+					},
+				],
+			}),
+		})
+	);
+
+	await page.goto("/explore");
+	await expect(page).toHaveURL(/\/explore$/);
+	await expect(page.getByRole("heading", { name: "探索標的", exact: true })).toBeVisible();
+	await expect(page.getByRole("button", { name: /AVGO Broadcom Inc\./ })).toBeVisible();
 });
 
 test("dashboard keeps one watchlist, supports dark mode, and stays usable on mobile", async ({ page }) => {

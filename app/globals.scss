@@ -331,7 +331,7 @@ h1 {
 }
 
 .primaryButton,
-.decisionBar button,
+.decisionBar > button,
 .searchBox button {
 	@include button-shell(action, action-ink, action);
 
@@ -350,6 +350,11 @@ h1 {
 	}
 }
 
+.aiActionGroup {
+	@include inline-center(6px);
+	justify-content: flex-end;
+}
+
 .routeLink {
 	@include button-shell(white, teal, line);
 	min-height: 42px;
@@ -362,6 +367,19 @@ h1 {
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 0.45;
+		transform: scale(0.85);
+	}
+
+	50% {
+		opacity: 1;
+		transform: scale(1);
 	}
 }
 
@@ -422,6 +440,78 @@ h1 {
 	align-items: start;
 	margin: 0 auto;
 	max-width: $container;
+}
+
+.exploreLayout {
+	@include grid(minmax(280px, 0.82fr) minmax(0, 1.6fr), 16px);
+	align-items: start;
+	margin: 0 auto;
+	max-width: $container;
+}
+
+.exploreIntro {
+	@include card(panel);
+	min-height: 100%;
+	padding: 22px;
+
+	h2 {
+		color: color(ink);
+		font-size: clamp(1.8rem, 3vw, 2.8rem);
+		margin: 4px 0 12px;
+	}
+
+	> p:not(.eyebrow) {
+		@include muted-text(0.98rem);
+		line-height: 1.7;
+		margin: 0;
+		max-width: 42rem;
+	}
+}
+
+.exploreStats {
+	@include grid(repeat(2, minmax(0, 1fr)), 10px);
+	margin-top: 28px;
+
+	div {
+		@include card(subpanel);
+		min-width: 0;
+		padding: 14px;
+	}
+
+	strong,
+	span {
+		display: block;
+	}
+
+	strong {
+		color: color(ink);
+		font-size: 1.8rem;
+		line-height: 1;
+		margin-bottom: 6px;
+	}
+
+	span {
+		@include muted-text(0.78rem, 800);
+	}
+}
+
+.exploreStatus {
+	@include inline-center(8px);
+	@include muted-text(0.82rem, 800);
+	margin-top: 18px;
+}
+
+.statusDot {
+	background: color(teal);
+	border-radius: 50%;
+	display: inline-block;
+	height: 8px;
+	width: 8px;
+
+	&.loading {
+		animation: pulse 1.2s ease-in-out infinite;
+		background: color(yellow);
+	}
 }
 
 .panel,
@@ -1137,6 +1227,17 @@ h1 {
 	padding: 12px 14px;
 }
 
+.supplyChainItemHeading {
+	align-items: baseline;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.supplyChainItemCompany {
+	@include muted-text(0.82rem, 700);
+}
+
 .supplyChainItemName {
 	color: color(ink);
 	font-size: 1rem;
@@ -1544,12 +1645,17 @@ h1 {
 
 .longTermPlan {
 	.planGrid {
-		@include grid(repeat(3, minmax(0, 1fr)), 12px);
+		@include grid(repeat(2, minmax(0, 1fr)), 12px);
+		align-items: start;
 	}
 
 	.planGrid > div {
 		@include card(panel-strong);
 		padding: 14px;
+	}
+
+	.planGrid > div:first-child {
+		grid-column: 1 / -1;
 	}
 
 	strong {
@@ -1562,6 +1668,11 @@ h1 {
 		line-height: 1.65;
 		margin: 0;
 		padding-left: 18px;
+		word-break: break-word;
+	}
+
+	li + li {
+		margin-top: 8px;
 	}
 }
 
@@ -2149,6 +2260,13 @@ h1 {
 		margin: 0;
 	}
 
+	.suggestionSelectionNote {
+		@include muted-text(0.78rem, 750);
+		display: block;
+		line-height: 1.5;
+		margin-top: 8px;
+	}
+
 	.suggestions {
 		margin-top: 10px;
 	}
@@ -2291,6 +2409,10 @@ h1 {
 		grid-template-columns: minmax(0, 1fr);
 	}
 
+	.exploreLayout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
 	.rightRail {
 		max-height: none;
 		position: static;
@@ -2332,6 +2454,15 @@ h1 {
 			justify-self: stretch;
 			width: 100%;
 		}
+	}
+
+	.aiActionGroup {
+		justify-content: stretch;
+		width: 100%;
+	}
+
+	.aiActionGroup .aiActionButton {
+		flex: 1;
 	}
 
 	.reportTabButton {

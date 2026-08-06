@@ -1,5 +1,6 @@
 import { cls, displayValue, downloadMarkdown } from "../../hooks/utils";
 import { Icon } from "../shared/Icon";
+import { TooltipHint } from "./shared/TooltipHint";
 
 export function ReportHeader({ quote, language, t, runAiAnalysis, isAiLoading }) {
 	const isUp = quote.changePercent >= 0;
@@ -37,10 +38,13 @@ export function ReportHeader({ quote, language, t, runAiAnalysis, isAiLoading })
 					<Icon name="Download" size={17} />
 					{t.exportMd}
 				</button>
-				<button type="button" className="aiActionButton" onClick={runAiAnalysis} disabled={isAiLoading}>
-					<Icon name="Sparkles" size={17} />
-					{isAiLoading ? t.aiResearching : t.aiResearch}
-				</button>
+				<div className="aiActionGroup">
+					<button type="button" className="aiActionButton" onClick={runAiAnalysis} disabled={isAiLoading} title={t.aiResearchTip}>
+						<Icon name="Sparkles" size={17} />
+						{isAiLoading ? t.aiResearching : t.aiResearch}
+					</button>
+					<TooltipHint content={t.aiResearchTip} ariaLabel={`${t.aiResearch} 說明`} />
+				</div>
 			</div>
 		</>
 	);

@@ -7,6 +7,7 @@ function normalizeSupplyChainItem(item) {
 
 	return {
 		name: item?.name || "",
+		symbol: item?.symbol || item?.ticker || "",
 		role: item?.role || "",
 	};
 }
@@ -20,19 +21,18 @@ function CompanyList({ title, description, items, tip }) {
 			</div>
 			<p className="summaryText">{description}</p>
 			<div className="supplyChainItems">
-				{items.length ? (
-					items.map((rawItem) => {
-						const item = normalizeSupplyChainItem(rawItem);
-						return (
-							<div key={`${item.name}-${item.role}`} className="supplyChainItem">
-								<strong className="supplyChainItemName">{item.name}</strong>
-								{item.role ? <span className="supplyChainItemRole">{item.role}</span> : null}
+				{items.map((rawItem) => {
+					const item = normalizeSupplyChainItem(rawItem);
+					return (
+						<div key={`${item.name}-${item.role}`} className="supplyChainItem">
+							<div className="supplyChainItemHeading">
+								<strong className="supplyChainItemName">{item.symbol || item.name}</strong>
+								{item.symbol && item.name ? <span className="supplyChainItemCompany">{item.name}</span> : null}
 							</div>
-						);
-					})
-				) : (
-					<p className="evidenceEmpty">資料不足</p>
-				)}
+							{item.role ? <span className="supplyChainItemRole">{item.role}</span> : null}
+						</div>
+					);
+				})}
 			</div>
 		</section>
 	);
@@ -63,16 +63,6 @@ export function SupplyChainPanel({ quote, language, t }) {
 				<CompanyList title={t.upstreamPartners} description={t.upstreamDescription} items={upstreamItems} tip={t.upstreamTip} />
 				<CompanyList title={t.downstreamCustomers} description={t.downstreamDescription} items={downstreamItems} tip={t.downstreamTip} />
 			</section>
-			{!upstreamItems.length && !downstreamItems.length ? (
-				<section className="analysisSection supplyChainEvidence">
-					<p className="evidenceEmpty">{t.undisclosedValueChain}</p>
-					{quote.ownership.latestDisclosure?.indexUrl ? (
-						<a href={quote.ownership.latestDisclosure.indexUrl} target="_blank" rel="noreferrer" className="sourceLink">
-							{t.latestFiling}: {quote.ownership.latestDisclosure.form} · {quote.ownership.latestDisclosure.filingDate}
-						</a>
-					) : null}
-				</section>
-			) : null}
 		</div>
 	);
 }

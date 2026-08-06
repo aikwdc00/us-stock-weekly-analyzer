@@ -4,7 +4,7 @@ const items = [
 	{ href: "/", id: "overview", label: "總覽" },
 	{ href: "/today", id: "today", label: "Today" },
 	{ href: "/watchlist", id: "watchlist", label: "追蹤清單" },
-	{ href: "/#ideas-rail", id: "discover", label: "探索標的" },
+	{ href: "/explore", id: "discover", label: "探索標的" },
 ];
 
 export function AppNav({ active, className = "appNav" }) {

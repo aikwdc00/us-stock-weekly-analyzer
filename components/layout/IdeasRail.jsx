@@ -50,6 +50,7 @@ export function IdeasRail({
 					<section key={group.id} className="suggestionGroup">
 						<h3>{language === "en" ? group.titleEn : group.title}</h3>
 						<p>{language === "en" ? group.criteriaEn : group.criteria}</p>
+						{group.selectionNote ? <small className="suggestionSelectionNote">{group.selectionNote}</small> : null}
 						<div className="suggestions">
 							{(group.items || []).map((item) => (
 								<button
@@ -57,6 +58,7 @@ export function IdeasRail({
 									className="suggestionItem"
 									onClick={() => addSymbol(item.symbol)}
 									disabled={watchlist.includes(item.symbol)}
+									aria-label={`${item.symbol} ${item.name || ""}`.trim()}
 								>
 									<span className="suggestionItemBody">
 										<strong>{item.symbol}</strong>

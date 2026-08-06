@@ -129,6 +129,7 @@ export const copy = {
 		aiDisabled: "未啟用 / 無 AI 補充",
 		aiResearch: "AI 研究補充",
 		aiResearching: "AI 分析中",
+		aiResearchTip: "只針對目前選取的股票，使用行情、估值、財報、分析師共識與新聞摘要，產生風險與 SWOT 補充；結果會合併回目前報告。",
 		marketDataSourceHint: "來自即時 StockAnalysis 預估與 Yahoo 共識資料",
 		forecastSource: "預估資料來源",
 		source: "資料來源",
@@ -288,6 +289,8 @@ export const copy = {
 		aiDisabled: "Disabled / No AI supplement",
 		aiResearch: "Run AI research supplement",
 		aiResearching: "AI analyzing",
+		aiResearchTip:
+			"Runs only for the selected stock, using its market data, valuation, financials, analyst consensus, and news summary to add risk and SWOT notes to the report.",
 		marketDataSourceHint: "Derived from live StockAnalysis forecasts and Yahoo consensus metrics",
 		forecastSource: "Forecast Source",
 		source: "Source",
