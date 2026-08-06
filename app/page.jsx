@@ -4,7 +4,6 @@ import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppNav } from "../components/layout/AppNav";
 import { IdeasRail } from "../components/layout/IdeasRail";
-import { WatchlistSummary } from "../components/layout/WatchlistSummary";
 import { StockReport } from "../components/report/StockReport";
 import { BackToTopButton } from "../components/shared/BackToTopButton";
 import { Icon } from "../components/shared/Icon";
@@ -23,7 +22,6 @@ function PageContent() {
 		watchlist,
 		selectedSymbol,
 		setSelectedSymbol,
-		quotes,
 		updatedAt,
 		isLoading,
 		error,
@@ -122,7 +120,6 @@ function PageContent() {
 			) : null}
 
 			<AppNav active="overview" />
-			<WatchlistSummary t={t} watchlist={watchlist} quotes={quotes} selectedSymbol={selectedSymbol} setSelectedSymbol={setSelectedSymbol} />
 
 			<section className="workspace">
 				<section className="mainPanel">

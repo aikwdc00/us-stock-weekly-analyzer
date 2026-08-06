@@ -331,7 +331,7 @@ h1 {
 }
 
 .primaryButton,
-.decisionBar > button,
+.decisionBar .reportActions > button,
 .searchBox button {
 	@include button-shell(action, action-ink, action);
 
@@ -341,9 +341,8 @@ h1 {
 }
 
 .aiActionButton {
-	background: color(teal-soft);
-	border: 1px solid color(teal-line);
-	color: color(teal-ink);
+	@include button-shell(teal-soft, teal-ink, teal-line);
+	min-width: 0;
 
 	&:disabled {
 		opacity: 0.6;
@@ -1300,21 +1299,28 @@ h1 {
 	gap: 10px;
 	margin-bottom: 16px;
 
-	> div {
+	> div:not(.reportActions) {
 		@include card(panel-strong);
 		padding: 12px;
 	}
 
-	> button {
-		@include button-shell(action, action-ink, action);
+	.reportActions {
+		align-items: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
 		grid-column: 1 / -1;
-		justify-self: end;
+		justify-content: flex-end;
+	}
+
+	.reportActions > button {
+		@include button-shell(action, action-ink, action);
 		min-width: 148px;
 		width: fit-content;
 	}
 }
 
-.decisionBar span,
+.decisionBar > div:not(.reportActions) > span,
 .info span {
 	@include muted-text(0.78rem);
 	display: block;
@@ -2450,7 +2456,8 @@ h1 {
 	.decisionBar {
 		grid-template-columns: 1fr;
 
-		> button {
+		> button,
+		.reportActions > button {
 			justify-self: stretch;
 			width: 100%;
 		}
@@ -2463,6 +2470,17 @@ h1 {
 
 	.aiActionGroup .aiActionButton {
 		flex: 1;
+	}
+
+	.reportActions {
+		align-items: stretch;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.reportActions > button,
+	.reportActions .aiActionGroup {
+		width: 100%;
 	}
 
 	.reportTabButton {

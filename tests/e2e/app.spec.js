@@ -141,7 +141,7 @@ test("explore is a working route with recommendation candidates", async ({ page 
 	await expect(page.getByRole("button", { name: /AVGO Broadcom Inc\./ })).toBeVisible();
 });
 
-test("dashboard keeps one watchlist, supports dark mode, and stays usable on mobile", async ({ page }) => {
+test("dashboard links to the watchlist route, supports dark mode, and stays usable on mobile", async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
 		route.fulfill({
@@ -155,15 +155,19 @@ test("dashboard keeps one watchlist, supports dark mode, and stays usable on mob
 	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
 
 	await page.goto("/");
-	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
-	await expect(page.getByRole("link", { name: "查看完整清單", exact: true })).toBeVisible();
+	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(0);
+	await expect(page.getByRole("link", { name: "追蹤清單", exact: true })).toBeVisible();
+	await expect(page.locator(".decisionBar .reportActions")).toBeVisible();
 	await page.getByRole("button", { name: "夜間", exact: true }).click();
 	await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 	await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-	await expect(page.getByRole("button", { name: "回到頂部", exact: true })).toBeVisible();
+	const backToTop = page.getByRole("button", { name: "回到頂部", exact: true });
+	await expect(backToTop).toBeVisible();
+	await backToTop.click();
+	await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
 	await page.setViewportSize({ width: 768, height: 1024 });
-	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
+	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(0);
 	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
 });
 

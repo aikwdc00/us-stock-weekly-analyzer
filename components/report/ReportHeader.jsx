@@ -34,16 +34,18 @@ export function ReportHeader({ quote, language, t, runAiAnalysis, isAiLoading })
 					<span>{t.technical}</span>
 					<strong>{displayValue(quote.trend, language)}</strong>
 				</div>
-				<button type="button" onClick={() => downloadMarkdown(quote, language)}>
-					<Icon name="Download" size={17} />
-					{t.exportMd}
-				</button>
-				<div className="aiActionGroup">
-					<button type="button" className="aiActionButton" onClick={runAiAnalysis} disabled={isAiLoading} title={t.aiResearchTip}>
-						<Icon name="Sparkles" size={17} />
-						{isAiLoading ? t.aiResearching : t.aiResearch}
+				<div className="reportActions">
+					<button type="button" onClick={() => downloadMarkdown(quote, language)}>
+						<Icon name="Download" size={17} />
+						{t.exportMd}
 					</button>
-					<TooltipHint content={t.aiResearchTip} ariaLabel={`${t.aiResearch} 說明`} />
+					<div className="aiActionGroup">
+						<button type="button" className="aiActionButton" onClick={runAiAnalysis} disabled={isAiLoading} title={t.aiResearchTip}>
+							<Icon name="Sparkles" size={17} />
+							{isAiLoading ? t.aiResearching : t.aiResearch}
+						</button>
+						<TooltipHint content={t.aiResearchTip} ariaLabel={`${t.aiResearch} 說明`} />
+					</div>
 				</div>
 			</div>
 		</>
