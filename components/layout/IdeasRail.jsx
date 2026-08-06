@@ -1,5 +1,5 @@
-import { Check, ListPlus, RefreshCw } from "lucide-react";
 import { cls, formatDate } from "../../hooks/utils";
+import { Icon } from "../shared/Icon";
 
 export function IdeasRail({
 	t,
@@ -13,14 +13,14 @@ export function IdeasRail({
 	addSymbol,
 }) {
 	return (
-		<aside className="panel rightRail">
+		<aside id="ideas-rail" className="panel rightRail">
 			<div className="panelHeader">
 				<div>
 					<p className="eyebrow">Ideas</p>
 					<h2>{t.ideas}</h2>
 				</div>
 				<button className="railRefresh" onClick={() => refreshIdeas()} disabled={isLoadingRecommendations}>
-					<RefreshCw size={15} className={cls(isLoadingRecommendations && "spin")} />
+					<Icon name="RefreshCw" size={15} className={cls(isLoadingRecommendations && "spin")} />
 					{t.dynamicIdeas}
 				</button>
 			</div>
@@ -66,7 +66,7 @@ export function IdeasRail({
 										</em>
 									</span>
 									<span className="suggestionItemAction">
-										{watchlist.includes(item.symbol) ? <Check size={16} /> : <ListPlus size={16} />}
+										{watchlist.includes(item.symbol) ? <Icon name="Check" size={16} /> : <Icon name="ListPlus" size={16} />}
 									</span>
 								</button>
 							))}

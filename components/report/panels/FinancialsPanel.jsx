@@ -1,9 +1,14 @@
-import { ExternalLink } from "lucide-react";
 import { FinancialCharts } from "../shared/FinancialCharts";
 import { Info } from "../shared/Info";
 import { SectionTitle } from "../shared/SectionTitle";
+import { Icon } from "../../shared/Icon";
 
 export function FinancialsPanel({ quote, t, language }) {
+	const filingFinancials = quote.filingFinancials;
+	const filingAnnual = filingFinancials?.annual?.metrics || {};
+	const filingBalance = filingFinancials?.balanceSheet?.metrics || {};
+	const filingLatest = filingFinancials?.latestPeriod?.metrics || {};
+	const filingValue = (metrics, key) => metrics?.[key]?.display || metrics?.[key] || "N/A";
 	const text =
 		language === "en"
 			? {
@@ -61,6 +66,10 @@ export function FinancialsPanel({ quote, t, language }) {
 					ttmEps: "TTM EPS",
 					currentYearEstimate: "Current year estimate",
 					nextYearEstimate: "Next year estimate",
+					secActuals: "SEC Filing Actuals",
+					reportedPeriod: "Reported period",
+					filedDate: "Filed",
+					balanceSheet: "Balance Sheet Snapshot",
 				}
 			: {
 					latestQuarterRevenue: "最新季度營收",
@@ -116,6 +125,10 @@ export function FinancialsPanel({ quote, t, language }) {
 					ttmEps: "TTM EPS",
 					currentYearEstimate: "本年度預估",
 					nextYearEstimate: "下一年度預估",
+					secActuals: "SEC 申報實際值",
+					reportedPeriod: "申報期間",
+					filedDate: "申報日期",
+					balanceSheet: "資產負債表快照",
 				};
 
 	const tips =
@@ -309,7 +322,7 @@ export function FinancialsPanel({ quote, t, language }) {
 				{quote.fundamentals.forecastSourceUrl ? (
 					<a className="sourceLink" href={quote.fundamentals.forecastSourceUrl} target="_blank" rel="noreferrer">
 						{t.forecastSource}: StockAnalysis Forecast
-						<ExternalLink size={14} />
+						<Icon name="ExternalLink" size={14} />
 					</a>
 				) : null}
 			</section>
@@ -365,6 +378,68 @@ export function FinancialsPanel({ quote, t, language }) {
 						</p>
 					</div>
 				) : null}
+			</section>
+
+			<section className="analysisSection">
+				<SectionTitle
+					title={text.secActuals}
+					tip={
+						language === "en"
+							? "Actual values parsed from SEC EDGAR Companyfacts. Market estimates and prices remain separate supplemental data."
+							: "這裡只顯示從 SEC EDGAR Companyfacts 解析的申報實際值；行情、分析師預估與目標價仍是另外的補充資料。"
+					}
+				/>
+				{filingFinancials?.status === "ok" ? (
+					<>
+						<div className="filingMeta">
+							<span>
+								{text.reportedPeriod}: {filingFinancials.annual?.period || filingFinancials.latestPeriod?.period || "N/A"}
+							</span>
+							<span>
+								{text.filedDate}:{" "}
+								{filingFinancials.annual?.filed || filingFinancials.latestPeriod?.filed || filingFinancials.asOf || "N/A"}
+							</span>
+						</div>
+						<div className="fundamentalGrid">
+							<Info label={text.annualRevenue} value={filingValue(filingAnnual, "revenue")} />
+							<Info label={text.annualCostOfRevenue} value={filingValue(filingAnnual, "costOfRevenue")} />
+							<Info label={text.ttmGrossProfit} value={filingValue(filingAnnual, "grossProfit")} />
+							<Info label={text.ttmOperatingIncome} value={filingValue(filingAnnual, "operatingIncome")} />
+							<Info label={text.ttmNetIncome} value={filingValue(filingAnnual, "netIncome")} />
+							<Info label={text.fcf} value={filingValue(filingAnnual, "operatingCashFlow")} />
+							<Info label={text.annualCapex} value={filingValue(filingAnnual, "capex")} />
+							<Info label={text.annualRnd} value={filingValue(filingAnnual, "researchAndDevelopment")} />
+							<Info label={text.grossMargin} value={filingValue(filingAnnual, "grossMargin")} />
+							<Info label={text.operatingMargin} value={filingValue(filingAnnual, "operatingMargin")} />
+							<Info label={text.netMargin} value={filingValue(filingAnnual, "netMargin")} />
+						</div>
+						<h4 className="subsectionHeading">{text.balanceSheet}</h4>
+						<div className="fundamentalGrid">
+							<Info label={text.cash} value={filingValue(filingBalance, "cash")} />
+							<Info label={text.totalDebt} value={filingValue(filingBalance, "totalDebt")} />
+							<Info label={language === "en" ? "Assets" : "資產"} value={filingValue(filingBalance, "assets")} />
+							<Info label={language === "en" ? "Liabilities" : "負債"} value={filingValue(filingBalance, "liabilities")} />
+							<Info label={language === "en" ? "Equity" : "股東權益"} value={filingValue(filingBalance, "equity")} />
+							<Info
+								label={language === "en" ? "Latest period revenue" : "最新申報期營收"}
+								value={filingValue(filingLatest, "revenue")}
+							/>
+						</div>
+						{filingFinancials.latestFilingUrl || filingFinancials.sourceUrl ? (
+							<a
+								className="sourceLink"
+								href={filingFinancials.latestFilingUrl || filingFinancials.sourceUrl}
+								target="_blank"
+								rel="noreferrer"
+							>
+								{t.source}: {filingFinancials.source}
+								<Icon name="ExternalLink" size={14} />
+							</a>
+						) : null}
+					</>
+				) : (
+					<p className="evidenceEmpty">{t.insufficientEvidence}</p>
+				)}
 			</section>
 
 			{quote.detailedFinancials ? (
@@ -455,7 +530,7 @@ export function FinancialsPanel({ quote, t, language }) {
 				{quote.fundamentals.sourceUrl ? (
 					<a className="sourceLink" href={quote.fundamentals.sourceUrl} target="_blank" rel="noreferrer">
 						{t.source}：{quote.fundamentals.source}
-						<ExternalLink size={14} />
+						<Icon name="ExternalLink" size={14} />
 					</a>
 				) : null}
 			</section>

@@ -1,10 +1,10 @@
-import { ExternalLink } from "lucide-react";
 import { AnalysisBlock } from "../shared/AnalysisBlock";
 import { Info } from "../shared/Info";
 import { PeerTable } from "../shared/PeerTable";
 import { TooltipHint } from "../shared/TooltipHint";
 import { useIndustryPeers } from "../../../hooks/useIndustryPeers";
 import { translateTerm } from "../../../lib/translationMap";
+import { Icon } from "../../shared/Icon";
 
 export function IndustryPanel({ quote, language, t }) {
 	const { peers: industryPeers, isLoading: isLoadingPeers, error: peerError } = useIndustryPeers(quote.symbol);
@@ -27,8 +27,9 @@ export function IndustryPanel({ quote, language, t }) {
 								target="_blank"
 								rel="noreferrer"
 								className="sourceIconLink"
+								aria-label={`${t.dataSource}: ${quote.fundamentals.source || t.insufficientEvidence}`}
 							>
-								<ExternalLink size={14} />
+								<Icon name="ExternalLink" size={14} />
 							</a>
 						)}
 					</div>
@@ -88,7 +89,7 @@ export function IndustryPanel({ quote, language, t }) {
 								<small>
 									{t.reportDate}: {filing.reportDate || "N/A"}
 								</small>
-								<ExternalLink size={14} />
+								<Icon name="ExternalLink" size={14} />
 							</a>
 						))}
 					</div>
@@ -109,7 +110,7 @@ export function IndustryPanel({ quote, language, t }) {
 				{quote.fundamentals.sourceUrl ? (
 					<a className="sourceLink" href={quote.fundamentals.sourceUrl} target="_blank" rel="noreferrer">
 						{t.dataSource}: {quote.fundamentals.source || t.insufficientEvidence}
-						<ExternalLink size={14} />
+						<Icon name="ExternalLink" size={14} />
 					</a>
 				) : null}
 			</section>

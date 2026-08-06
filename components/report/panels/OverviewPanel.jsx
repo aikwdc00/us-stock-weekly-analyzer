@@ -1,7 +1,7 @@
-import { ExternalLink } from "lucide-react";
 import { displayValue, getLocalizedNewsText, getLocalizedNewsTitle, getNewsUrl, thesisText } from "../../../hooks/utils";
 import { Info } from "../shared/Info";
 import { LongTermPlan } from "../shared/LongTermPlan";
+import { Icon } from "../../shared/Icon";
 
 export function OverviewPanel({ quote, language, t }) {
 	const formatEventDate = (value) => {
@@ -59,7 +59,7 @@ export function OverviewPanel({ quote, language, t }) {
 									<b>{formatEventDate(event.date)}</b>
 									{event.sourceUrl ? (
 										<a href={event.sourceUrl} target="_blank" rel="noreferrer" aria-label={`${t.eventSource}: ${event.source}`}>
-											<ExternalLink size={14} />
+											<Icon name="ExternalLink" size={14} />
 										</a>
 									) : null}
 								</div>
@@ -82,7 +82,7 @@ export function OverviewPanel({ quote, language, t }) {
 								</span>
 								<strong>
 									{getLocalizedNewsTitle(item, language)}
-									<ExternalLink size={14} />
+									<Icon name="ExternalLink" size={14} />
 								</strong>
 								<p>{getLocalizedNewsText(item, language)}</p>
 								<em>{t.openNews}</em>

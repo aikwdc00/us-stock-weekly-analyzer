@@ -1,12 +1,14 @@
 import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
 import { allSettledWithConcurrency, mapWithConcurrency } from "../../../lib/concurrency.mjs";
 import { fetchSecOwnershipFilings } from "../../../lib/secOwnershipProvider";
+import { fetchSecFinancials } from "../../../lib/secFinancialsProvider";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
 import { fetchFinnhubData } from "../../../lib/finnhubProvider";
 import { fetchAiTranslatedNews } from "../../../lib/aiNewsProvider";
 import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskProvider";
 import { fetchWithTimeout } from "../../../lib/fetchPolicy";
 import { fetchMarketEvents } from "../../../lib/marketEventsProvider";
+import { filterQuotesToRequestedSymbols } from "../../../lib/quoteBoundary.mjs";
 import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
 import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
@@ -170,7 +172,7 @@ function pickFulfilled(results, fallback) {
 	return results.map((result) => (result.status === "fulfilled" ? result.value : fallback));
 }
 
-function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translatedNews, marketEvents) {
+function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, secFinancials, finnhub, translatedNews, marketEvents) {
 	const metrics = snapshot.metrics || {};
 
 	return {
@@ -200,6 +202,7 @@ function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translat
 		financials: snapshot.financials,
 		news: translatedNews || snapshot.news || quote.news || [],
 		secOwnership,
+		secFinancials,
 		finnhub,
 		events: marketEvents?.events || [],
 		fundamentalsSource: snapshot.source,
@@ -209,14 +212,16 @@ function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, finnhub, translat
 }
 
 async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
-	const [snapshotResults, ownershipResults, finnhubResults] = await Promise.all([
+	const [snapshotResults, ownershipResults, secFinancialResults, finnhubResults] = await Promise.all([
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchStockAnalysisSnapshot(quote.symbol)),
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchSecOwnershipFilings(quote.symbol)),
+		allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchSecFinancials(quote.symbol)),
 		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchFinnhubData(quote.symbol)),
 	]);
 	const eventResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchMarketEvents(quote.symbol, quote));
 	const snapshots = pickFulfilled(snapshotResults, {});
 	const ownershipFilings = pickFulfilled(ownershipResults, null);
+	const secFinancials = pickFulfilled(secFinancialResults, null);
 	const finnhubData = pickFulfilled(finnhubResults, null);
 	const marketEvents = pickFulfilled(eventResults, { events: [] });
 	const aiRiskInsights = runAiAnalysis
@@ -225,7 +230,7 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 					quote.symbol,
 					snapshots[index] || {},
 					finnhubData[index] || {},
-					getProfileForSymbol(quote.symbol, snapshots[index] || {})
+					getProfileForSymbol(quote.symbol, { ...(snapshots[index] || {}), secFinancials: secFinancials[index] || null })
 				).catch(() => [])
 			)
 		: rawQuotes.map(() => []);
@@ -235,7 +240,7 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 					quote.symbol,
 					snapshots[index] || {},
 					finnhubData[index] || {},
-					getProfileForSymbol(quote.symbol, snapshots[index] || {})
+					getProfileForSymbol(quote.symbol, { ...(snapshots[index] || {}), secFinancials: secFinancials[index] || null })
 				).catch(() => null)
 			)
 		: rawQuotes.map(() => null);
@@ -256,12 +261,13 @@ async function enrichRawQuotes(rawQuotes, runAiAnalysis) {
 			quote,
 			snapshot,
 			ownershipFilings[index] || null,
+			secFinancials[index] || null,
 			finnhubData[index] || {},
 			translatedNews[index] || [],
 			marketEvents[index] || { events: [] }
 		);
 
-		return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshotWithAi));
+		return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, { ...snapshotWithAi, secFinancials: secFinancials[index] || null }));
 	});
 }
 
@@ -308,11 +314,13 @@ export async function GET(request) {
 		}
 
 		const payload = await response.json();
-		let rawQuotes = payload.quoteResponse?.result || [];
+		let rawQuotes = filterQuotesToRequestedSymbols(payload.quoteResponse?.result, symbols);
 
-		if (!rawQuotes.length) {
-			rawQuotes = await mapWithConcurrency(symbols, 8, (symbol) => fetchBackupQuote(symbol));
-			rawQuotes = rawQuotes.filter(Boolean);
+		if (rawQuotes.length < symbols.length) {
+			const returnedSymbols = new Set(rawQuotes.map((quote) => quote.symbol));
+			const missingSymbols = symbols.filter((symbol) => !returnedSymbols.has(symbol));
+			const backups = await mapWithConcurrency(missingSymbols, 8, (symbol) => fetchBackupQuote(symbol));
+			rawQuotes = [...rawQuotes, ...filterQuotesToRequestedSymbols(backups, missingSymbols)];
 		}
 
 		const quotes = await enrichRawQuotes(rawQuotes, runAiAnalysis);
@@ -324,7 +332,7 @@ export async function GET(request) {
 	} catch (error) {
 		try {
 			const rawQuotes = await mapWithConcurrency(symbols, 8, (symbol) => fetchBackupQuote(symbol));
-			const validRawQuotes = rawQuotes.filter(Boolean);
+			const validRawQuotes = filterQuotesToRequestedSymbols(rawQuotes, symbols);
 			const quotes = await enrichRawQuotes(validRawQuotes, runAiAnalysis);
 
 			if (quotes.length) {

@@ -1,6 +1,7 @@
 import { Info } from "../shared/Info";
 import { SectionTitle } from "../shared/SectionTitle";
 import { TooltipHint } from "../shared/TooltipHint";
+import { Icon } from "../../shared/Icon";
 
 export function ValuationPanel({ quote, t, language, activeModel, setSelectedModel }) {
 	const text =
@@ -178,6 +179,18 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 				<div className="methodEvidence">
 					{quote.valuationMethod.evidence.length ? renderEvidence(quote.valuationMethod.evidence) : <span>資料不足</span>}
 				</div>
+				{quote.valuationMethod.sources?.length ? (
+					<div className="methodSources">
+						{quote.valuationMethod.sources.map((source) => (
+							<a key={source.sourceUrl} className="sourceLink" href={source.sourceUrl} target="_blank" rel="noreferrer">
+								{t.source}: {source.source}
+								<Icon name="ExternalLink" size={14} />
+							</a>
+						))}
+					</div>
+				) : (
+					<p className="evidenceEmpty">{t.insufficientEvidence}</p>
+				)}
 			</section>
 
 			<section className="analysisSection">

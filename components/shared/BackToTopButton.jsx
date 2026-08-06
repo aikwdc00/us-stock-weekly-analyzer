@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Icon } from "./Icon";
 
 export function BackToTopButton({ label = "Back to top" }) {
 	const [visible, setVisible] = useState(false);
@@ -25,7 +25,7 @@ export function BackToTopButton({ label = "Back to top" }) {
 			hidden={!visible}
 			onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
 		>
-			<ArrowUp size={18} aria-hidden="true" />
+			<Icon name="ArrowUp" size={18} />
 		</button>
 	);
 }

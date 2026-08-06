@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowDownAZ, ArrowUpAZ, Check, ChevronDown, SlidersHorizontal, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Icon } from "../shared/Icon";
 
 const EMPTY = "N/A";
 
@@ -16,7 +16,17 @@ function sortRows(rows, sortKey, direction) {
 	});
 }
 
-export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedSymbol, removeSymbol, t }) {
+export function WatchlistBoard({
+	watchlist,
+	quotes,
+	selectedSymbol,
+	setSelectedSymbol,
+	removeSymbol,
+	t,
+	addPanel,
+	openSymbol,
+	showHeaderTitle = true,
+}) {
 	const [query, setQuery] = useState("");
 	const [filter, setFilter] = useState("all");
 	const [sortKey, setSortKey] = useState("symbol");
@@ -65,13 +75,20 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 		});
 	}
 
+	function selectSymbol(symbol) {
+		setSelectedSymbol(symbol);
+		openSymbol?.(symbol);
+	}
+
 	return (
-		<section className="watchlistBoard" aria-labelledby="watchlist-board-title">
-			<div className="watchlistBoardHeader">
-				<div>
-					<p className="eyebrow">{t.watchlistWorkspace}</p>
-					<h2 id="watchlist-board-title">{t.watchlist}</h2>
-				</div>
+		<section className="watchlistBoard" aria-labelledby={showHeaderTitle ? "watchlist-board-title" : undefined}>
+			<div className={`watchlistBoardHeader${showHeaderTitle ? "" : " noTitle"}`}>
+				{showHeaderTitle ? (
+					<div>
+						<p className="eyebrow">{t.watchlistWorkspace}</p>
+						<h2 id="watchlist-board-title">{t.watchlist}</h2>
+					</div>
+				) : null}
 				<div className="watchlistBoardControls">
 					<label className="watchlistControl">
 						<span>{t.filter}</span>
@@ -80,7 +97,7 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 							<option value="review">{t.needsReview}</option>
 							<option value="loaded">{t.loaded}</option>
 						</select>
-						<ChevronDown size={14} aria-hidden="true" />
+						<Icon name="ChevronDown" size={14} />
 					</label>
 					<label className="watchlistControl">
 						<span>{t.sort}</span>
@@ -90,15 +107,21 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 							<option value="quality">{t.dataQuality}</option>
 							<option value="industry">{t.industry}</option>
 						</select>
-						{direction === 1 ? <ArrowDownAZ size={14} aria-hidden="true" /> : <ArrowUpAZ size={14} aria-hidden="true" />}
+						{direction === 1 ? <Icon name="ArrowDownAZ" size={14} /> : <Icon name="ArrowUpAZ" size={14} />}
 					</label>
 					<label className="watchlistSearch">
-						<SlidersHorizontal size={15} aria-hidden="true" />
+						<Icon name="SlidersHorizontal" size={15} />
 						<span className="srOnly">{t.search}</span>
-						<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.filterWatchlist} />
+						<input
+							suppressHydrationWarning
+							value={query}
+							onChange={(event) => setQuery(event.target.value)}
+							placeholder={t.filterWatchlist}
+						/>
 					</label>
 				</div>
 			</div>
+			{addPanel ? <div className="watchlistBoardAdd">{addPanel}</div> : null}
 
 			{compareSymbols.length ? (
 				<div className="watchlistCompareBar" role="status">
@@ -138,11 +161,11 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 												aria-label={`${t.selectForCompare} ${row.symbol}`}
 												onClick={() => toggleCompare(row.symbol)}
 											>
-												{compared ? <Check size={14} /> : null}
+												{compared ? <Icon name="Check" size={14} /> : null}
 											</button>
 										</td>
 										<td data-label={t.tableSymbol}>
-											<button type="button" className="watchlistSymbolButton" onClick={() => setSelectedSymbol(row.symbol)}>
+											<button type="button" className="watchlistSymbolButton" onClick={() => selectSymbol(row.symbol)}>
 												<strong>{row.symbol}</strong>
 												<span>{row.name}</span>
 											</button>
@@ -161,7 +184,7 @@ export function WatchlistBoard({ watchlist, quotes, selectedSymbol, setSelectedS
 												aria-label={`${t.remove} ${row.symbol}`}
 												onClick={() => removeSymbol(row.symbol)}
 											>
-												<Trash2 size={15} />
+												<Icon name="Trash2" size={15} />
 											</button>
 										</td>
 									</tr>

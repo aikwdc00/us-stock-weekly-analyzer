@@ -204,6 +204,7 @@ h1 {
 .shell {
 	min-height: 100vh;
 	padding: 28px;
+	width: 100%;
 }
 
 .topbar {
@@ -241,6 +242,51 @@ h1 {
 	gap: 8px;
 	padding-top: 4px;
 	flex: 0 0 auto;
+}
+
+.pageHeader {
+	@include flex-between(18px, flex-start);
+	margin: 0 auto 18px;
+	max-width: $container;
+}
+
+.pageHeaderActions {
+	align-items: flex-end;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.secondaryButton {
+	@include button-shell(white, teal, line);
+	min-height: 40px;
+}
+
+.appNav {
+	align-items: center;
+	border-bottom: 1px solid color(line);
+	display: flex;
+	gap: 24px;
+	margin: 0 auto 18px;
+	max-width: $container;
+	overflow-x: auto;
+	padding-bottom: 1px;
+
+	a {
+		border-bottom: 2px solid transparent;
+		color: color(muted);
+		font-size: 0.88rem;
+		font-weight: 850;
+		min-height: 40px;
+		padding: 10px 4px 8px;
+		white-space: nowrap;
+
+		&:hover,
+		&.active {
+			border-bottom-color: color(teal);
+			color: color(ink);
+		}
+	}
 }
 
 .topTimestamp {
@@ -292,6 +338,21 @@ h1 {
 	&:disabled {
 		opacity: 0.6;
 	}
+}
+
+.aiActionButton {
+	background: color(teal-soft);
+	border: 1px solid color(teal-line);
+	color: color(teal-ink);
+
+	&:disabled {
+		opacity: 0.6;
+	}
+}
+
+.routeLink {
+	@include button-shell(white, teal, line);
+	min-height: 42px;
 }
 
 .spin {
@@ -357,7 +418,7 @@ h1 {
 }
 
 .workspace {
-	@include grid(minmax(260px, 1fr) minmax(0, 2.2fr) minmax(260px, 1fr), 16px);
+	@include grid(minmax(0, 2.2fr) minmax(260px, 1fr), 16px);
 	align-items: start;
 	margin: 0 auto;
 	max-width: $container;
@@ -546,9 +607,97 @@ h1 {
 
 .watchlistBoard {
 	@include card(panel, line, true);
-	margin: 18px 0;
+	margin: 18px auto;
+	max-width: $container;
 	min-width: 0;
 	padding: 18px;
+	width: 100%;
+}
+
+.watchlistSummary {
+	@include card(panel, line, true);
+	margin: 18px auto;
+	max-width: $container;
+	min-width: 0;
+	padding: 18px;
+	width: 100%;
+}
+
+.watchlistSummaryHeader {
+	@include flex-between(16px, flex-end);
+	margin-bottom: 14px;
+
+	h2 {
+		font-size: 1.35rem;
+		margin: 2px 0 4px;
+	}
+
+	p:last-child {
+		@include muted-text(0.82rem);
+		margin: 0;
+	}
+}
+
+.watchlistSummaryList {
+	border-top: 1px solid color(line);
+}
+
+.watchlistSummaryRow {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid color(line);
+	color: color(ink);
+	display: grid;
+	gap: 12px;
+	grid-template-columns: minmax(0, 1fr) minmax(80px, auto) minmax(80px, auto) 20px;
+	padding: 12px 4px;
+	text-align: left;
+	width: 100%;
+
+	> span:first-child {
+		min-width: 0;
+
+		strong,
+		small {
+			display: block;
+		}
+
+		strong {
+			color: color(teal);
+		}
+
+		small {
+			@include muted-text(0.75rem);
+			margin-top: 3px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	> span:not(:first-child) {
+		font-size: 0.82rem;
+		font-weight: 800;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	> svg {
+		color: color(teal);
+		justify-self: end;
+	}
+
+	&:hover,
+	&.selected {
+		background: color(subpanel);
+	}
+}
+
+.watchlistSummaryEmpty,
+.watchlistSummaryMore {
+	@include muted-text(0.82rem);
+	margin: 14px 0 0;
 }
 
 .watchlistBoardHeader {
@@ -558,6 +707,33 @@ h1 {
 	h2 {
 		font-size: 1.45rem;
 		margin: 2px 0 0;
+	}
+}
+
+.watchlistBoardHeader.noTitle {
+	justify-content: flex-end;
+}
+
+.watchlistBoardAdd {
+	border-top: 1px solid color(line);
+	margin: 16px 0 14px;
+	padding-top: 14px;
+}
+
+.watchlistAddPanel {
+	min-width: 0;
+
+	.panelHeader {
+		margin-bottom: 10px;
+	}
+
+	.panelHeader h3 {
+		font-size: 1rem;
+		margin: 0;
+	}
+
+	.searchBox {
+		max-width: 720px;
 	}
 }
 
@@ -1102,14 +1278,6 @@ h1 {
 	@include inline-center;
 	flex: 0 0 auto;
 	position: relative;
-
-	&[data-visible="true"] {
-		.tooltipBubble {
-			opacity: 1;
-			transform: translateY(0);
-			visibility: visible;
-		}
-	}
 }
 
 .tooltipTrigger {
@@ -1138,39 +1306,41 @@ h1 {
 	font-size: 0.82rem;
 	font-weight: 650;
 	inline-size: min(var(--tooltip-max-width, 320px), calc(100vw - 32px));
+	left: var(--tooltip-left, 16px);
 	line-height: 1.6;
+	max-block-size: calc(100vh - 32px);
 	max-inline-size: calc(100vw - 32px);
 	min-inline-size: min(240px, calc(100vw - 32px));
-	opacity: 0;
+	opacity: 1;
 	padding: 10px 12px;
-	position: absolute;
+	position: fixed;
 	overflow-wrap: break-word;
+	overflow-y: auto;
 	text-wrap: pretty;
-	top: calc(100% + 8px);
-	transform: translateY(-4px);
-	transition:
-		opacity 0.18s ease,
-		transform 0.18s ease,
-		visibility 0.18s ease;
-	visibility: hidden;
-	z-index: 20;
+	top: var(--tooltip-top, 16px);
+	z-index: 1000;
+}
 
-	.tooltipAnchor[data-align="start"] & {
-		left: 0;
-	}
+.tooltipBubble[data-placement="top"] {
+	transform: translateY(-100%);
+}
 
-	.tooltipAnchor[data-align="center"] & {
-		left: 50%;
-		transform: translate(-50%, -4px);
-	}
+.filingMeta {
+	@include inline-center(16px);
+	@include muted-text(0.82rem);
+	flex-wrap: wrap;
+	margin-bottom: 12px;
+}
 
-	.tooltipAnchor[data-align="center"][data-visible="true"] & {
-		transform: translate(-50%, 0);
-	}
+.subsectionHeading {
+	font-size: 0.95rem;
+	margin: 18px 0 10px;
+}
 
-	.tooltipAnchor[data-align="end"] & {
-		right: 0;
-	}
+.methodSources {
+	@include inline-center(10px);
+	flex-wrap: wrap;
+	margin-top: 12px;
 }
 
 .analysisCard h3 {
@@ -2118,11 +2288,10 @@ h1 {
 
 @media (max-width: 1180px) {
 	.workspace {
-		grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.rightRail {
-		grid-column: 1 / -1;
 		max-height: none;
 		position: static;
 	}
@@ -2133,15 +2302,24 @@ h1 {
 	}
 }
 
-@media (max-width: 880px) {
+@media (max-width: 1024px) {
 	.shell {
 		padding: 16px;
 	}
 
 	.topbar,
+	.pageHeader,
 	.reportHero {
 		align-items: stretch;
 		flex-direction: column;
+	}
+
+	.pageHeaderActions {
+		align-items: flex-start;
+	}
+
+	.appNav {
+		gap: 14px;
 	}
 
 	.metricGrid,
@@ -2188,8 +2366,18 @@ h1 {
 	}
 
 	.watchlistBoard {
-		margin: 12px 0;
+		margin: 12px auto;
 		padding: 14px;
+	}
+
+	.watchlistSummary {
+		margin: 12px auto;
+		padding: 14px;
+	}
+
+	.watchlistSummaryHeader {
+		align-items: stretch;
+		flex-direction: column;
 	}
 
 	.watchlistBoardHeader {
@@ -2303,18 +2491,6 @@ h1 {
 		inline-size: min(var(--tooltip-max-width, 320px), calc(100vw - 24px));
 		max-inline-size: calc(100vw - 24px);
 		min-inline-size: min(220px, calc(100vw - 24px));
-
-		.tooltipAnchor[data-align="center"] &,
-		.tooltipAnchor[data-align="start"] &,
-		.tooltipAnchor[data-align="end"] & {
-			left: 0;
-			right: auto;
-			transform: translateY(-4px);
-		}
-
-		.tooltipAnchor[data-visible="true"] & {
-			transform: translateY(0);
-		}
 	}
 }
 
@@ -2323,6 +2499,313 @@ h1 {
 	color: color(ink);
 	min-height: 100vh;
 	padding: 32px clamp(16px, 4vw, 56px) 48px;
+}
+
+.todayShell {
+	background: color(bg);
+	color: color(ink);
+	min-height: 100vh;
+	padding: 28px clamp(16px, 4vw, 56px) 56px;
+}
+
+.todayHeader,
+.todayNav,
+.todayIntro,
+.todayQueueGrid,
+.todayEventsPanel,
+.todayResearchPanel,
+.todayLoading {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 1240px;
+}
+
+.todayHeader {
+	@include flex-between(18px, flex-start);
+	padding-bottom: 24px;
+}
+
+.todayHeaderActions {
+	align-items: flex-end;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.todayNav {
+	border-bottom: 1px solid color(line);
+	display: flex;
+	gap: 26px;
+	margin-bottom: 44px;
+	padding-bottom: 14px;
+}
+
+.todayNav a {
+	color: color(muted);
+	font-weight: 800;
+	padding-bottom: 8px;
+}
+
+.todayNav a.active,
+.todayNav a:hover {
+	border-bottom: 2px solid color(teal);
+	color: color(teal);
+}
+
+.todayIntro {
+	@include flex-between(18px, flex-end);
+	margin-bottom: 22px;
+}
+
+.todayIntro h2 {
+	font-size: clamp(2rem, 4vw, 3.5rem);
+	margin-bottom: 10px;
+}
+
+.todayIntro p:last-child {
+	color: color(muted);
+	margin-bottom: 0;
+}
+
+.todayActionButton,
+.todayTextButton {
+	@include inline-center(8px);
+	color: color(teal);
+	font-weight: 800;
+}
+
+.todayActionButton {
+	@include button-shell(action, action-ink, action);
+}
+
+.todayQueueGrid {
+	@include grid(repeat(2, minmax(0, 1fr)), 18px);
+	margin-bottom: 18px;
+}
+
+.todayPanel,
+.todayResearchPanel {
+	@include card(panel, line, true);
+	padding: 24px;
+}
+
+.todaySectionHeading {
+	@include flex-between(12px);
+	margin-bottom: 18px;
+}
+
+.todaySectionHeading > div {
+	@include inline-center(10px);
+}
+
+.todaySectionHeading h3 {
+	margin: 0;
+}
+
+.todaySectionNumber {
+	color: color(teal);
+	font-size: 0.78rem;
+	font-weight: 900;
+}
+
+.todaySectionHeading > strong {
+	color: color(teal);
+	font-size: 1.8rem;
+}
+
+.todayQueueList {
+	display: grid;
+	gap: 8px;
+}
+
+.todayQueueRow {
+	align-items: center;
+	background: color(subpanel);
+	border: 1px solid color(line);
+	border-radius: $radius;
+	color: color(ink);
+	display: grid;
+	gap: 12px;
+	grid-template-columns: auto 1fr auto;
+	min-height: 62px;
+	padding: 10px 12px;
+	text-align: left;
+	width: 100%;
+}
+
+.todayQueueRow:hover,
+.todayQueueRow.selected {
+	border-color: color(teal-line-2);
+	background: color(teal-soft-2);
+}
+
+.todayTicker {
+	color: color(teal);
+	font-weight: 900;
+}
+
+.todayQueueCopy {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.todayQueueCopy small,
+.todayEmpty,
+.todayHealthList,
+.todayHealthScore small {
+	color: color(muted);
+}
+
+.todayEmpty {
+	margin: 0;
+}
+
+.todayHealthPanel > .todaySectionHeading > svg {
+	color: color(teal);
+}
+
+.todayHealthScore {
+	align-items: baseline;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 24px 0;
+}
+
+.todayHealthScore strong {
+	font-size: 4rem;
+	line-height: 1;
+}
+
+.todayHealthScore span {
+	color: color(muted);
+	font-size: 1.3rem;
+}
+
+.todayHealthScore small {
+	flex-basis: 100%;
+	margin-top: 4px;
+}
+
+.todayHealthList {
+	display: grid;
+	gap: 12px;
+}
+
+.todayHealthList span {
+	align-items: center;
+	display: inline-flex;
+	gap: 8px;
+}
+
+.todayHealthList i {
+	background: color(muted);
+	border-radius: 50%;
+	height: 8px;
+	width: 8px;
+}
+
+.todayHealthList i.positive {
+	background: color(green);
+}
+
+.todayHealthList i.warning {
+	background: color(yellow);
+}
+
+.todayEventsPanel {
+	margin-bottom: 18px;
+}
+
+.todayEventGrid {
+	@include grid(repeat(4, minmax(0, 1fr)), 10px);
+}
+
+.todayEvent {
+	@include card(subpanel, line);
+	display: grid;
+	gap: 6px;
+	min-height: 112px;
+	padding: 14px;
+}
+
+.todayEvent strong {
+	color: color(teal);
+	font-size: 1.05rem;
+}
+
+.todayEvent span,
+.todayEvent small {
+	color: color(muted);
+	line-height: 1.45;
+}
+
+.todayResearchPanel {
+	align-items: center;
+	display: flex;
+	gap: 20px;
+	justify-content: space-between;
+	margin-bottom: 18px;
+}
+
+.todayResearchPanel h2 {
+	margin-bottom: 8px;
+}
+
+.todayResearchPanel h2 span {
+	color: color(muted);
+	font-size: 0.55em;
+	font-weight: 700;
+}
+
+.todayResearchPanel p:last-child {
+	color: color(muted);
+	margin-bottom: 0;
+	max-width: 760px;
+}
+
+.todayResearchStats {
+	display: grid;
+	gap: 5px;
+	min-width: 150px;
+	text-align: right;
+}
+
+.todayResearchStats strong {
+	font-size: 2rem;
+}
+
+.todayResearchStats span:last-child {
+	color: color(muted);
+	font-size: 0.85rem;
+}
+
+.todayLoading {
+	color: color(muted);
+	text-align: center;
+}
+
+@media (max-width: 820px) {
+	.todayHeader,
+	.todayIntro,
+	.todayResearchPanel {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.todayHeaderActions {
+		align-items: flex-start;
+	}
+
+	.todayQueueGrid,
+	.todayEventGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.todayResearchStats {
+		text-align: left;
+	}
 }
 
 .prototypeHeader,
@@ -2456,21 +2939,22 @@ h1 {
 
 .prototypeNav {
 	justify-content: flex-start;
-	margintop: 26px;
+	margin-top: 26px;
 	overflow-x: auto;
 	padding-bottom: 1px;
 
-	button {
+	a {
 		background: transparent;
 		border: 0;
 		border-bottom: 2px solid transparent;
 		color: color(muted);
 		font-weight: 850;
 		min-height: 42px;
-		padding: 0 4px;
+		padding: 10px 4px 8px;
 		white-space: nowrap;
 
-		&.active {
+		&.active,
+		&:hover {
 			border-bottom-color: color(teal);
 			color: color(ink);
 		}
@@ -2596,6 +3080,39 @@ h1 {
 		margin-top: 4px;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.prototypeEmpty,
+.prototypeLoading {
+	color: color(muted);
+	margin: 0;
+}
+
+.prototypeAlert,
+.prototypeNotice {
+	align-items: flex-start;
+	display: flex;
+	gap: 10px;
+	line-height: 1.5;
+	margin: 0 auto 16px;
+	max-width: 1240px;
+	padding: 12px 14px;
+}
+
+.prototypeAlert {
+	@include card(warning-bg, warning-line);
+	color: color(warning-ink);
+	flex-direction: column;
+}
+
+.prototypeNotice {
+	@include card(panel, line);
+	color: color(body-copy);
+
+	strong {
+		color: color(teal);
 		white-space: nowrap;
 	}
 }
@@ -3007,6 +3524,11 @@ h1 {
 		width: 100%;
 	}
 
+	.prototypeNav {
+		margin-top: 18px;
+		width: 100%;
+	}
+
 	.prototypeQueueGrid,
 	.prototypeResearchGrid,
 	.prototypeDiscoverGrid,
@@ -3072,6 +3594,17 @@ h1 {
 
 	.watchlistSearch {
 		grid-column: auto;
+	}
+
+	.watchlistSummaryRow {
+		gap: 8px;
+		grid-template-columns: minmax(0, 1fr) 66px 66px 18px;
+		padding-left: 0;
+		padding-right: 0;
+
+		> span:not(:first-child) {
+			font-size: 0.76rem;
+		}
 	}
 
 	.watchlistCompareBar {

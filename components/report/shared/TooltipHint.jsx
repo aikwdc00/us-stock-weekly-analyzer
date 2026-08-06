@@ -1,27 +1,25 @@
 "use client";
 
-import { Info as InfoIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Icon } from "../../shared/Icon";
 
 function resolveTooltipLayout(anchor) {
 	if (!anchor || typeof window === "undefined") {
-		return { align: "center", maxWidth: 320 };
+		return { maxWidth: 320, placement: "bottom", top: 0, left: 0 };
 	}
 
 	const rect = anchor.getBoundingClientRect();
 	const viewportWidth = window.innerWidth || 375;
+	const viewportHeight = window.innerHeight || 700;
 	const maxWidth = Math.min(320, Math.max(220, viewportWidth - 32));
-	const gutter = 24;
-	const halfWidth = maxWidth / 2;
+	const gap = 8;
+	const placement = viewportHeight - rect.bottom < 180 && rect.top > 180 ? "top" : "bottom";
+	const idealLeft = rect.left + rect.width / 2 - maxWidth / 2;
+	const left = Math.min(Math.max(16, idealLeft), Math.max(16, viewportWidth - maxWidth - 16));
+	const top = placement === "top" ? Math.max(16, rect.top - gap) : Math.min(viewportHeight - 16, rect.bottom + gap);
 
-	let align = "center";
-	if (rect.left < halfWidth + gutter) {
-		align = "start";
-	} else if (viewportWidth - rect.right < halfWidth + gutter) {
-		align = "end";
-	}
-
-	return { align, maxWidth };
+	return { maxWidth, placement, top, left };
 }
 
 export function TooltipHint({ content, ariaLabel = "顯示說明", iconSize = 15 }) {
@@ -30,7 +28,7 @@ export function TooltipHint({ content, ariaLabel = "顯示說明", iconSize = 15
 	const [hovered, setHovered] = useState(false);
 	const [focused, setFocused] = useState(false);
 	const [pinned, setPinned] = useState(false);
-	const [layout, setLayout] = useState({ align: "center", maxWidth: 320 });
+	const [layout, setLayout] = useState({ maxWidth: 320, placement: "bottom", top: 0, left: 0 });
 	const visible = hovered || focused || pinned;
 
 	useEffect(() => {
@@ -42,7 +40,11 @@ export function TooltipHint({ content, ariaLabel = "顯示說明", iconSize = 15
 
 		syncLayout();
 		window.addEventListener("resize", syncLayout);
-		return () => window.removeEventListener("resize", syncLayout);
+		window.addEventListener("scroll", syncLayout, true);
+		return () => {
+			window.removeEventListener("resize", syncLayout);
+			window.removeEventListener("scroll", syncLayout, true);
+		};
 	}, [visible]);
 
 	useEffect(() => {
@@ -75,8 +77,6 @@ export function TooltipHint({ content, ariaLabel = "顯示說明", iconSize = 15
 			ref={anchorRef}
 			className="tooltipAnchor"
 			data-visible={visible ? "true" : "false"}
-			data-align={layout.align}
-			style={{ "--tooltip-max-width": `${layout.maxWidth}px` }}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 		>
@@ -90,11 +90,26 @@ export function TooltipHint({ content, ariaLabel = "顯示說明", iconSize = 15
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 			>
-				<InfoIcon size={iconSize} />
+				<Icon name="Info" size={iconSize} />
 			</button>
-			<span id={tooltipId} role="tooltip" className="tooltipBubble">
-				{content}
-			</span>
+			{visible && typeof document !== "undefined"
+				? createPortal(
+						<span
+							id={tooltipId}
+							role="tooltip"
+							className="tooltipBubble"
+							data-placement={layout.placement}
+							style={{
+								"--tooltip-left": `${layout.left}px`,
+								"--tooltip-max-width": `${layout.maxWidth}px`,
+								"--tooltip-top": `${layout.top}px`,
+							}}
+						>
+							{content}
+						</span>,
+						document.body
+					)
+				: null}
 		</span>
 	);
 }

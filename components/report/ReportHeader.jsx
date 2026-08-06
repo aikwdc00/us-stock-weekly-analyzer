@@ -1,7 +1,7 @@
-import { Download } from "lucide-react";
 import { cls, displayValue, downloadMarkdown } from "../../hooks/utils";
+import { Icon } from "../shared/Icon";
 
-export function ReportHeader({ quote, language, t }) {
+export function ReportHeader({ quote, language, t, runAiAnalysis, isAiLoading }) {
 	const isUp = quote.changePercent >= 0;
 
 	return (
@@ -34,8 +34,12 @@ export function ReportHeader({ quote, language, t }) {
 					<strong>{displayValue(quote.trend, language)}</strong>
 				</div>
 				<button type="button" onClick={() => downloadMarkdown(quote, language)}>
-					<Download size={17} />
+					<Icon name="Download" size={17} />
 					{t.exportMd}
+				</button>
+				<button type="button" className="aiActionButton" onClick={runAiAnalysis} disabled={isAiLoading}>
+					<Icon name="Sparkles" size={17} />
+					{isAiLoading ? t.aiResearching : t.aiResearch}
 				</button>
 			</div>
 		</>

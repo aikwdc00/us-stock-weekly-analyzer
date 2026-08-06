@@ -24,7 +24,10 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 
 			try {
 				const force = Boolean(options?.force);
-				const query = force ? `symbols=${targetSymbols.join(",")}&_ts=${Date.now()}` : `symbols=${targetSymbols.join(",")}`;
+				const params = new URLSearchParams({ symbols: targetSymbols.join(",") });
+				if (force) params.set("_ts", String(Date.now()));
+				if (options?.ai) params.set("ai", "true");
+				const query = params.toString();
 				const response = await fetch(`/api/quotes?${query}`, {
 					cache: "no-store",
 				});

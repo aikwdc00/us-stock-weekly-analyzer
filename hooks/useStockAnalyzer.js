@@ -8,8 +8,9 @@ import { useRecommendations } from "./useRecommendations";
 import { useSymbolSearch } from "./useSymbolSearch";
 import { useWatchlist } from "./useWatchlist";
 
-export function useStockAnalyzer() {
+export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 	const [error, setError] = useState("");
+	const [isAiLoading, setIsAiLoading] = useState(false);
 	const preferences = usePreferences();
 	const watchlistState = useWatchlist();
 
@@ -24,7 +25,7 @@ export function useStockAnalyzer() {
 	const quotesState = useQuotes(watchlistState.watchlist, { onError: reportError, enabled: watchlistState.hydrated });
 	const recommendationsState = useRecommendations(watchlistState.watchlist, {
 		onError: reportError,
-		enabled: watchlistState.hydrated,
+		enabled: watchlistState.hydrated && loadRecommendations,
 	});
 	const searchState = useSymbolSearch({ onError: reportError });
 
@@ -54,9 +55,23 @@ export function useStockAnalyzer() {
 	}, [clearError, quotesState]);
 
 	const refreshIdeas = useCallback(async () => {
+		if (!loadRecommendations) return;
 		clearError();
 		await recommendationsState.refreshRecommendations(undefined, { force: true });
-	}, [clearError, recommendationsState]);
+	}, [clearError, loadRecommendations, recommendationsState]);
+
+	const runAiAnalysis = useCallback(async () => {
+		const symbol = watchlistState.selectedSymbol;
+		if (!symbol) return;
+
+		clearError();
+		setIsAiLoading(true);
+		try {
+			await quotesState.refreshQuotes([symbol], { force: true, merge: true, ai: true });
+		} finally {
+			setIsAiLoading(false);
+		}
+	}, [clearError, quotesState, watchlistState.selectedSymbol]);
 
 	const selectedQuote = useMemo(
 		() => quotesState.quotes.find((quote) => quote.symbol === watchlistState.selectedSymbol),
@@ -86,9 +101,11 @@ export function useStockAnalyzer() {
 		recommendationGroups: recommendationsState.groups,
 		recommendationsUpdatedAt: recommendationsState.updatedAt,
 		isLoadingRecommendations: recommendationsState.isLoading,
+		isAiLoading,
 		addSymbol,
 		removeSymbol,
 		refreshAll: refreshQuotes,
 		refreshIdeas,
+		runAiAnalysis,
 	};
 }

@@ -50,7 +50,10 @@ const quoteFixture = {
 		totalCash: "53.17B",
 		debt: "12.81B",
 	},
-	valuationMethod: { primary: "Forward PE + FCF Yield" },
+	valuationMethod: { primary: "Forward PE + FCF Yield", why: "Fixture valuation method.", evidence: [], sources: [] },
+	valuationModels: [],
+	catalystTimeline: [],
+	zones: { ideal: "N/A", buy: "N/A", watch: "N/A" },
 	quality: { score: 100, status: "完整", available: 12, total: 12, missing: [] },
 	catalysts: [],
 	news: [],
@@ -113,7 +116,7 @@ test("dashboard keeps one watchlist, supports dark mode, and stays usable on mob
 
 	await page.goto("/");
 	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
-	await expect(page.getByRole("heading", { name: "新增追蹤標的", exact: true })).toBeVisible();
+	await expect(page.getByRole("link", { name: "查看完整清單", exact: true })).toBeVisible();
 	await page.getByRole("button", { name: "夜間", exact: true }).click();
 	await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 	await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -122,4 +125,78 @@ test("dashboard keeps one watchlist, supports dark mode, and stays usable on mob
 	await page.setViewportSize({ width: 768, height: 1024 });
 	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
 	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+});
+
+test("watchlist has its own route and does not load recommendations", async ({ page }) => {
+	let recommendationRequests = 0;
+	page.on("request", (request) => {
+		if (request.url().includes("/api/recommendations")) recommendationRequests += 1;
+	});
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", quotes: [quoteFixture] }),
+		})
+	);
+
+	await page.goto("/watchlist");
+	await expect(page.getByRole("heading", { name: "我的清單", exact: true })).toHaveCount(1);
+	await expect(page.getByRole("heading", { name: "新增追蹤標的", exact: true })).toBeVisible();
+	await expect(page.getByRole("button", { name: "NVDA NVIDIA Corporation" })).toBeVisible();
+	await expect(recommendationRequests).toBe(0);
+	await page.getByRole("button", { name: "NVDA NVIDIA Corporation" }).click();
+	await expect(page).toHaveURL(/\/?symbol=NVDA/);
+	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+});
+
+test("watchlist stays contained at tablet width", async ({ page }) => {
+	await page.setViewportSize({ width: 1024, height: 900 });
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", quotes: [quoteFixture] }),
+		})
+	);
+
+	await page.goto("/watchlist");
+	await expect(page.getByRole("heading", { name: "新增追蹤標的", exact: true })).toBeVisible();
+	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+	await expect(page.locator(".watchlistTable")).toHaveCSS("display", "block");
+});
+
+test("today surfaces quote failures instead of reporting a healthy empty state", async ({ page }) => {
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({ status: 502, contentType: "application/json", body: JSON.stringify({ error: "行情來源暫時無法取得" }) })
+	);
+
+	await page.goto("/today");
+	await expect(page.locator(".prototypeAlert")).toContainText("行情來源暫時無法取得");
+	await expect(page.getByText("資料不足，暫不評估", { exact: true })).toBeVisible();
+});
+
+test("tooltip renders in the viewport instead of being clipped by report panels", async ({ page }) => {
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", quotes: [quoteFixture] }),
+		})
+	);
+	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
+		route.fulfill({ contentType: "application/json", body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", groups: [] }) })
+	);
+	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
+
+	await page.goto("/");
+	await page.getByRole("tab", { name: "估值", exact: true }).click();
+	await page.getByRole("button", { name: "顯示說明" }).first().click();
+
+	const tooltip = page.getByRole("tooltip");
+	await expect(tooltip).toBeVisible();
+	const box = await tooltip.boundingBox();
+	const viewport = page.viewportSize();
+	expect(box).not.toBeNull();
+	expect(box.x).toBeGreaterThanOrEqual(0);
+	expect(box.y).toBeGreaterThanOrEqual(0);
+	expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+	expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
 });
