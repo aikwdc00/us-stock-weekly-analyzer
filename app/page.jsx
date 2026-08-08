@@ -22,6 +22,7 @@ function PageContent() {
 		watchlist,
 		selectedSymbol,
 		setSelectedSymbol,
+		previewSymbol,
 		updatedAt,
 		isLoading,
 		error,
@@ -42,10 +43,15 @@ function PageContent() {
 	const requestedSymbol = searchParams.get("symbol");
 
 	useEffect(() => {
-		if (requestedSymbol && watchlist.includes(requestedSymbol)) {
-			setSelectedSymbol(requestedSymbol);
+		if (requestedSymbol) {
+			previewSymbol(requestedSymbol);
+			return;
 		}
-	}, [requestedSymbol, setSelectedSymbol, watchlist]);
+
+		if (selectedSymbol && !watchlist.includes(selectedSymbol)) {
+			setSelectedSymbol(watchlist[0] || "");
+		}
+	}, [previewSymbol, requestedSymbol, selectedSymbol, setSelectedSymbol, watchlist]);
 
 	return (
 		<main className="shell">

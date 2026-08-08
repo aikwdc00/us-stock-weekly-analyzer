@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cls, formatDate } from "../../hooks/utils";
 import { Icon } from "../shared/Icon";
 
@@ -52,26 +53,37 @@ export function IdeasRail({
 						<p>{language === "en" ? group.criteriaEn : group.criteria}</p>
 						{group.selectionNote ? <small className="suggestionSelectionNote">{group.selectionNote}</small> : null}
 						<div className="suggestions">
-							{(group.items || []).map((item) => (
-								<button
-									key={`${group.id}-${item.symbol}`}
-									className="suggestionItem"
-									onClick={() => addSymbol(item.symbol)}
-									disabled={watchlist.includes(item.symbol)}
-									aria-label={`${item.symbol} ${item.name || ""}`.trim()}
-								>
-									<span className="suggestionItemBody">
-										<strong>{item.symbol}</strong>
-										<small>{item.name}</small>
-										<em>
-											{t.score} {item.score} · {item.valuation} · {item.revenueGrowth}
-										</em>
-									</span>
-									<span className="suggestionItemAction">
-										{watchlist.includes(item.symbol) ? <Icon name="Check" size={16} /> : <Icon name="ListPlus" size={16} />}
-									</span>
-								</button>
-							))}
+							{(group.items || []).map((item) => {
+								const isTracked = watchlist.includes(item.symbol);
+
+								return (
+									<article key={`${group.id}-${item.symbol}`} className="suggestionItem">
+										<Link
+											className="suggestionItemPreview"
+											href={{ pathname: "/", query: { symbol: item.symbol } }}
+											aria-label={`${item.symbol} ${item.name || ""} ${t.tabOverview}`.trim()}
+										>
+											<span className="suggestionItemBody">
+												<strong>{item.symbol}</strong>
+												<small>{item.name}</small>
+												<em>
+													{t.score} {item.score} · {item.valuation} · {item.revenueGrowth}
+												</em>
+											</span>
+										</Link>
+										<button
+											type="button"
+											className="suggestionItemAction"
+											onClick={() => addSymbol(item.symbol)}
+											disabled={isTracked}
+											aria-label={`${item.symbol} ${isTracked ? t.alreadyTracked : t.addToWatchlist}`}
+											title={isTracked ? t.alreadyTracked : t.addToWatchlist}
+										>
+											<Icon name={isTracked ? "Check" : "ListPlus"} size={16} />
+										</button>
+									</article>
+								);
+							})}
 						</div>
 						<div className="suggestionReasons">
 							{(group.items || []).slice(0, 3).map((item) => (

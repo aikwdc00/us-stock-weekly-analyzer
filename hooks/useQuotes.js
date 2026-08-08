@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useQuotes(watchlist, { onError, enabled = true } = {}) {
+export function useQuotes(watchlist, { onError, enabled = true, retainSymbols = [] } = {}) {
 	const [quotes, setQuotes] = useState([]);
 	const [updatedAt, setUpdatedAt] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -97,9 +97,12 @@ export function useQuotes(watchlist, { onError, enabled = true } = {}) {
 		return () => window.clearInterval(interval);
 	}, [enabled, refreshQuotes]);
 
+	const retainedSymbolsKey = retainSymbols.filter(Boolean).join(",");
+
 	useEffect(() => {
-		setQuotes((currentQuotes) => currentQuotes.filter((quote) => watchlist.includes(quote.symbol)));
-	}, [watchlist.join(",")]);
+		const retained = new Set(retainedSymbolsKey ? retainedSymbolsKey.split(",") : []);
+		setQuotes((currentQuotes) => currentQuotes.filter((quote) => watchlist.includes(quote.symbol) || retained.has(quote.symbol)));
+	}, [retainedSymbolsKey, watchlist.join(",")]);
 
 	return {
 		quotes,

@@ -610,8 +610,7 @@ h1 {
 	}
 }
 
-.searchResults button,
-.suggestions button {
+.searchResults button {
 	@include flex-between(10px);
 	background: color(white);
 	border: 0;
@@ -2277,18 +2276,6 @@ h1 {
 
 .suggestions {
 	@include grid(1fr, 8px);
-
-	button {
-		@include card(white);
-		font-weight: 850;
-		padding: 11px;
-
-		&:disabled {
-			background: color(teal-soft-2);
-			color: color(teal);
-			cursor: default;
-		}
-	}
 }
 
 .suggestionBasis {
@@ -2350,12 +2337,32 @@ h1 {
 }
 
 .suggestionItem {
+	@include card(white);
 	align-items: flex-start;
 	display: grid;
 	gap: 10px;
-	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-columns: minmax(0, 1fr) 56px;
 	min-width: 0;
+	overflow: hidden;
+	padding: 0;
 	text-align: left;
+}
+
+.suggestionItemPreview {
+	color: color(ink);
+	display: block;
+	min-width: 0;
+	padding: 11px;
+	text-decoration: none;
+
+	&:hover {
+		background: color(teal-soft-2);
+	}
+
+	&:focus-visible {
+		outline: 2px solid color(teal);
+		outline-offset: -3px;
+	}
 }
 
 .suggestionItemBody {
@@ -2386,10 +2393,37 @@ h1 {
 }
 
 .suggestionItemAction {
-	@include inline-center;
+	align-self: stretch;
+	background: transparent;
+	border: 0;
+	border-left: 1px solid color(line);
 	color: color(teal);
-	flex: 0 0 auto;
-	margin-top: 2px;
+	cursor: pointer;
+	display: grid;
+	min-height: 44px;
+	min-width: 56px;
+	padding: 0 12px;
+	place-items: center;
+	width: 56px;
+
+	svg {
+		flex: 0 0 auto;
+	}
+
+	&:hover:not(:disabled) {
+		background: color(teal-soft-2);
+	}
+
+	&:focus-visible {
+		outline: 2px solid color(teal);
+		outline-offset: -3px;
+	}
+
+	&:disabled {
+		background: color(teal-soft-2);
+		color: color(teal);
+		cursor: default;
+	}
 }
 
 .suggestionReasons {

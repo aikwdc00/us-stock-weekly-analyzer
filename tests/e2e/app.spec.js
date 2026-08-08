@@ -47,18 +47,39 @@ const quoteFixture = {
 		freeCashFlow: "119.08B",
 		grossMargin: "74.15%",
 		profitMargin: "62.97%",
+		estimatedAnnualGrossProfit: "$279.65B",
+		estimatedAnnualGrossProfitGrowth: "+82.39%",
+		estimatedNextAnnualGrossProfit: "$398.65B",
+		estimatedNextAnnualGrossProfitGrowth: "+42.57%",
+		estimatedAnnualOperatingIncome: "$238.05B",
+		estimatedAnnualOperatingIncomeGrowth: "+82.39%",
+		estimatedNextAnnualOperatingIncome: "$340.00B",
+		estimatedNextAnnualOperatingIncomeGrowth: "+42.57%",
+		forecastAssumptionNote: "公式：預估營收 × 最近可取得利潤率；這是計算值。",
+		forecastGrossMarginReference: "+74.15%",
+		forecastOperatingMarginReference: "+64.02%",
+		forecastSource: "StockAnalysis Forecast",
+		forecastSourceUrl: "https://stockanalysis.com/stocks/nvda/forecast/",
 		totalCash: "53.17B",
 		debt: "12.81B",
 	},
 	valuationMethod: { primary: "Forward PE + FCF Yield", why: "Fixture valuation method.", evidence: [], sources: [] },
 	valuationModels: [],
 	catalystTimeline: [],
-	zones: { ideal: "N/A", buy: "N/A", watch: "N/A" },
+	zones: {
+		ideal: "$173.62 - $197.30",
+		buy: "$197.30 - $214.84",
+		watch: "$214.84 - $236.54",
+		isEstimate: true,
+		basis: "客端估算：以行情 API 的現價、52 週高低點與估值分類（PE / Forward PE / PEG / FCF Yield）計算；不是公司揭露或分析師目標價。",
+	},
 	quality: { score: 100, status: "完整", available: 12, total: 12, missing: [] },
 	catalysts: [],
 	news: [],
 	ownership: { insiders: "3.91%", institutions: "69.08%", filings: [], transactionNote: "N/A" },
 };
+
+const avgoQuoteFixture = { ...quoteFixture, symbol: "AVGO", name: "Broadcom Inc." };
 
 test("quote API returns a coherent daily price range", async ({ request }) => {
 	const response = await request.get("/api/quotes?symbols=NVDA");
@@ -88,11 +109,16 @@ test("dashboard loads a report and opens the mind map SWOT tab", async ({ page }
 	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
 		route.fulfill({ contentType: "application/json", body: JSON.stringify({ updatedAt: "2026-07-16T00:00:00.000Z", groups: [] }) })
 	);
-	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
+	await page.route(/\/api\/peers(?:\?.*)?$/, (route) =>
+		route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: ["AVGO"] }) })
+	);
 
 	await page.goto("/");
 	await expect(page.getByRole("heading", { name: "美股週報分析工作台" })).toBeVisible();
 	await expect(page.getByText("[object Object]", { exact: true })).toHaveCount(0);
+	await page.getByRole("tab", { name: "財報", exact: true }).click();
+	await expect(page.getByText("$279.65B / +82.39%", { exact: true })).toBeVisible();
+	await expect(page.getByText("公式：預估營收 × 最近可取得利潤率；這是計算值。", { exact: true })).toBeVisible();
 
 	const mindMapTab = page.getByRole("tab", { name: "心智圖與 SWOT" });
 	await expect(mindMapTab).toBeVisible();
@@ -114,11 +140,15 @@ test("market refresh uses the summary path while selected research uses detail",
 	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
 		route.fulfill({ contentType: "application/json", body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", groups: [] }) })
 	);
-	await page.route(/\/api\/peers(?:\?.*)?$/, (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: [] }) }));
+	await page.route(/\/api\/peers(?:\?.*)?$/, (route) =>
+		route.fulfill({ contentType: "application/json", body: JSON.stringify({ peers: ["AVGO"] }) })
+	);
 
 	await page.goto("/");
 	await expect.poll(() => quoteScopes.includes("summary")).toBeTruthy();
 	await expect.poll(() => quoteScopes.includes("detail")).toBeTruthy();
+	await page.getByRole("tab", { name: "產業與風險", exact: true }).click();
+	await expect.poll(() => quoteScopes.includes("peer")).toBeTruthy();
 
 	quoteScopes.length = 0;
 	await page.getByRole("button", { name: "更新行情", exact: true }).click();
@@ -126,13 +156,14 @@ test("market refresh uses the summary path while selected research uses detail",
 	expect(quoteScopes.every((scope) => scope === "summary")).toBeTruthy();
 });
 
-test("explore is a working route with recommendation candidates", async ({ page }) => {
-	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
-		route.fulfill({
+test("explore opens a suggested item in overview without adding it to the watchlist", async ({ page }) => {
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) => {
+		const symbols = new URL(route.request().url()).searchParams.get("symbols") || "";
+		return route.fulfill({
 			contentType: "application/json",
-			body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", quotes: [quoteFixture] }),
-		})
-	);
+			body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", quotes: [symbols.includes("AVGO") ? avgoQuoteFixture : quoteFixture] }),
+		});
+	});
 	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
 		route.fulfill({
 			contentType: "application/json",
@@ -162,7 +193,66 @@ test("explore is a working route with recommendation candidates", async ({ page 
 	await page.goto("/explore");
 	await expect(page).toHaveURL(/\/explore$/);
 	await expect(page.getByRole("heading", { name: "探索標的", exact: true })).toBeVisible();
-	await expect(page.getByRole("button", { name: /AVGO Broadcom Inc\./ })).toBeVisible();
+	await page.getByRole("link", { name: /AVGO Broadcom Inc\./ }).click();
+	await expect(page).toHaveURL(/\/?symbol=AVGO/);
+	await expect(page.getByRole("heading", { name: "AVGO Broadcom Inc." })).toBeVisible();
+	await expect
+		.poll(() => page.evaluate(() => JSON.parse(window.localStorage.getItem("us-stock-weekly-analyzer.watchlist") || "[]").includes("AVGO")))
+		.toBe(false);
+});
+
+test("suggestion add icon adds a stock without leaving explore", async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({ updatedAt: "2026-08-06T00:00:00.000Z", quotes: [avgoQuoteFixture] }),
+		})
+	);
+	await page.route(/\/api\/recommendations(?:\?.*)?$/, (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({
+				updatedAt: "2026-08-06T00:00:00.000Z",
+				groups: [
+					{
+						id: "stableGrowth",
+						title: "穩定成長",
+						criteria: "候選池排序",
+						items: [
+							{
+								symbol: "AVGO",
+								name: "Broadcom Inc.",
+								score: 84,
+								valuation: "合理",
+								revenueGrowth: "+20%",
+								reasons: ["FCF Yield 為正"],
+							},
+						],
+					},
+				],
+			}),
+		})
+	);
+
+	await page.goto("/explore");
+	const addButton = page.getByRole("button", { name: "AVGO 新增追蹤標的" });
+	const actionBox = await addButton.boundingBox();
+	const iconBox = await addButton.locator("svg").boundingBox();
+
+	expect(actionBox).not.toBeNull();
+	expect(iconBox).not.toBeNull();
+	expect(Math.abs(iconBox.x + iconBox.width / 2 - (actionBox.x + actionBox.width / 2))).toBeLessThanOrEqual(1);
+	expect(iconBox.x).toBeGreaterThan(actionBox.x);
+	expect(iconBox.x + iconBox.width).toBeLessThan(actionBox.x + actionBox.width);
+
+	await addButton.click();
+	await expect(page).toHaveURL(/\/explore$/);
+	await expect(page.getByRole("button", { name: "AVGO 已在追蹤清單" })).toBeDisabled();
+	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+	await expect
+		.poll(() => page.evaluate(() => JSON.parse(window.localStorage.getItem("us-stock-weekly-analyzer.watchlist") || "[]").includes("AVGO")))
+		.toBe(true);
 });
 
 test("dashboard links to the watchlist route, supports dark mode, and stays usable on mobile", async ({ page }) => {
@@ -256,6 +346,8 @@ test("tooltip renders in the viewport instead of being clipped by report panels"
 
 	await page.goto("/");
 	await page.getByRole("tab", { name: "估值", exact: true }).click();
+	await expect(page.getByText("$173.62 - $197.30", { exact: true })).toBeVisible();
+	await expect(page.getByText(/客端估算：以行情 API/)).toBeVisible();
 	await page.getByRole("button", { name: "顯示說明" }).first().click();
 
 	const tooltip = page.getByRole("tooltip");

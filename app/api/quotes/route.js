@@ -224,8 +224,23 @@ async function enrichSummaryQuotes(rawQuotes) {
 	});
 }
 
+async function enrichPeerQuotes(rawQuotes) {
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
+	if (!stockAnalysisAllowed) return enrichSummaryQuotes(rawQuotes);
+
+	const snapshotResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchStockAnalysisSnapshot(quote.symbol));
+	const snapshots = pickFulfilled(snapshotResults, {});
+
+	return rawQuotes.map((quote, index) => {
+		const snapshot = snapshots[index] || {};
+		const mergedQuote = mergeQuoteWithSnapshot(quote, snapshot, null, null, {}, snapshot.news || [], { events: [] });
+		return enrichQuote({ ...mergedQuote, detailLevel: "peer" }, getProfileForSymbol(quote.symbol, { ...snapshot, secFinancials: null }));
+	});
+}
+
 async function enrichRawQuotes(rawQuotes, { runAiAnalysis = false, scope = "detail" } = {}) {
 	if (scope === "summary") return enrichSummaryQuotes(rawQuotes);
+	if (scope === "peer") return enrichPeerQuotes(rawQuotes);
 
 	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
 	const finnhubAllowed = Boolean(getProviderForUse("finnhub", { capability: "profile", role: "supplementary" }));
@@ -298,7 +313,8 @@ async function enrichRawQuotes(rawQuotes, { runAiAnalysis = false, scope = "deta
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
 	const runAiAnalysis = AI_ANALYSIS_ENABLED && searchParams.get("ai") === "true";
-	const scope = searchParams.get("scope") === "summary" ? "summary" : "detail";
+	const requestedScope = searchParams.get("scope");
+	const scope = ["summary", "peer"].includes(requestedScope) ? requestedScope : "detail";
 	const rawSymbols = searchParams.get("symbols");
 
 	if (!rawSymbols) {

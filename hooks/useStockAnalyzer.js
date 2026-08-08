@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { normalizeSymbol } from "../lib/analysis";
 import { safeNumber } from "./utils";
 import { usePreferences } from "./usePreferences";
 import { useQuotes } from "./useQuotes";
@@ -22,7 +23,11 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 		setError("");
 	}, []);
 
-	const quotesState = useQuotes(watchlistState.watchlist, { onError: reportError, enabled: watchlistState.hydrated });
+	const quotesState = useQuotes(watchlistState.watchlist, {
+		onError: reportError,
+		enabled: watchlistState.hydrated,
+		retainSymbols: [watchlistState.selectedSymbol],
+	});
 	const recommendationsState = useRecommendations(watchlistState.watchlist, {
 		onError: reportError,
 		enabled: watchlistState.hydrated && loadRecommendations,
@@ -37,6 +42,18 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 			searchState.clearSearch();
 		},
 		[clearError, searchState, watchlistState]
+	);
+
+	const previewSymbol = useCallback(
+		(rawSymbol) => {
+			const symbol = normalizeSymbol(String(rawSymbol || ""));
+			if (!symbol) return null;
+
+			clearError();
+			watchlistState.setSelectedSymbol(symbol);
+			return symbol;
+		},
+		[clearError, watchlistState.setSelectedSymbol]
 	);
 
 	useEffect(() => {
@@ -106,6 +123,7 @@ export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 		isLoadingRecommendations: recommendationsState.isLoading,
 		isAiLoading,
 		addSymbol,
+		previewSymbol,
 		removeSymbol,
 		refreshAll: refreshQuotes,
 		refreshIdeas,

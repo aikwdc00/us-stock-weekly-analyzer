@@ -215,6 +215,7 @@ export function FinancialsPanel({ quote, t, language }) {
 					roe: "股東權益報酬率，衡量公司用股東資本賺錢的效率。",
 					roic: "投入資本報酬率，衡量公司對整體資本配置的使用效率。",
 				};
+	const formatProfitForecast = (value, growth) => (value ? `${value} / ${growth || t.growthUnavailable}` : t.forecastUnavailable);
 
 	const epsRows = [
 		{
@@ -321,7 +322,7 @@ export function FinancialsPanel({ quote, t, language }) {
 				</div>
 				{quote.fundamentals.forecastSourceUrl ? (
 					<a className="sourceLink" href={quote.fundamentals.forecastSourceUrl} target="_blank" rel="noreferrer">
-						{t.forecastSource}: StockAnalysis Forecast
+						{t.forecastSource}: {quote.fundamentals.forecastSource || "StockAnalysis Forecast"}
 						<Icon name="ExternalLink" size={14} />
 					</a>
 				) : null}
@@ -332,38 +333,34 @@ export function FinancialsPanel({ quote, t, language }) {
 				<div className="fundamentalGrid">
 					<Info
 						label={text.estAnnualGrossProfit}
-						value={
-							quote.fundamentals.estimatedAnnualGrossProfit
-								? `${quote.fundamentals.estimatedAnnualGrossProfit} / ${quote.fundamentals.estimatedAnnualGrossProfitGrowth || t.growthNA}`
-								: "N/A"
-						}
+						value={formatProfitForecast(
+							quote.fundamentals.estimatedAnnualGrossProfit,
+							quote.fundamentals.estimatedAnnualGrossProfitGrowth
+						)}
 						tip={tips.estAnnualGrossProfit}
 					/>
 					<Info
 						label={text.estNextAnnualGrossProfit}
-						value={
-							quote.fundamentals.estimatedNextAnnualGrossProfit
-								? `${quote.fundamentals.estimatedNextAnnualGrossProfit} / ${quote.fundamentals.estimatedNextAnnualGrossProfitGrowth || t.growthNA}`
-								: "N/A"
-						}
+						value={formatProfitForecast(
+							quote.fundamentals.estimatedNextAnnualGrossProfit,
+							quote.fundamentals.estimatedNextAnnualGrossProfitGrowth
+						)}
 						tip={tips.estNextAnnualGrossProfit}
 					/>
 					<Info
 						label={text.estAnnualOperatingIncome}
-						value={
-							quote.fundamentals.estimatedAnnualOperatingIncome
-								? `${quote.fundamentals.estimatedAnnualOperatingIncome} / ${quote.fundamentals.estimatedAnnualOperatingIncomeGrowth || t.growthNA}`
-								: "N/A"
-						}
+						value={formatProfitForecast(
+							quote.fundamentals.estimatedAnnualOperatingIncome,
+							quote.fundamentals.estimatedAnnualOperatingIncomeGrowth
+						)}
 						tip={tips.estAnnualOperatingIncome}
 					/>
 					<Info
 						label={text.estNextAnnualOperatingIncome}
-						value={
-							quote.fundamentals.estimatedNextAnnualOperatingIncome
-								? `${quote.fundamentals.estimatedNextAnnualOperatingIncome} / ${quote.fundamentals.estimatedNextAnnualOperatingIncomeGrowth || t.growthNA}`
-								: "N/A"
-						}
+						value={formatProfitForecast(
+							quote.fundamentals.estimatedNextAnnualOperatingIncome,
+							quote.fundamentals.estimatedNextAnnualOperatingIncomeGrowth
+						)}
 						tip={tips.estNextAnnualOperatingIncome}
 					/>
 				</div>

@@ -34,8 +34,8 @@ export function useIndustryPeers(symbol) {
 					return;
 				}
 
-				// Peer comparison only needs summary metrics; selected company detail stays on the main report path.
-				const quotesRes = await fetch(`/api/quotes?scope=summary&symbols=${peerSymbols.map(encodeURIComponent).join(",")}`, {
+				// Peer comparison needs valuation and margin metrics, but not full SEC/news/AI detail.
+				const quotesRes = await fetch(`/api/quotes?scope=peer&symbols=${peerSymbols.map(encodeURIComponent).join(",")}`, {
 					signal: controller.signal,
 				});
 				if (!quotesRes.ok) throw new Error(`Peer quotes request failed: ${quotesRes.status}`);
