@@ -1,14 +1,18 @@
 "use client";
 
-import { Activity, BarChart3, CircleDollarSign, Languages, Moon, RefreshCw, ShieldCheck, Sparkles, Sun } from "lucide-react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { AppNav } from "../components/layout/AppNav";
 import { IdeasRail } from "../components/layout/IdeasRail";
-import { WatchlistSidebar } from "../components/layout/WatchlistSidebar";
 import { StockReport } from "../components/report/StockReport";
+import { BackToTopButton } from "../components/shared/BackToTopButton";
+import { Icon } from "../components/shared/Icon";
 import { useStockAnalyzer } from "../hooks/useStockAnalyzer";
 import { cls } from "../hooks/utils";
 
-export default function Page() {
+function PageContent() {
 	const analyzer = useStockAnalyzer();
+	const searchParams = useSearchParams();
 	const {
 		language,
 		setLanguage,
@@ -18,27 +22,36 @@ export default function Page() {
 		watchlist,
 		selectedSymbol,
 		setSelectedSymbol,
-		quotes,
+		previewSymbol,
 		updatedAt,
 		isLoading,
 		error,
 		dataWarning,
-		searchTerm,
-		setSearchTerm,
-		results,
-		isSearching,
-		searchSymbols,
 		recommendationGroups,
 		recommendationsUpdatedAt,
 		isLoadingRecommendations,
 		hasRecommendationItems,
 		selectedQuote,
+		runAiAnalysis,
+		isAiLoading,
 		coverageStats,
 		addSymbol,
 		removeSymbol,
 		refreshAll,
 		refreshIdeas,
 	} = analyzer;
+	const requestedSymbol = searchParams.get("symbol");
+
+	useEffect(() => {
+		if (requestedSymbol) {
+			previewSymbol(requestedSymbol);
+			return;
+		}
+
+		if (selectedSymbol && !watchlist.includes(selectedSymbol)) {
+			setSelectedSymbol(watchlist[0] || "");
+		}
+	}, [previewSymbol, requestedSymbol, selectedSymbol, setSelectedSymbol, watchlist]);
 
 	return (
 		<main className="shell">
@@ -61,7 +74,7 @@ export default function Page() {
 					</span>
 					<div className="topActions">
 						<div className="languageToggle" aria-label="Language">
-							<Languages size={17} />
+							<Icon name="Languages" size={17} />
 							<button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>
 								中
 							</button>
@@ -70,11 +83,11 @@ export default function Page() {
 							</button>
 						</div>
 						<button className="themeToggle" onClick={toggleTheme}>
-							{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+							{theme === "dark" ? <Icon name="Sun" size={17} /> : <Icon name="Moon" size={17} />}
 							{theme === "dark" ? t.lightMode : t.darkMode}
 						</button>
 						<button className="primaryButton" onClick={() => refreshAll()} disabled={isLoading}>
-							<RefreshCw size={18} className={cls(isLoading && "spin")} />
+							<Icon name="RefreshCw" size={18} className={cls(isLoading && "spin")} />
 							{isLoading ? t.refreshing : t.refresh}
 						</button>
 					</div>
@@ -83,22 +96,22 @@ export default function Page() {
 
 			<section className="metricGrid">
 				<div className="metric">
-					<Activity size={20} />
+					<Icon name="Activity" size={20} />
 					<span>{t.tracked}</span>
 					<strong>{watchlist.length}</strong>
 				</div>
 				<div className="metric">
-					<ShieldCheck size={20} />
+					<Icon name="ShieldCheck" size={20} />
 					<span>{t.loaded}</span>
 					<strong>{coverageStats.loaded}</strong>
 				</div>
 				<div className="metric">
-					<CircleDollarSign size={20} />
+					<Icon name="CircleDollarSign" size={20} />
 					<span>{t.positive}</span>
 					<strong>{coverageStats.positive}</strong>
 				</div>
 				<div className="metric">
-					<BarChart3 size={20} />
+					<Icon name="BarChart3" size={20} />
 					<span>{t.avgMove}</span>
 					<strong>{Number.isFinite(coverageStats.avgMove) ? `${coverageStats.avgMove.toFixed(2)}%` : "N/A"}</strong>
 				</div>
@@ -112,36 +125,28 @@ export default function Page() {
 				</div>
 			) : null}
 
-			<section className="workspace">
-				<WatchlistSidebar
-					t={t}
-					language={language}
-					updatedAt={updatedAt}
-					searchTerm={searchTerm}
-					setSearchTerm={setSearchTerm}
-					searchSymbols={searchSymbols}
-					isSearching={isSearching}
-					addSymbol={addSymbol}
-					results={results}
-					watchlist={watchlist}
-					quotes={quotes}
-					selectedSymbol={selectedSymbol}
-					setSelectedSymbol={setSelectedSymbol}
-					removeSymbol={removeSymbol}
-				/>
+			<AppNav active="overview" />
 
+			<section className="workspace">
 				<section className="mainPanel">
 					{selectedQuote ? (
-						<StockReport quote={selectedQuote} peerQuotes={quotes} language={language} t={t} updatedAt={updatedAt} />
+						<StockReport
+							quote={selectedQuote}
+							language={language}
+							t={t}
+							updatedAt={updatedAt}
+							runAiAnalysis={runAiAnalysis}
+							isAiLoading={isAiLoading}
+						/>
 					) : selectedSymbol ? (
 						<div className="emptyState">
-							<RefreshCw size={30} className={cls(isLoading && "spin")} />
+							<Icon name="RefreshCw" size={30} className={cls(isLoading && "spin")} />
 							<h2>{t.loadingReport}</h2>
 							<p>{t.loadingReportHint}</p>
 						</div>
 					) : (
 						<div className="emptyState">
-							<Sparkles size={30} />
+							<Icon name="Sparkles" size={30} />
 							<h2>{t.addFirst}</h2>
 							<p>{t.addFirstHint}</p>
 						</div>
@@ -165,6 +170,15 @@ export default function Page() {
 				<span>© 2026 Fred Li. All rights reserved.</span>
 				<span>{t.footer}</span>
 			</footer>
+			<BackToTopButton label={t.backToTop} />
 		</main>
+	);
+}
+
+export default function Page() {
+	return (
+		<Suspense fallback={<main className="shell" aria-busy="true" />}>
+			<PageContent />
+		</Suspense>
 	);
 }

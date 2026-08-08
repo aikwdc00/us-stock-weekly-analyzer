@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { normalizeSymbol } from "../lib/analysis";
 import { safeNumber } from "./utils";
 import { usePreferences } from "./usePreferences";
 import { useQuotes } from "./useQuotes";
@@ -8,8 +9,9 @@ import { useRecommendations } from "./useRecommendations";
 import { useSymbolSearch } from "./useSymbolSearch";
 import { useWatchlist } from "./useWatchlist";
 
-export function useStockAnalyzer() {
+export function useStockAnalyzer({ loadRecommendations = true } = {}) {
 	const [error, setError] = useState("");
+	const [isAiLoading, setIsAiLoading] = useState(false);
 	const preferences = usePreferences();
 	const watchlistState = useWatchlist();
 
@@ -21,22 +23,43 @@ export function useStockAnalyzer() {
 		setError("");
 	}, []);
 
-	const quotesState = useQuotes(watchlistState.watchlist, { onError: reportError });
+	const quotesState = useQuotes(watchlistState.watchlist, {
+		onError: reportError,
+		enabled: watchlistState.hydrated,
+		retainSymbols: [watchlistState.selectedSymbol],
+	});
 	const recommendationsState = useRecommendations(watchlistState.watchlist, {
 		onError: reportError,
+		enabled: watchlistState.hydrated && loadRecommendations,
 	});
 	const searchState = useSymbolSearch({ onError: reportError });
 
 	const addSymbol = useCallback(
-		async (rawSymbol) => {
+		(rawSymbol) => {
 			clearError();
 			const next = watchlistState.addSymbol(rawSymbol);
 			if (!next || next === watchlistState.watchlist) return;
 			searchState.clearSearch();
-			await Promise.all([quotesState.refreshQuotes(next), recommendationsState.refreshRecommendations(next)]);
 		},
-		[clearError, quotesState, recommendationsState, searchState, watchlistState]
+		[clearError, searchState, watchlistState]
 	);
+
+	const previewSymbol = useCallback(
+		(rawSymbol) => {
+			const symbol = normalizeSymbol(String(rawSymbol || ""));
+			if (!symbol) return null;
+
+			clearError();
+			watchlistState.setSelectedSymbol(symbol);
+			return symbol;
+		},
+		[clearError, watchlistState.setSelectedSymbol]
+	);
+
+	useEffect(() => {
+		if (!watchlistState.hydrated || !watchlistState.selectedSymbol) return;
+		void quotesState.refreshDetail([watchlistState.selectedSymbol]);
+	}, [quotesState.refreshDetail, watchlistState.hydrated, watchlistState.selectedSymbol]);
 
 	const removeSymbol = useCallback(
 		(symbol) => {
@@ -46,18 +69,29 @@ export function useStockAnalyzer() {
 		[clearError, watchlistState]
 	);
 
-	const refreshAll = useCallback(async () => {
+	const refreshQuotes = useCallback(async () => {
 		clearError();
-		await Promise.all([
-			quotesState.refreshQuotes(undefined, { force: true }),
-			recommendationsState.refreshRecommendations(undefined, { force: true }),
-		]);
-	}, [clearError, quotesState, recommendationsState]);
+		await quotesState.refreshQuotes(undefined, { force: true, merge: true, scope: "summary" });
+	}, [clearError, quotesState]);
 
 	const refreshIdeas = useCallback(async () => {
+		if (!loadRecommendations) return;
 		clearError();
 		await recommendationsState.refreshRecommendations(undefined, { force: true });
-	}, [clearError, recommendationsState]);
+	}, [clearError, loadRecommendations, recommendationsState]);
+
+	const runAiAnalysis = useCallback(async () => {
+		const symbol = watchlistState.selectedSymbol;
+		if (!symbol) return;
+
+		clearError();
+		setIsAiLoading(true);
+		try {
+			await quotesState.refreshDetail([symbol], { force: true, ai: true });
+		} finally {
+			setIsAiLoading(false);
+		}
+	}, [clearError, quotesState, watchlistState.selectedSymbol]);
 
 	const selectedQuote = useMemo(
 		() => quotesState.quotes.find((quote) => quote.symbol === watchlistState.selectedSymbol),
@@ -87,9 +121,12 @@ export function useStockAnalyzer() {
 		recommendationGroups: recommendationsState.groups,
 		recommendationsUpdatedAt: recommendationsState.updatedAt,
 		isLoadingRecommendations: recommendationsState.isLoading,
+		isAiLoading,
 		addSymbol,
+		previewSymbol,
 		removeSymbol,
-		refreshAll,
+		refreshAll: refreshQuotes,
 		refreshIdeas,
+		runAiAnalysis,
 	};
 }

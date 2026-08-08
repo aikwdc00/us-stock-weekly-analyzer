@@ -1,5 +1,9 @@
 export const dynamic = "force-dynamic";
 
+import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { getClientKey, normalizeSearchQuery } from "../../../lib/requestValidation.mjs";
+import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
+
 const YAHOO_SEARCH_URL = "https://query1.finance.yahoo.com/v1/finance/search";
 const aliasResults = {
 	google: [{ symbol: "GOOGL", name: "Alphabet Inc. Class A", exchange: "NASDAQ", type: "EQUITY" }],
@@ -19,7 +23,17 @@ const aliasResults = {
 
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
-	const query = searchParams.get("q")?.trim();
+	const normalized = normalizeSearchQuery(searchParams.get("q"));
+	const query = normalized.query;
+	const rateLimit = checkRateLimit(getClientKey(request, "search"), { limit: 60, windowMs: 60_000 });
+
+	if (!rateLimit.allowed) {
+		return Response.json({ results: [], error: "搜尋請求過於頻繁，請稍後再試。" }, { status: 429, headers: rateLimitHeaders(rateLimit) });
+	}
+
+	if (normalized.error) {
+		return Response.json({ results: [], error: normalized.error }, { status: 400 });
+	}
 
 	if (!query) {
 		return Response.json({ results: [] });
@@ -33,7 +47,8 @@ export async function GET(request) {
 		url.searchParams.set("lang", "en-US");
 		url.searchParams.set("region", "US");
 
-		const response = await fetch(url, {
+		const response = await fetchWithTimeout(url, {
+			timeoutMs: 8_000,
 			headers: {
 				"User-Agent": "Mozilla/5.0",
 			},
@@ -71,7 +86,6 @@ export async function GET(request) {
 			{
 				results: [],
 				error: "目前無法搜尋公開行情來源，請稍後再試。",
-				detail: error.message,
 			},
 			{ status: 502 }
 		);

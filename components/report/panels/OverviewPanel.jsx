@@ -1,9 +1,17 @@
-import { ExternalLink } from "lucide-react";
 import { displayValue, getLocalizedNewsText, getLocalizedNewsTitle, getNewsUrl, thesisText } from "../../../hooks/utils";
 import { Info } from "../shared/Info";
 import { LongTermPlan } from "../shared/LongTermPlan";
+import { Icon } from "../../shared/Icon";
 
 export function OverviewPanel({ quote, language, t }) {
+	const formatEventDate = (value) => {
+		if (!value) return "N/A";
+		const date = new Date(`${value}T00:00:00Z`);
+		return Number.isNaN(date.getTime())
+			? value
+			: new Intl.DateTimeFormat(language === "en" ? "en-US" : "zh-TW", { dateStyle: "medium", timeZone: "UTC" }).format(date);
+	};
+
 	return (
 		<div className="reportTabPanel">
 			<section className="analysisSection conclusion">
@@ -37,6 +45,32 @@ export function OverviewPanel({ quote, language, t }) {
 				</div>
 			</section>
 
+			<section className="analysisSection eventsSection">
+				<h3>{t.importantEvents}</h3>
+				{quote.events?.length ? (
+					<div className="eventList">
+						{quote.events.slice(0, 8).map((event) => (
+							<div key={`${event.type}-${event.date}-${event.source}`} className="eventRow">
+								<div>
+									<strong>{language === "en" ? event.labelEn || event.label : event.label}</strong>
+									<span>{event.detail || (event.status === "expected" ? t.eventExpected : t.eventScheduled)}</span>
+								</div>
+								<div className="eventRowDate">
+									<b>{formatEventDate(event.date)}</b>
+									{event.sourceUrl ? (
+										<a href={event.sourceUrl} target="_blank" rel="noreferrer" aria-label={`${t.eventSource}: ${event.source}`}>
+											<Icon name="ExternalLink" size={14} />
+										</a>
+									) : null}
+								</div>
+							</div>
+						))}
+					</div>
+				) : (
+					<p className="evidenceEmpty">{t.noEvents}</p>
+				)}
+			</section>
+
 			<section className="analysisSection">
 				<h3>{t.majorNews}</h3>
 				{quote.news.length ? (
@@ -48,7 +82,7 @@ export function OverviewPanel({ quote, language, t }) {
 								</span>
 								<strong>
 									{getLocalizedNewsTitle(item, language)}
-									<ExternalLink size={14} />
+									<Icon name="ExternalLink" size={14} />
 								</strong>
 								<p>{getLocalizedNewsText(item, language)}</p>
 								<em>{t.openNews}</em>
