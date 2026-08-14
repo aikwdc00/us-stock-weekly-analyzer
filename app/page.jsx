@@ -11,8 +11,9 @@ import { useStockAnalyzer } from "../hooks/useStockAnalyzer";
 import { cls } from "../hooks/utils";
 
 function PageContent() {
-	const analyzer = useStockAnalyzer();
 	const searchParams = useSearchParams();
+	const requestedSymbol = searchParams.get("symbol");
+	const analyzer = useStockAnalyzer({ preferredSymbol: requestedSymbol });
 	const {
 		language,
 		setLanguage,
@@ -22,7 +23,6 @@ function PageContent() {
 		watchlist,
 		selectedSymbol,
 		setSelectedSymbol,
-		previewSymbol,
 		updatedAt,
 		isLoading,
 		error,
@@ -40,18 +40,12 @@ function PageContent() {
 		refreshAll,
 		refreshIdeas,
 	} = analyzer;
-	const requestedSymbol = searchParams.get("symbol");
 
 	useEffect(() => {
-		if (requestedSymbol) {
-			previewSymbol(requestedSymbol);
-			return;
-		}
-
-		if (selectedSymbol && !watchlist.includes(selectedSymbol)) {
+		if (!requestedSymbol && selectedSymbol && !watchlist.includes(selectedSymbol)) {
 			setSelectedSymbol(watchlist[0] || "");
 		}
-	}, [previewSymbol, requestedSymbol, selectedSymbol, setSelectedSymbol, watchlist]);
+	}, [requestedSymbol, selectedSymbol, setSelectedSymbol, watchlist]);
 
 	return (
 		<main className="shell">

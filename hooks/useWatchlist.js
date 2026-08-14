@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeSymbol } from "../lib/analysis";
 import { DEFAULT_WATCHLIST, STORAGE_KEYS } from "./copy";
 
-export function useWatchlist() {
+export function useWatchlist({ preferredSymbol } = {}) {
+	const normalizedPreferredSymbol = normalizeSymbol(String(preferredSymbol || ""));
 	const [watchlist, setWatchlist] = useState(DEFAULT_WATCHLIST);
-	const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_WATCHLIST[0]);
+	const [selectedSymbol, setSelectedSymbol] = useState(() => normalizedPreferredSymbol || DEFAULT_WATCHLIST[0]);
 	const [hydrated, setHydrated] = useState(false);
+	const preferredSymbolRef = useRef(normalizedPreferredSymbol);
+	preferredSymbolRef.current = normalizedPreferredSymbol;
 
 	useEffect(() => {
 		const saved = window.localStorage.getItem(STORAGE_KEYS.watchlist);
@@ -20,7 +23,7 @@ export function useWatchlist() {
 			const parsed = JSON.parse(saved);
 			if (Array.isArray(parsed) && parsed.length) {
 				setWatchlist(parsed);
-				setSelectedSymbol(parsed[0]);
+				setSelectedSymbol(preferredSymbolRef.current || parsed[0]);
 			}
 		} catch {
 			window.localStorage.removeItem(STORAGE_KEYS.watchlist);
@@ -28,6 +31,10 @@ export function useWatchlist() {
 			setHydrated(true);
 		}
 	}, []);
+
+	useEffect(() => {
+		if (normalizedPreferredSymbol) setSelectedSymbol(normalizedPreferredSymbol);
+	}, [normalizedPreferredSymbol]);
 
 	useEffect(() => {
 		if (!hydrated) return;

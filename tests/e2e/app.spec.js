@@ -80,6 +80,18 @@ const quoteFixture = {
 };
 
 const avgoQuoteFixture = { ...quoteFixture, symbol: "AVGO", name: "Broadcom Inc." };
+const aaplQuoteFixture = {
+	...quoteFixture,
+	symbol: "AAPL",
+	name: "Apple Inc.",
+	formatted: { ...quoteFixture.formatted, price: "$210.00" },
+};
+const tslaQuoteFixture = {
+	...quoteFixture,
+	symbol: "TSLA",
+	name: "Tesla, Inc.",
+	formatted: { ...quoteFixture.formatted, price: "$330.00" },
+};
 
 test("quote API returns a coherent daily price range", async ({ request }) => {
 	const response = await request.get("/api/quotes?symbols=NVDA");
@@ -305,6 +317,35 @@ test("watchlist has its own route and does not load recommendations", async ({ p
 	await page.getByRole("button", { name: "NVDA NVIDIA Corporation" }).click();
 	await expect(page).toHaveURL(/\/?symbol=NVDA/);
 	await expect(page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).resolves.toBe(true);
+});
+
+test("watchlist item opens and loads its own overview report", async ({ page }) => {
+	const fixtures = { AAPL: aaplQuoteFixture, TSLA: tslaQuoteFixture };
+	const detailRequests = [];
+
+	await page.addInitScript(() => {
+		window.localStorage.setItem("us-stock-weekly-analyzer.watchlist", JSON.stringify(["AAPL", "TSLA"]));
+	});
+	await page.route(/\/api\/quotes(?:\?.*)?$/, (route) => {
+		const requestUrl = new URL(route.request().url());
+		const symbols = (requestUrl.searchParams.get("symbols") || "").split(",").filter(Boolean);
+		if (requestUrl.searchParams.get("scope") === "detail") detailRequests.push(symbols.join(","));
+
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify({
+				updatedAt: "2026-08-06T00:00:00.000Z",
+				quotes: symbols.map((symbol) => fixtures[symbol]).filter(Boolean),
+			}),
+		});
+	});
+
+	await page.goto("/watchlist");
+	await page.getByRole("button", { name: "TSLA Tesla, Inc." }).click();
+
+	await expect(page).toHaveURL(/\/?symbol=TSLA/);
+	await expect(page.locator(".reportHero h2")).toHaveText(/TSLA\s*Tesla, Inc\./);
+	await expect.poll(() => detailRequests.includes("TSLA")).toBe(true);
 });
 
 test("watchlist stays contained at tablet width", async ({ page }) => {

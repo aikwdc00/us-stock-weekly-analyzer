@@ -9,11 +9,11 @@ import { useRecommendations } from "./useRecommendations";
 import { useSymbolSearch } from "./useSymbolSearch";
 import { useWatchlist } from "./useWatchlist";
 
-export function useStockAnalyzer({ loadRecommendations = true } = {}) {
+export function useStockAnalyzer({ loadRecommendations = true, preferredSymbol } = {}) {
 	const [error, setError] = useState("");
 	const [isAiLoading, setIsAiLoading] = useState(false);
 	const preferences = usePreferences();
-	const watchlistState = useWatchlist();
+	const watchlistState = useWatchlist({ preferredSymbol });
 
 	const reportError = useCallback((message) => {
 		setError(message);
