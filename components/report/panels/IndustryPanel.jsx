@@ -1,14 +1,14 @@
-import { ExternalLink } from "lucide-react";
 import { AnalysisBlock } from "../shared/AnalysisBlock";
 import { Info } from "../shared/Info";
 import { PeerTable } from "../shared/PeerTable";
-import { TooltipHint } from "../shared/TooltipHint";
 import { useIndustryPeers } from "../../../hooks/useIndustryPeers";
-import { displayValue } from "../../../hooks/utils";
 import { translateTerm } from "../../../lib/translationMap";
+import { Icon } from "../../shared/Icon";
 
-export function IndustryPanel({ quote, peerQuotes, language, t }) {
-	const { peers: industryPeers, isLoading: isLoadingPeers, error: peerError } = useIndustryPeers(quote.symbol);
+export function IndustryPanel({ quote, language, t }) {
+	const { peers: industryPeers, isLoading: isLoadingPeers } = useIndustryPeers(quote.symbol);
+	const peerItems = industryPeers.map((peer) => (peer?.symbol ? `${peer.symbol} · ${peer.name || peer.symbol}` : null)).filter(Boolean);
+	const competitorItems = peerItems.length ? peerItems : quote.profile.competitors || [];
 
 	return (
 		<div className="reportTabPanel">
@@ -16,54 +16,30 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 				<AnalysisBlock
 					title={t.industry || "產業分類"}
 					items={[translateTerm(quote.profile.sector, language), translateTerm(quote.profile.industry, language)].filter(Boolean)}
+					emptyLabel={t.insufficientEvidence}
 				/>
-				<AnalysisBlock title={t.competitorWatchlist} items={quote.profile.competitors} />
+				<AnalysisBlock title={t.competitorWatchlist} items={competitorItems} />
 				<div className="analysisCard">
 					<div className="sectionTitle">
 						<h3>{t.companySummary}</h3>
-						{quote.fundamentals.sourceUrl && (
-							<a
-								href={quote.fundamentals.sourceUrl.replace("/statistics/", "/")}
-								target="_blank"
-								rel="noreferrer"
-								className="sourceIconLink"
-							>
-								<ExternalLink size={14} />
-							</a>
-						)}
 					</div>
 					<p className="summaryText">{quote.profile.description ? `${quote.profile.description.slice(0, 300)}...` : t.noDescription}</p>
 				</div>
 			</section>
 
 			<section className="analysisSection analysisSectionScroll">
-				<h3>{t.watchlistCompare}</h3>
-				<PeerTable quotes={peerQuotes} selectedSymbol={quote.symbol} language={language} t={t} />
-			</section>
-
-			{/* 新增的同業比較區塊 */}
-			<section className="analysisSection analysisSectionScroll">
-				<div className="sectionTitle">
-					<h3>{t.industryPeers}</h3>
-					<TooltipHint
-						content={
-							<>
-								{t.peerSource}: Yahoo Finance Recommendations
-								<br />
-								{t.dataSource}: StockAnalysis
-							</>
-						}
-					/>
-				</div>
+				<h3>{t.industryPeers}</h3>
 
 				{isLoadingPeers ? (
 					<p>{t.industryLoading}</p>
 				) : industryPeers.length ? (
 					<PeerTable quotes={industryPeers} language={language} t={t} />
-				) : peerError ? (
-					<p>{t.industryUnavailable}</p>
 				) : (
-					<p>{t.industryEmpty}</p>
+					<div className="analysisCardTags">
+						{competitorItems.map((item) => (
+							<span key={item}>{item}</span>
+						))}
+					</div>
 				)}
 			</section>
 
@@ -94,7 +70,7 @@ export function IndustryPanel({ quote, peerQuotes, language, t }) {
 								<small>
 									{t.reportDate}: {filing.reportDate || "N/A"}
 								</small>
-								<ExternalLink size={14} />
+								<Icon name="ExternalLink" size={14} />
 							</a>
 						))}
 					</div>

@@ -122,6 +122,7 @@ Peter Lynch:
 - Ideal price: ${quote.zones.ideal}
 - Buy zone: ${quote.zones.buy}
 - Watch zone: ${quote.zones.watch}
+- Price zone method: ${quote.zones.basis || "N/A"}
 
 ## Key Risks
 
@@ -202,6 +203,7 @@ ${profile.moat}
 - 理想價：${quote.zones.ideal}
 - 買入價：${quote.zones.buy}
 - 觀察價：${quote.zones.watch}
+- 價格區間方法：${quote.zones.basis || "資料不足"}
 
 ## 最終評級
 

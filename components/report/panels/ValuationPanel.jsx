@@ -1,8 +1,21 @@
 import { Info } from "../shared/Info";
 import { SectionTitle } from "../shared/SectionTitle";
 import { TooltipHint } from "../shared/TooltipHint";
+import { Icon } from "../../shared/Icon";
 
 export function ValuationPanel({ quote, t, language, activeModel, setSelectedModel }) {
+	const zoneSources = [quote.evidence?.market?.source, ...(quote.valuationMethod?.sources || []).map((source) => source.source)]
+		.filter(Boolean)
+		.filter((source, index, sources) => sources.indexOf(source) === index);
+	const zoneSourceText = zoneSources.length
+		? zoneSources.join("、")
+		: language === "en"
+			? "the available market and valuation fields"
+			: "目前可取得的行情與估值欄位";
+	const priceZonesTip =
+		language === "en"
+			? `Client-side reference estimate, not a company-issued price target. It uses the current price, 52-week range, and valuation classification from ${zoneSourceText}. The valuation discount is a transparent heuristic for comparing entry zones, not an intrinsic-value model.`
+			: `客端參考估算，不是公司提供的目標價。計算使用 ${zoneSourceText} 的現價、52 週高低點與估值分類；折價係數是透明的比較用 heuristic，不等同完整內在價值模型。`;
 	const text =
 		language === "en"
 			? {
@@ -12,7 +25,7 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					catalystTimelineTip: "Shows the catalysts and checkpoints that can cause the market to re-rate valuation in the coming quarters.",
 					targetPriceTip:
 						"Compares analyst consensus target price with the current market price. Use as reference, not as a standalone decision rule.",
-					priceZonesTip: "Suggested price zones based on valuation, trend, and risk/reward rather than a precise intrinsic value point.",
+					priceZonesTip,
 					peterLynch: "Peter Lynch Check",
 					peterLynchTip:
 						"A simplified Peter Lynch style check: fair value is approximated as EPS multiplied by growth rate (%). It is most useful for profitable growth companies.",
@@ -41,9 +54,12 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					baseEpsTip: "The EPS figure used in the Peter Lynch calculation.",
 					growthBaseTip: "The growth rate plugged into the Peter Lynch formula.",
 					formulaTip: "The simplified formula used here for quick comparison.",
-					idealPriceTip: "A more conservative price zone with better margin of safety.",
-					buyPriceTip: "A reasonable accumulation zone if the long-term thesis remains intact.",
-					watchPriceTip: "A zone where valuation is less attractive and patience may be better than chasing.",
+					idealPriceTip:
+						"Client-side estimate with a larger margin of safety. It applies the valuation discount to the current price and checks the 52-week range; it is not a company target price.",
+					buyPriceTip:
+						"Client-side reference accumulation zone. It is calculated from the current price and valuation classification, then compared with the 52-week range; it is not a company-issued recommendation.",
+					watchPriceTip:
+						"Client-side reference zone near or above the current price. It helps identify when valuation may be less attractive, but it is not an intrinsic-value model.",
 					statusLabels: {
 						undervalued: "Below Peter Lynch fair value",
 						fair: "Near Peter Lynch fair value",
@@ -61,7 +77,7 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					valuationModelsTip: "可以切換不同估值模型，從成長、現金流、半導體週期或分部估值等角度交叉比對。",
 					catalystTimelineTip: "列出接下來最可能影響市場重新評價估值的事件與檢查點。",
 					targetPriceTip: "用分析師平均目標價與現價做參考比較，但不建議把它當成唯一決策依據。",
-					priceZonesTip: "價格區間是綜合估值、技術面與風險報酬後的操作參考，不代表單一精確內在價值。",
+					priceZonesTip,
 					peterLynch: "彼得林區評估",
 					peterLynchTip: "簡化版 Peter Lynch 檢查：合理價約等於 EPS × 成長率(% )。較適合已獲利、仍具成長性的公司。",
 					fairValue: "彼得林區合理價",
@@ -88,9 +104,9 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					baseEpsTip: "Peter Lynch 計算中採用的 EPS 基準值。",
 					growthBaseTip: "Peter Lynch 公式中採用的成長率。",
 					formulaTip: "本頁使用的簡化 Peter Lynch 公式，適合做快速比對，不是完整 DCF。",
-					idealPriceTip: "安全邊際較高、風險報酬較好的價格區間。",
-					buyPriceTip: "若長線 thesis 未變，屬於可分批布局的合理區間。",
-					watchPriceTip: "估值偏高或風險報酬較弱，適合先觀察、不急著追價。",
+					idealPriceTip: "客端估算的較高安全邊際區間：以現價套用估值分類折價，再參考 52 週低點；不是公司目標價。",
+					buyPriceTip: "客端估算的分批布局參考區間：以現價與估值分類計算，再與 52 週區間交叉檢查；不是公司投資建議。",
+					watchPriceTip: "客端估算的現價附近或上方區間，用來辨識估值可能較不吸引人的位置；不是完整內在價值模型。",
 					statusLabels: {
 						undervalued: "低於彼得林區合理價",
 						fair: "接近彼得林區合理價",
@@ -178,6 +194,18 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 				<div className="methodEvidence">
 					{quote.valuationMethod.evidence.length ? renderEvidence(quote.valuationMethod.evidence) : <span>資料不足</span>}
 				</div>
+				{quote.valuationMethod.sources?.length ? (
+					<div className="methodSources">
+						{quote.valuationMethod.sources.map((source) => (
+							<a key={source.sourceUrl} className="sourceLink" href={source.sourceUrl} target="_blank" rel="noreferrer">
+								{t.source}: {source.source}
+								<Icon name="ExternalLink" size={14} />
+							</a>
+						))}
+					</div>
+				) : (
+					<p className="evidenceEmpty">{t.insufficientEvidence}</p>
+				)}
 			</section>
 
 			<section className="analysisSection">
@@ -250,6 +278,7 @@ export function ValuationPanel({ quote, t, language, activeModel, setSelectedMod
 					<Info label={text.buyPrice} value={quote.zones.buy} tip={text.buyPriceTip} />
 					<Info label={text.watchPrice} value={quote.zones.watch} tip={text.watchPriceTip} />
 				</div>
+				{quote.zones.basis ? <p className="evidenceEmpty">{quote.zones.basis}</p> : null}
 			</section>
 		</div>
 	);

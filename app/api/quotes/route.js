@@ -1,9 +1,17 @@
 import { enrichQuote, getProfileForSymbol } from "../../../lib/analysis";
+import { allSettledWithConcurrency, mapWithConcurrency } from "../../../lib/concurrency.mjs";
 import { fetchSecOwnershipFilings } from "../../../lib/secOwnershipProvider";
+import { fetchSecFinancials } from "../../../lib/secFinancialsProvider";
 import { fetchStockAnalysisSnapshot } from "../../../lib/stockAnalysisProvider";
 import { fetchFinnhubData } from "../../../lib/finnhubProvider";
 import { fetchAiTranslatedNews } from "../../../lib/aiNewsProvider";
 import { fetchAiRiskInsights, fetchAiSwotInsights } from "../../../lib/aiRiskProvider";
+import { fetchWithTimeout } from "../../../lib/fetchPolicy";
+import { fetchMarketEvents } from "../../../lib/marketEventsProvider";
+import { filterQuotesToRequestedSymbols } from "../../../lib/quoteBoundary.mjs";
+import { getProviderForUse } from "../../../lib/providerRegistry.mjs";
+import { getClientKey, normalizeSymbols } from "../../../lib/requestValidation.mjs";
+import { checkRateLimit, rateLimitHeaders } from "../../../lib/rateLimit.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +67,8 @@ async function fetchStooqQuote(symbol) {
 	url.searchParams.set("h", "");
 	url.searchParams.set("e", "csv");
 
-	const response = await fetch(url, {
+	const response = await fetchWithTimeout(url, {
+		timeoutMs: 8_000,
 		headers: {
 			"User-Agent": "Mozilla/5.0",
 		},
@@ -110,7 +119,8 @@ async function fetchYahooChartQuote(symbol) {
 	url.searchParams.set("interval", "5m");
 	url.searchParams.set("includePrePost", "false");
 
-	const response = await fetch(url, {
+	const response = await fetchWithTimeout(url, {
+		timeoutMs: 8_000,
 		headers: {
 			"User-Agent": "Mozilla/5.0",
 		},
@@ -163,17 +173,176 @@ function pickFulfilled(results, fallback) {
 	return results.map((result) => (result.status === "fulfilled" ? result.value : fallback));
 }
 
+function mergeQuoteWithSnapshot(quote, snapshot, secOwnership, secFinancials, finnhub, translatedNews, marketEvents) {
+	const metrics = snapshot.metrics || {};
+
+	return {
+		...quote,
+		shortName: snapshot.name || quote.shortName,
+		fullExchangeName: snapshot.exchange || quote.fullExchangeName,
+		regularMarketPrice: snapshot.price ?? quote.regularMarketPrice,
+		regularMarketChange: snapshot.change ?? quote.regularMarketChange,
+		regularMarketChangePercent: snapshot.changePercent ?? quote.regularMarketChangePercent,
+		regularMarketPreviousClose: snapshot.previousClose ?? quote.regularMarketPreviousClose,
+		regularMarketOpen: snapshot.open ?? quote.regularMarketOpen,
+		regularMarketDayLow: snapshot.dayLow ?? quote.regularMarketDayLow,
+		regularMarketDayHigh: snapshot.dayHigh ?? quote.regularMarketDayHigh,
+		regularMarketVolume: snapshot.volume ?? quote.regularMarketVolume,
+		marketCap: metrics.marketcap?.number ?? quote.marketCap,
+		trailingPE: metrics.pe?.number ?? quote.trailingPE,
+		forwardPE: metrics.peForward?.number ?? quote.forwardPE,
+		epsTrailingTwelveMonths: metrics.eps?.number ?? quote.epsTrailingTwelveMonths,
+		fiftyDayAverage: metrics.sma50?.number ?? quote.fiftyDayAverage,
+		twoHundredDayAverage: metrics.sma200?.number ?? quote.twoHundredDayAverage,
+		fiftyTwoWeekLow: snapshot.low52 ?? quote.fiftyTwoWeekLow,
+		fiftyTwoWeekHigh: snapshot.high52 ?? quote.fiftyTwoWeekHigh,
+		targetMeanPrice: metrics.priceTarget?.number ?? quote.targetMeanPrice,
+		averageAnalystRating: metrics.analystRatings?.value ?? quote.averageAnalystRating,
+		metrics,
+		forecast: snapshot.forecast,
+		financials: snapshot.financials,
+		news: translatedNews || snapshot.news || quote.news || [],
+		secOwnership,
+		secFinancials,
+		finnhub,
+		events: marketEvents?.events || [],
+		fundamentalsSource: snapshot.source,
+		fundamentalsSourceUrl: snapshot.sourceUrl,
+		updated: snapshot.updated || quote.updated || null,
+		updatedAt: quote.updatedAt || new Date().toISOString(),
+	};
+}
+
+async function enrichSummaryQuotes(rawQuotes) {
+	return rawQuotes.map((quote) => {
+		const summaryQuote = {
+			...quote,
+			detailLevel: "summary",
+			updatedAt: quote.updatedAt || new Date().toISOString(),
+		};
+		return enrichQuote(summaryQuote, getProfileForSymbol(quote.symbol, {}));
+	});
+}
+
+async function enrichPeerQuotes(rawQuotes) {
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
+	if (!stockAnalysisAllowed) return enrichSummaryQuotes(rawQuotes);
+
+	const snapshotResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchStockAnalysisSnapshot(quote.symbol));
+	const snapshots = pickFulfilled(snapshotResults, {});
+
+	return rawQuotes.map((quote, index) => {
+		const snapshot = snapshots[index] || {};
+		const mergedQuote = mergeQuoteWithSnapshot(quote, snapshot, null, null, {}, snapshot.news || [], { events: [] });
+		return enrichQuote({ ...mergedQuote, detailLevel: "peer" }, getProfileForSymbol(quote.symbol, { ...snapshot, secFinancials: null }));
+	});
+}
+
+async function enrichRawQuotes(rawQuotes, { runAiAnalysis = false, scope = "detail" } = {}) {
+	if (scope === "summary") return enrichSummaryQuotes(rawQuotes);
+	if (scope === "peer") return enrichPeerQuotes(rawQuotes);
+
+	const stockAnalysisAllowed = Boolean(getProviderForUse("stockanalysis", { capability: "statistics", role: "supplementary" }));
+	const finnhubAllowed = Boolean(getProviderForUse("finnhub", { capability: "profile", role: "supplementary" }));
+	const [snapshotResults, ownershipResults, secFinancialResults, finnhubResults] = await Promise.all([
+		stockAnalysisAllowed
+			? allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchStockAnalysisSnapshot(quote.symbol))
+			: rawQuotes.map(() => ({ status: "fulfilled", value: {} })),
+		allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchSecOwnershipFilings(quote.symbol)),
+		allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchSecFinancials(quote.symbol)),
+		finnhubAllowed
+			? allSettledWithConcurrency(rawQuotes, 6, (quote) => fetchFinnhubData(quote.symbol))
+			: rawQuotes.map(() => ({ status: "fulfilled", value: {} })),
+	]);
+	const eventResults = await allSettledWithConcurrency(rawQuotes, 4, (quote) => fetchMarketEvents(quote.symbol, quote));
+	const snapshots = pickFulfilled(snapshotResults, {});
+	const ownershipFilings = pickFulfilled(ownershipResults, null);
+	const secFinancials = pickFulfilled(secFinancialResults, null);
+	const finnhubData = pickFulfilled(finnhubResults, null);
+	const marketEvents = pickFulfilled(eventResults, { events: [] });
+	const aiRiskInsights = runAiAnalysis
+		? await mapWithConcurrency(rawQuotes, 2, (quote, index) =>
+				fetchAiRiskInsights(
+					quote.symbol,
+					snapshots[index] || {},
+					finnhubData[index] || {},
+					getProfileForSymbol(quote.symbol, { ...(snapshots[index] || {}), secFinancials: secFinancials[index] || null })
+				).catch(() => [])
+			)
+		: rawQuotes.map(() => []);
+	const aiSwotInsights = runAiAnalysis
+		? await mapWithConcurrency(rawQuotes, 2, (quote, index) =>
+				fetchAiSwotInsights(
+					quote.symbol,
+					snapshots[index] || {},
+					finnhubData[index] || {},
+					getProfileForSymbol(quote.symbol, { ...(snapshots[index] || {}), secFinancials: secFinancials[index] || null })
+				).catch(() => null)
+			)
+		: rawQuotes.map(() => null);
+	const translatedNews = runAiAnalysis
+		? await mapWithConcurrency(rawQuotes, 2, (quote, index) =>
+				fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || quote.news || [])
+			)
+		: rawQuotes.map((quote, index) => snapshots[index]?.news || quote.news || []);
+
+	return rawQuotes.map((quote, index) => {
+		const snapshot = snapshots[index] || {};
+		const snapshotWithAi = {
+			...snapshot,
+			aiRisks: aiRiskInsights[index] || [],
+			aiSwot: aiSwotInsights[index] || null,
+		};
+		const mergedQuote = mergeQuoteWithSnapshot(
+			quote,
+			snapshot,
+			ownershipFilings[index] || null,
+			secFinancials[index] || null,
+			finnhubData[index] || {},
+			translatedNews[index] || [],
+			marketEvents[index] || { events: [] }
+		);
+
+		return enrichQuote(
+			{ ...mergedQuote, detailLevel: "detail" },
+			getProfileForSymbol(quote.symbol, { ...snapshotWithAi, secFinancials: secFinancials[index] || null })
+		);
+	});
+}
+
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
 	const runAiAnalysis = AI_ANALYSIS_ENABLED && searchParams.get("ai") === "true";
-	const symbols = searchParams
-		.get("symbols")
-		?.split(",")
-		.map((symbol) => symbol.trim().toUpperCase())
-		.filter(Boolean);
+	const requestedScope = searchParams.get("scope");
+	const scope = ["summary", "peer"].includes(requestedScope) ? requestedScope : "detail";
+	const rawSymbols = searchParams.get("symbols");
 
-	if (!symbols?.length) {
+	if (!rawSymbols) {
 		return Response.json({ quotes: [] });
+	}
+
+	const normalized = normalizeSymbols(rawSymbols, { maxSymbols: 20 });
+	if (normalized.error) {
+		return Response.json({ quotes: [], error: normalized.error }, { status: 400 });
+	}
+
+	const symbols = normalized.symbols;
+	if (runAiAnalysis && (symbols.length > 1 || scope !== "detail")) {
+		return Response.json({ quotes: [], error: "AI 分析一次只允許一個股票代號。" }, { status: 400 });
+	}
+
+	const rateLimit = checkRateLimit(getClientKey(request, "quotes"), { limit: 90, windowMs: 60_000 });
+	if (!rateLimit.allowed) {
+		return Response.json({ quotes: [], error: "請求過於頻繁，請稍後再試。" }, { status: 429, headers: rateLimitHeaders(rateLimit) });
+	}
+	if (runAiAnalysis) {
+		const aiRateLimit = checkRateLimit(getClientKey(request, "quotes-ai"), { limit: 3, windowMs: 60_000 });
+		if (!aiRateLimit.allowed) {
+			return Response.json(
+				{ quotes: [], error: "AI 研究請求已達本分鐘上限，請稍後再試。" },
+				{ status: 429, headers: rateLimitHeaders(aiRateLimit) }
+			);
+		}
 	}
 
 	try {
@@ -182,7 +351,8 @@ export async function GET(request) {
 		url.searchParams.set("lang", "en-US");
 		url.searchParams.set("region", "US");
 
-		const response = await fetch(url, {
+		const response = await fetchWithTimeout(url, {
+			timeoutMs: 10_000,
 			headers: {
 				"User-Agent": "Mozilla/5.0",
 			},
@@ -194,96 +364,16 @@ export async function GET(request) {
 		}
 
 		const payload = await response.json();
-		let rawQuotes = payload.quoteResponse?.result || [];
+		let rawQuotes = filterQuotesToRequestedSymbols(payload.quoteResponse?.result, symbols);
 
-		if (!rawQuotes.length) {
-			rawQuotes = await Promise.all(symbols.map((symbol) => fetchBackupQuote(symbol)));
-			rawQuotes = rawQuotes.filter(Boolean);
+		if (rawQuotes.length < symbols.length) {
+			const returnedSymbols = new Set(rawQuotes.map((quote) => quote.symbol));
+			const missingSymbols = symbols.filter((symbol) => !returnedSymbols.has(symbol));
+			const backups = await mapWithConcurrency(missingSymbols, 8, (symbol) => fetchBackupQuote(symbol));
+			rawQuotes = [...rawQuotes, ...filterQuotesToRequestedSymbols(backups, missingSymbols)];
 		}
 
-		const [snapshotResults, ownershipResults, finnhubResults] = await Promise.all([
-			Promise.allSettled(rawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-			Promise.allSettled(rawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol))),
-			Promise.allSettled(rawQuotes.map((quote) => fetchFinnhubData(quote.symbol))),
-		]);
-		const snapshots = pickFulfilled(snapshotResults, {});
-		const ownershipFilings = pickFulfilled(ownershipResults, null);
-		const finnhubData = pickFulfilled(finnhubResults, null);
-		const aiRiskInsights = runAiAnalysis
-			? await Promise.all(
-					rawQuotes.map((quote, index) =>
-						fetchAiRiskInsights(
-							quote.symbol,
-							snapshots[index] || {},
-							finnhubData[index] || {},
-							getProfileForSymbol(quote.symbol, snapshots[index] || {})
-						).catch(() => [])
-					)
-				)
-			: rawQuotes.map(() => []);
-		const aiSwotInsights = runAiAnalysis
-			? await Promise.all(
-					rawQuotes.map((quote, index) =>
-						fetchAiSwotInsights(
-							quote.symbol,
-							snapshots[index] || {},
-							finnhubData[index] || {},
-							getProfileForSymbol(quote.symbol, snapshots[index] || {})
-						).catch(() => null)
-					)
-				)
-			: rawQuotes.map(() => null);
-		const translatedNews = runAiAnalysis
-			? await Promise.all(
-					rawQuotes.map((quote, index) =>
-						fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || [])
-					)
-				)
-			: rawQuotes.map((quote, index) => snapshots[index]?.news || quote.news || []);
-		const quotes = rawQuotes.map((quote, index) => {
-			const snapshot = snapshots[index] || {};
-			const snapshotWithAi = {
-				...snapshot,
-				aiRisks: aiRiskInsights[index] || [],
-				aiSwot: aiSwotInsights[index] || null,
-			};
-			const secOwnership = ownershipFilings[index] || null;
-			const finnhub = finnhubData[index] || {};
-			const metrics = snapshot.metrics || {};
-			const mergedQuote = {
-				...quote,
-				shortName: snapshot.name || quote.shortName,
-				fullExchangeName: snapshot.exchange || quote.fullExchangeName,
-				regularMarketPrice: snapshot.price ?? quote.regularMarketPrice,
-				regularMarketChange: snapshot.change ?? quote.regularMarketChange,
-				regularMarketChangePercent: snapshot.changePercent ?? quote.regularMarketChangePercent,
-				regularMarketPreviousClose: snapshot.previousClose ?? quote.regularMarketPreviousClose,
-				regularMarketOpen: snapshot.open ?? quote.regularMarketOpen,
-				regularMarketDayLow: snapshot.dayLow ?? quote.regularMarketDayLow,
-				regularMarketDayHigh: snapshot.dayHigh ?? quote.regularMarketDayHigh,
-				regularMarketVolume: snapshot.volume ?? quote.regularMarketVolume,
-				marketCap: metrics.marketcap?.number ?? quote.marketCap,
-				trailingPE: metrics.pe?.number ?? quote.trailingPE,
-				forwardPE: metrics.peForward?.number ?? quote.forwardPE,
-				epsTrailingTwelveMonths: metrics.eps?.number ?? quote.epsTrailingTwelveMonths,
-				fiftyDayAverage: metrics.sma50?.number ?? quote.fiftyDayAverage,
-				twoHundredDayAverage: metrics.sma200?.number ?? quote.twoHundredDayAverage,
-				fiftyTwoWeekLow: snapshot.low52 ?? quote.fiftyTwoWeekLow,
-				fiftyTwoWeekHigh: snapshot.high52 ?? quote.fiftyTwoWeekHigh,
-				targetMeanPrice: metrics.priceTarget?.number ?? quote.targetMeanPrice,
-				averageAnalystRating: metrics.analystRatings?.value ?? quote.averageAnalystRating,
-				metrics,
-				forecast: snapshot.forecast,
-				financials: snapshot.financials,
-				news: translatedNews[index] || snapshot.news,
-				secOwnership,
-				finnhub,
-				fundamentalsSource: snapshot.source,
-				fundamentalsSourceUrl: snapshot.sourceUrl,
-			};
-
-			return enrichQuote(mergedQuote, getProfileForSymbol(quote.symbol, snapshotWithAi));
-		});
+		const quotes = await enrichRawQuotes(rawQuotes, { runAiAnalysis, scope });
 
 		return Response.json({
 			updatedAt: new Date().toISOString(),
@@ -291,92 +381,9 @@ export async function GET(request) {
 		});
 	} catch (error) {
 		try {
-			const rawQuotes = await Promise.all(symbols.map((symbol) => fetchBackupQuote(symbol)));
-			const validRawQuotes = rawQuotes.filter(Boolean);
-			const [snapshotResults, ownershipResults, finnhubResults] = await Promise.all([
-				Promise.allSettled(validRawQuotes.map((quote) => fetchStockAnalysisSnapshot(quote.symbol))),
-				Promise.allSettled(validRawQuotes.map((quote) => fetchSecOwnershipFilings(quote.symbol))),
-				Promise.allSettled(validRawQuotes.map((quote) => fetchFinnhubData(quote.symbol))),
-			]);
-			const snapshots = pickFulfilled(snapshotResults, {});
-			const ownershipFilings = pickFulfilled(ownershipResults, null);
-			const finnhubData = pickFulfilled(finnhubResults, null);
-			const aiRiskInsights = runAiAnalysis
-				? await Promise.all(
-						validRawQuotes.map((quote, index) =>
-							fetchAiRiskInsights(
-								quote.symbol,
-								snapshots[index] || {},
-								finnhubData[index] || {},
-								getProfileForSymbol(quote.symbol, snapshots[index] || {})
-							).catch(() => [])
-						)
-					)
-				: validRawQuotes.map(() => []);
-			const aiSwotInsights = runAiAnalysis
-				? await Promise.all(
-						validRawQuotes.map((quote, index) =>
-							fetchAiSwotInsights(
-								quote.symbol,
-								snapshots[index] || {},
-								finnhubData[index] || {},
-								getProfileForSymbol(quote.symbol, snapshots[index] || {})
-							).catch(() => null)
-						)
-					)
-				: validRawQuotes.map(() => null);
-			const translatedNews = runAiAnalysis
-				? await Promise.all(
-						validRawQuotes.map((quote, index) =>
-							fetchAiTranslatedNews(quote.symbol, snapshots[index]?.news || []).catch(() => snapshots[index]?.news || [])
-						)
-					)
-				: validRawQuotes.map((quote, index) => snapshots[index]?.news || quote.news || []);
-			const quotes = validRawQuotes.map((quote, index) => {
-				const snapshot = snapshots[index] || {};
-				const snapshotWithAi = {
-					...snapshot,
-					aiRisks: aiRiskInsights[index] || [],
-					aiSwot: aiSwotInsights[index] || null,
-				};
-				const secOwnership = ownershipFilings[index] || null;
-				const finnhub = finnhubData[index] || {};
-				const metrics = snapshot.metrics || {};
-				return enrichQuote(
-					{
-						...quote,
-						shortName: snapshot.name || quote.shortName,
-						fullExchangeName: snapshot.exchange || quote.fullExchangeName,
-						regularMarketPrice: snapshot.price ?? quote.regularMarketPrice,
-						regularMarketChange: snapshot.change ?? quote.regularMarketChange,
-						regularMarketChangePercent: snapshot.changePercent ?? quote.regularMarketChangePercent,
-						regularMarketPreviousClose: snapshot.previousClose ?? quote.regularMarketPreviousClose,
-						regularMarketOpen: snapshot.open ?? quote.regularMarketOpen,
-						regularMarketDayLow: snapshot.dayLow ?? quote.regularMarketDayLow,
-						regularMarketDayHigh: snapshot.dayHigh ?? quote.regularMarketDayHigh,
-						regularMarketVolume: snapshot.volume ?? quote.regularMarketVolume,
-						marketCap: metrics.marketcap?.number,
-						trailingPE: metrics.pe?.number,
-						forwardPE: metrics.peForward?.number,
-						epsTrailingTwelveMonths: metrics.eps?.number,
-						fiftyDayAverage: metrics.sma50?.number,
-						twoHundredDayAverage: metrics.sma200?.number,
-						fiftyTwoWeekLow: snapshot.low52,
-						fiftyTwoWeekHigh: snapshot.high52,
-						targetMeanPrice: metrics.priceTarget?.number,
-						averageAnalystRating: metrics.analystRatings?.value,
-						metrics,
-						forecast: snapshot.forecast,
-						financials: snapshot.financials,
-						news: translatedNews[index] || snapshot.news,
-						secOwnership,
-						finnhub,
-						fundamentalsSource: snapshot.source,
-						fundamentalsSourceUrl: snapshot.sourceUrl,
-					},
-					getProfileForSymbol(quote.symbol, snapshotWithAi)
-				);
-			});
+			const rawQuotes = await mapWithConcurrency(symbols, 8, (symbol) => fetchBackupQuote(symbol));
+			const validRawQuotes = filterQuotesToRequestedSymbols(rawQuotes, symbols);
+			const quotes = await enrichRawQuotes(validRawQuotes, { runAiAnalysis, scope });
 
 			if (quotes.length) {
 				return Response.json({
@@ -393,7 +400,6 @@ export async function GET(request) {
 			{
 				quotes: [],
 				error: "目前無法取得公開行情資料，請稍後再試。",
-				detail: error.message,
 			},
 			{ status: 502 }
 		);
